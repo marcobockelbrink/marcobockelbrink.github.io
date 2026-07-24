@@ -222,8 +222,8 @@ for img, cap_t, cap_s in montage:
     cx += 4.16
 text(s, 0.6, 6.6, 12.15, 0.5,
      [[("Außerdem: ", 12, ACCENT, True),
-       ("Hell-/Dunkel-Modus · SFTP-Backup · Mail & Erinnerungen · "
-        "CSV-Export · Auto-Freigabe · Reviewer-Handbuch · Zeitzone · Blättern",
+       ("Webhooks · Hell-/Dunkel-Modus · SFTP-Backup · Mail & Erinnerungen · "
+        "Auto-Freigabe · Reviewer-Handbuch · Zeitzone · Blättern",
         12, MUTED, False)]], line_spacing=1.05)
 footer(s, 7)
 
@@ -234,10 +234,10 @@ text(s, 0.6, 1.9, 12.1, 0.5,
      [[("In rund zwei Wochen entstanden — ", 14.5, MUTED, False),
        ("vollständig mit einer KI (Claude) geschrieben.", 14.5, ACCENT, True)]])
 stats = [
-    ("105", "Releases"), ("167", "Commits"),
-    ("11.114", "Zeilen Code · 1 Datei"), ("0", "Fremd-Abhängigkeiten"),
-    ("94", "automatisierte Smoke-Checks"), ("5", "Security-Scanner in der CI"),
-    ("620+", "Übersetzungen · DE ↔ EN"), ("11", "Verwaltungs-Bereiche"),
+    ("106", "Releases"), ("175", "Commits"),
+    ("11.392", "Zeilen Code · 1 Datei"), ("0", "Fremd-Abhängigkeiten"),
+    ("98", "automatisierte Smoke-Checks"), ("5", "Security-Scanner in der CI"),
+    ("630+", "Übersetzungen · DE ↔ EN"), ("12", "Verwaltungs-Bereiche"),
 ]
 tw, th, gx = 2.8, 1.9, 0.31
 xs = [0.6 + i * (tw + gx) for i in range(4)]
@@ -306,10 +306,10 @@ groups = [
         "vROps-Quellen-Filter je Nutzer",
         "CSP-Härtung · 5 CI-Scanner"]),
     ("Integration & Betrieb", [
-        "Multi-vROps + Offline-Import",
+        "Ausgehende Webhooks (HMAC-signiert)",
         "Lesende v1-API (Bearer-Token)",
-        "SFTP-Backup · JSON oder SQLite",
-        "/healthz · Proxy-fähig"]),
+        "Multi-vROps + Offline-Import",
+        "SFTP-Backup · JSON/SQLite · /healthz"]),
     ("Bedienung & Doku", [
         "Zweisprachig DE/EN · Hell-/Dunkel-Modus",
         "Sortieren, Blättern, Spalten wählen",

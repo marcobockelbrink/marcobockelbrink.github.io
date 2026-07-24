@@ -34,6 +34,7 @@ flowchart LR
         AD["Active Directory<br/>ldaps://"]
         SMTP["SMTP server"]
         BK["SFTP backup target"]
+        HOOK["Webhook targets<br/>(ITSM, AWX, pipelines, chat)"]
     end
 
     B -->|HTTPS| NG
@@ -46,6 +47,7 @@ flowchart LR
     APP -->|simple bind + memberOf| AD
     APP -->|mails, template| SMTP
     APP -->|tar.gz twice a day| BK
+    APP -->|webhook POST, signed| HOOK
     APP <--> DATA
 ```
 
