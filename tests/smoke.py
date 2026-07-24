@@ -316,9 +316,20 @@ try:
     check("Zeitzone persistiert (GET)",
           req("GET", "/api/refreshcfg")[1].get("tz") == "America/Los_Angeles")
     st, tzbad, _ = req("PUT", "/api/refreshcfg",
-                       {"vms": 0, "network": 0, "storage": 0, "tz": "Quatsch/Unfug"})
-    check("Unbekannte Zeitzone -> 400 mit Hinweis",
+                       {"vms": 0, "network": 0, "storage": 0, "tz": "Europe/Nonexistent"})
+    check("Unbekannte (aber formal gültige) Zeitzone -> 400",
           st == 400 and "Zeitzone" in (tzbad.get("error") or ""))
+    # Sicherheit: Path-Traversal in tz muss abgelehnt werden (kein Datei-
+    # Existenz-Orakel über /usr/share/zoneinfo/.. hinaus).
+    st_exist = req("PUT", "/api/refreshcfg",
+                   {"vms": 0, "network": 0, "storage": 0, "tz": "../../../etc/passwd"})[0]
+    st_missing = req("PUT", "/api/refreshcfg",
+                     {"vms": 0, "network": 0, "storage": 0, "tz": "/etc/gibtsnicht"})[0]
+    check("tz-Path-Traversal abgelehnt (400) – kein Datei-Orakel",
+          st_exist == 400 and st_missing == 400)
+    check("Gültige mehrsegmentige Zone akzeptiert",
+          req("PUT", "/api/refreshcfg", {"vms": 0, "network": 0, "storage": 0,
+              "tz": "America/Argentina/Buenos_Aires"})[0] == 200)
     req("PUT", "/api/refreshcfg", {"vms": 0, "network": 0, "storage": 0, "tz": ""})
 
     print("== Offline-Import (PowerCLI-JSON, robust gegen ConvertTo-Json) ==")

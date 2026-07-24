@@ -18,7 +18,7 @@ Aufruf:
 Benötigt nur die Python-Standardbibliothek (Python 3.8+).
 """
 
-VERSION = "2.28.0"
+VERSION = "2.28.1"
 
 # Interne Rollen-Schlüssel (steuern die Rechte, unveränderlich) und ihre
 # Standard-Bezeichnungen. Die Bezeichnungen lassen sich auf der Verwaltungsseite
@@ -8938,7 +8938,10 @@ def serve(args, password):
     # (Stand, Log, Abgleich-Uhrzeiten, Mails) – der Abruf-Takt selbst rechnet
     # in Sekunden und bleibt davon unberührt. Leer = Zeitzone des Servers.
     _orig_tz = os.environ.get("TZ")
-    _TZ_RX = re.compile(r"^[A-Za-z0-9_+/.\-]{1,60}$")
+    # Strikt auf IANA-Zonennamen: Segmente aus [A-Za-z0-9_+-], per "/" getrennt,
+    # KEINE Punkte/„..", kein führender/absoluter Pfad. Verhindert Path-Traversal
+    # (sonst würde tz_available via os.path.exists zum Datei-Existenz-Orakel).
+    _TZ_RX = re.compile(r"^[A-Za-z0-9_+-]{1,20}(?:/[A-Za-z0-9_+-]{1,20}){0,3}$")
 
     def clean_tz(raw):
         s = " ".join(str(raw or "").split())
@@ -10681,7 +10684,15 @@ def serve(args, password):
                 s = self._require("admin")
                 if not s:
                     return
-                clean = _clean_refreshcfg(self._body() or {})
+                _rawbody = self._body() or {}
+                clean = _clean_refreshcfg(_rawbody)
+                # Nicht-leere Eingabe, die die Formatprüfung nicht überlebt
+                # (z. B. Path-Traversal), klar ablehnen statt still zu verwerfen.
+                if str(_rawbody.get("tz") or "").strip() and not clean.get("tz"):
+                    self._json({"error": "Ungültiger Zonenname. Bitte einen "
+                                "IANA-Namen wie „Europe/Berlin“ verwenden "
+                                "(oder leer für die Server-Zeitzone)."}, 400)
+                    return
                 if clean.get("tz") and not tz_available(clean["tz"]):
                     self._json({"error": "Unbekannte Zeitzone „%s“. Bitte einen "
                                 "IANA-Namen wie „Europe/Berlin“ verwenden "
