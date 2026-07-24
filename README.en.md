@@ -282,10 +282,13 @@ rejections, cancellations and backups:
   double-counting of shared LUNs). If no capacity is reported, the column
   shows "–". The refresh logs the mapped datastores, per-cluster totals and
   detected storage types — useful for verification.
-- **vSAN counts as usable capacity**: because vSAN mirrors (RAID-1), the gross
-  capacity only counts partially. The factor is configurable via
-  `--vsan-factor` (default `0.5`; `1` = gross). It applies to **capacity and
-  usage** so utilization stays correct — vROps reports both values gross. The
+- **vSAN counts as usable capacity**: because the vSAN policy eats into usable
+  capacity (RAID-1 ≈ 50 %, RAID-5 ≈ 75/67 %, RAID-6 ≈ 67 %), gross capacity only
+  counts partially. **vROps provides no clean value** for this (only physical raw
+  + used), hence a **configurable factor**: global as a policy dropdown **and
+  overridable per cluster** (Administration → Storage), seeded via `--vsan-factor`
+  (default `0.5`). It applies to **capacity and usage**; in the **% utilization it
+  cancels out**, so that stays physically correct. The
   LUN list shows the **storage type** (vSAN/VMFS/NFS) and, for vSAN, the gross
   capacity in a tooltip. For FC/iSCSI LUNs the **NAA identifier** of the
   backing device (`naa.6000…`) is additionally read best effort — first from the

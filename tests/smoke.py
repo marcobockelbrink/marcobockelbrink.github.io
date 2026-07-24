@@ -258,6 +258,29 @@ try:
                             for n in left3))
     req("PUT", "/api/storagecfg", {"enabled": False, "min_lun_gb": 0,
                                    "exclude_names": ""})
+    # vSAN-Policy-Faktor: global + Cluster-Override, wirkt je Cluster
+    req("PUT", "/api/storagecfg", {"enabled": False, "min_lun_gb": 0,
+                                   "exclude_names": "", "vsan_factor": 0.75,
+                                   "vsan_overrides": {"Cluster-01": 0.333}})
+    st, vcfg, _ = req("GET", "/api/storagecfg")
+    check("vSAN-Faktor + Override persistiert",
+          abs(vcfg.get("vsan_factor", 0) - 0.75) < 0.001
+          and abs((vcfg.get("vsan_overrides") or {}).get("Cluster-01", 0) - 0.333) < 0.001)
+    t0 = time.time()
+    while time.time() - t0 < 12:
+        dv = req("GET", "/api/v1/data")[1]
+        if not req("GET", "/api/status")[1].get("refreshing"):
+            break
+        time.sleep(0.5)
+    vfac = {c["name"]: next((l["factor"] for l in c.get("datastores", [])
+                             if "vsan" in (l.get("type", "") or "").lower()), None)
+            for c in dv["clusters"]}
+    check("vSAN-Faktor je Cluster angewandt (Override < global)",
+          abs((vfac.get("Cluster-01") or 0) - 0.333) < 0.001
+          and abs((vfac.get("Cluster-02") or 0) - 0.75) < 0.001)
+    req("PUT", "/api/storagecfg", {"enabled": False, "min_lun_gb": 0,
+                                   "exclude_names": "", "vsan_factor": 0.5,
+                                   "vsan_overrides": {}})
 
     print("== Netzwerk-Filter (Portgruppen) ==")
     # Demo: Cluster-01 hat VLANs 100-105, Cluster-02 hat 200-205. VLAN-Bereich

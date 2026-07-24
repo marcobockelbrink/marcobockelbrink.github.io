@@ -292,10 +292,14 @@ Ablehnungen, Stornos und Backups:
   sehen (kein Doppeln geteilter LUNs). Wird keine Kapazität geliefert, zeigt die
   Spalte „–". Der Abruf protokolliert im Log die zugeordneten Datastores, die
   Summe je Cluster und die erkannten Storage-Typen – hilfreich zur Kontrolle.
-- **vSAN wird als nutzbare Kapazität gerechnet**: Weil vSAN spiegelt (RAID-1),
-  zählt die Bruttokapazität nur anteilig. Der Faktor ist über `--vsan-factor`
-  einstellbar (Standard `0.5`; `1` = brutto). Er wirkt auf **Kapazität und
-  Belegung**, damit die Auslastung stimmt — vROps meldet beide Werte brutto.
+- **vSAN wird als nutzbare Kapazität gerechnet**: Weil die vSAN-Policy an der
+  nutzbaren Kapazität zehrt (RAID-1 ≈ 50 %, RAID-5 ≈ 75/67 %, RAID-6 ≈ 67 %),
+  zählt die Bruttokapazität nur anteilig. **vROps liefert dazu keinen sauberen
+  Wert** (nur physisch roh + belegt), daher ein **konfigurierbarer Faktor**:
+  global als Policy-Dropdown **und je Cluster überschreibbar** (Verwaltung →
+  Storage), Startwert über `--vsan-factor` (Standard `0.5`). Er wirkt auf
+  **Kapazität und Belegung**; in der **%-Auslastung kürzt er sich heraus**, die
+  bleibt also physisch korrekt.
   Die LUN-Liste zeigt den **Storage-Typ** (vSAN/VMFS/NFS) und bei vSAN die
   Bruttokapazität im Tooltip. Bei FC-/iSCSI-LUNs wird zusätzlich die
   **NAA-Kennung** des Backing-Devices (`naa.6000…`) best effort gelesen — zuerst

@@ -18,7 +18,7 @@ Aufruf:
 Benötigt nur die Python-Standardbibliothek (Python 3.8+).
 """
 
-VERSION = "2.28.1"
+VERSION = "2.29.0"
 
 # Interne Rollen-Schlüssel (steuern die Rechte, unveränderlich) und ihre
 # Standard-Bezeichnungen. Die Bezeichnungen lassen sich auf der Verwaltungsseite
@@ -1223,7 +1223,7 @@ class _SkipTier(Exception):
 
 def collect(api, cpu_factor, progress=None, failover_hosts=1, exclude_tag="",
             tag_property="", vsan_factor=0.5, tanzu_mhz=2500, vlan_hint=None,
-            min_lun_gb=0, exclude_names=None,
+            min_lun_gb=0, exclude_names=None, vsan_overrides=None,
             net_exclude_names=None, net_exclude_vlans=None,
             skip=None, prev=None):
     """skip: Teilbereiche überspringen ("vms" | "network" | "storage") und
@@ -1596,10 +1596,15 @@ def collect(api, cpu_factor, progress=None, failover_hosts=1, exclude_tag="",
                 continue
             nm = name_of(ds)
             typ = ds_type(did, nm)
-            # vSAN spiegelt (RAID-1): brutto zählt nur anteilig als nutzbar.
-            # Kapazität UND Belegung werden mit dem Faktor gerechnet, sonst
-            # käme die Auslastung nicht hin (vROps meldet beide brutto).
-            f = vsan_factor if is_vsan(typ, nm) else 1.0
+            # vSAN-Policy zehrt an der nutzbaren Kapazität (RAID-1 ~50 %, RAID-5
+            # ~75/67 %, RAID-6 ~67 %). vROps liefert dazu KEINEN sauberen Wert,
+            # nur physisch roh + physisch belegt – daher ein konfigurierbarer
+            # Faktor (global, je Cluster überschreibbar). Kapazität UND Belegung
+            # werden gerechnet; in der %-Auslastung kürzt sich der Faktor heraus
+            # (used·f / cap·f = used/cap), sie bleibt also physisch korrekt.
+            f = 1.0
+            if is_vsan(typ, nm):
+                f = (vsan_overrides or {}).get(cl, vsan_factor)
             raw_cap, raw_used = float(cap or 0), float(used or 0)
             eff_cap, eff_used = raw_cap * f, raw_used * f
             data[cl]["storage"]["cap_gb"] += eff_cap
@@ -1989,7 +1994,7 @@ def build_summary(data, cpu_factor, failover_hosts=1, tanzu_mhz=2500,
 
 # ------------------------------------------------------------ Beispieldaten --
 
-def sample_data():
+def sample_data(vsan_factor=0.5, vsan_overrides=None):
     import random
     random.seed(42)
     data = {}
@@ -2016,8 +2021,9 @@ def sample_data():
         # Beispiel-LUNs: ein großer vSAN-Datastore (Spiegelung -> 50 % nutzbar)
         # plus mehrere FC-LUNs (VMFS, brutto = nutzbar)
         raw = random.choice([40000, 80000])
-        luns = [{"name": f"vsan-cl{ci}", "type": "vSAN", "factor": 0.5,
-                 "raw_cap_gb": raw, "cap_gb": raw * 0.5, "used_gb": 0}]
+        _vf = (vsan_overrides or {}).get(cl, vsan_factor)   # global bzw. je Cluster
+        luns = [{"name": f"vsan-cl{ci}", "type": "vSAN", "factor": _vf,
+                 "raw_cap_gb": raw, "cap_gb": raw * _vf, "used_gb": 0}]
         for li in range(1, random.randint(3, 7)):
             cap = random.choice([2000, 4000, 8000])
             luns.append({"name": f"FC-LUN-{ci}{li:02d}", "type": "VMFS",
@@ -3511,6 +3517,28 @@ try { var _t = new URLSearchParams(location.search).get("theme")
   Maximum: <input id="storMaxLun" type="number" min="0" step="1"
     style="width:110px;background:var(--field);border:1px solid var(--line);color:var(--text);border-radius:6px;padding:4px 6px;text-align:center"> TB
 </div>
+<div class="sechead">vSAN-Kapazität (Policy-Faktor)</div>
+<div class="hint" style="color:var(--muted);margin-bottom:8px">
+  vROps liefert für vSAN <b>keinen</b> sauberen Nutzbar-nach-RAID-Wert, nur die
+  <b>physische</b> Roh- und Belegt-Kapazität. Die <b>Auslastung in %</b> stimmt
+  damit ohnehin; der Faktor rechnet nur die <b>absolute nutzbare</b> Kapazität aus
+  der Policy (Annahme): RAID-1 ≈ 50 %, RAID-5 ≈ 75 % (3+1) bzw. 67 % (2+1),
+  RAID-6 ≈ 67 %. Bei gemischten Policies je Cluster den passenden Standard wählen.</div>
+<div style="margin-bottom:10px">
+  Standard-Policy:
+  <select id="vsanPolicy" class="filterbox" style="width:auto" onchange="vsanPresetToFactor('vsanPolicy','vsanFactor')"></select>
+  &nbsp;Faktor: <input id="vsanFactor" type="number" min="0.05" max="1" step="0.01"
+    style="width:90px;background:var(--field);border:1px solid var(--line);color:var(--text);border-radius:6px;padding:4px 6px;text-align:center"
+    oninput="vsanFactorToPreset('vsanFactor','vsanPolicy')">
+  <span style="color:var(--muted);font-size:12px">(0,05–1,0 · z. B. 0,5 = 50 % nutzbar)</span>
+</div>
+<div class="hint" style="color:var(--muted);margin:4px 0 6px">Override je Cluster (optional – für abweichende Policies):</div>
+<table class="kt" id="vsanOvrTable" style="max-width:560px;margin-bottom:8px">
+  <thead><tr><th>Cluster</th><th>Policy</th><th class="num">Faktor</th><th class="nosort"></th></tr></thead>
+  <tbody id="vsanOvrBody"></tbody>
+</table>
+<button class="btn" onclick="addVsanOverride()">+ Cluster-Override</button>
+<div style="margin-top:14px"></div>
 <button class="btn approve" onclick="saveStorageCfg()">✓ Speichern &amp; anwenden</button>
 <span id="storMinSaved" style="color:var(--ok);font-size:12px;margin-left:8px"></span>
 </div><!-- admGrpStorCfg -->
@@ -5165,17 +5193,74 @@ function saveVisibility() {
     }).catch(() => notify("Speichern der Sichtbarkeit fehlgeschlagen."));
 }
 
-// ---- Storage-Erweiterungen: Schalter (im Auto-Freigabe-Tab) ----
+// ---- Storage-Einstellungen (inkl. vSAN-Policy-Faktor) ----
+// vROps liefert keinen sauberen „nutzbar"-Wert; die Faktoren sind Annahmen je
+// RAID-Policy. RAID-5 (2+1) und RAID-6 haben beide ~0,667.
+const VSAN_POLICIES = [
+  ["RAID-1 (FTT=1) · 50 %", 0.5], ["RAID-1 (FTT=2) · 33 %", 0.333],
+  ["RAID-5 (3+1) · 75 %", 0.75], ["RAID-5 (2+1) · 67 %", 0.667],
+  ["RAID-6 (4+2) · 67 %", 0.667]];
+function vsanOptions(sel) {
+  const match = VSAN_POLICIES.some(([l,f]) => Math.abs(f - sel) < 0.005);
+  return `<option value=""${match ? "" : " selected"}>eigener Wert</option>`
+    + VSAN_POLICIES.map(([l,f]) =>
+        `<option value="${f}"${Math.abs(f-sel)<0.005?" selected":""}>${esc(l)}</option>`).join("");
+}
+function vsanPresetToFactor(selId, facId) {
+  const v = (document.getElementById(selId) || {}).value;
+  const f = document.getElementById(facId);
+  if (v && f) f.value = v;
+}
+function vsanFactorToPreset(facId, selId) {
+  const f = parseFloat((document.getElementById(facId) || {}).value);
+  const sel = document.getElementById(selId); if (!sel) return;
+  let m = false;
+  [...sel.options].forEach(o => {
+    if (o.value && !m && Math.abs(parseFloat(o.value) - f) < 0.005) { sel.value = o.value; m = true; } });
+  if (!m) sel.value = "";
+}
+function vsanOvrRow(cl, f) {
+  return `<tr>
+    <td><input class="filterbox vovrCl" style="width:160px" value="${esc(cl)}" placeholder="Cluster-Name"></td>
+    <td><select class="filterbox vovrPol" style="width:auto" onchange="const t=this.closest('tr').querySelector('.vovrFac'); if(this.value) t.value=this.value">${vsanOptions(f)}</select></td>
+    <td class="num"><input class="filterbox vovrFac" type="number" min="0.05" max="1" step="0.01" style="width:80px" value="${f}"></td>
+    <td><button class="del" title="Override entfernen" onclick="this.closest('tr').remove()">✕</button></td>
+  </tr>`;
+}
+function renderVsanOverrides(ovr) {
+  const tb = document.getElementById("vsanOvrBody"); if (!tb) return;
+  const rows = Object.entries(ovr || {});
+  tb.innerHTML = rows.length ? rows.map(([cl,f]) => vsanOvrRow(cl, f)).join("") : "";
+}
+function addVsanOverride() {
+  const tb = document.getElementById("vsanOvrBody");
+  if (tb) tb.insertAdjacentHTML("beforeend", vsanOvrRow("", 0.5));
+}
+function collectVsanOverrides() {
+  const out = {};
+  [...document.querySelectorAll("#vsanOvrBody tr")].forEach(tr => {
+    const cl = ((tr.querySelector(".vovrCl") || {}).value || "").trim();
+    const f = parseFloat((tr.querySelector(".vovrFac") || {}).value);
+    if (cl && f >= 0.05 && f <= 1) out[cl] = Math.round(f * 10000) / 10000;
+  });
+  return out;
+}
 function saveStorageCfg() {
   const on = !!(document.getElementById("storEnabled") || {}).checked;
   const mn = parseInt((document.getElementById("storMinLun") || {}).value, 10) || 0;
   const ex = (document.getElementById("storExclNames") || {}).value || "";
   const mxTb = parseFloat((document.getElementById("storMaxLun") || {}).value) || 0;
   const mx = Math.round(mxTb * 1024);   // Eingabe in TB, Speicherung in GB
+  const vfac = parseFloat((document.getElementById("vsanFactor") || {}).value) || 0.5;
   fetch("api/storagecfg", { method: "PUT", headers: {"Content-Type":"application/json"},
-      body: JSON.stringify({ enabled: on, min_lun_gb: mn, max_lun_gb: mx, exclude_names: ex }) })
+      body: JSON.stringify({ enabled: on, min_lun_gb: mn, max_lun_gb: mx, exclude_names: ex,
+                             vsan_factor: vfac, vsan_overrides: collectVsanOverrides() }) })
     .then(r => r.ok ? r.json() : Promise.reject())
     .then(d => { STOR.enabled = !!d.enabled; STOR.max_lun_gb = d.max_lun_gb || 0;
+      const vf = document.getElementById("vsanFactor");
+      const vp = document.getElementById("vsanPolicy");
+      if (d.vsan_factor != null) { if (vf) vf.value = d.vsan_factor; if (vp) vp.innerHTML = vsanOptions(d.vsan_factor); }
+      renderVsanOverrides(d.vsan_overrides || {});
       ["storCfgSaved","storMinSaved"].forEach(id => { const st = document.getElementById(id);
         if (st) { st.textContent = "✓ gespeichert"; setTimeout(() => { if (st) st.textContent = ""; }, 2500); } }); })
     .catch(() => notify("Speichern fehlgeschlagen."));
@@ -5191,6 +5276,11 @@ function loadStorageCfg() {
     if (ex && document.activeElement !== ex) ex.value = d.exclude_names || "";
     const mx = document.getElementById("storMaxLun");
     if (mx && document.activeElement !== mx) mx.value = d.max_lun_gb ? (d.max_lun_gb / 1024) : "";
+    const fac = (d.vsan_factor != null ? d.vsan_factor : 0.5);
+    const vp = document.getElementById("vsanPolicy"); if (vp) vp.innerHTML = vsanOptions(fac);
+    const vf = document.getElementById("vsanFactor");
+    if (vf && document.activeElement !== vf) vf.value = fac;
+    renderVsanOverrides(d.vsan_overrides || {});
   }).catch(() => {});
 }
 
@@ -6434,6 +6524,15 @@ const I18N = {
   "Offline-Quelle importiert": "Offline source imported",
   "Noch kein Webhook konfiguriert.": "No webhook configured yet.",
   "z. B. AWX": "e.g. AWX",
+  "vSAN-Kapazität (Policy-Faktor)": "vSAN capacity (policy factor)",
+  "vROps liefert für vSAN keinen sauberen Nutzbar-nach-RAID-Wert, nur die physische Roh- und Belegt-Kapazität. Die Auslastung in % stimmt damit ohnehin; der Faktor rechnet nur die absolute nutzbare Kapazität aus der Policy (Annahme): RAID-1 ≈ 50 %, RAID-5 ≈ 75 % (3+1) bzw. 67 % (2+1), RAID-6 ≈ 67 %. Bei gemischten Policies je Cluster den passenden Standard wählen.":
+    "vROps provides no clean usable-after-RAID value for vSAN, only the physical raw and used capacity. Utilization in % is therefore already correct; the factor only derives the absolute usable capacity from the policy (an assumption): RAID-1 ≈ 50 %, RAID-5 ≈ 75 % (3+1) or 67 % (2+1), RAID-6 ≈ 67 %. For mixed policies, pick the right default per cluster.",
+  "Standard-Policy:": "Default policy:",
+  "Override je Cluster (optional – für abweichende Policies):":
+    "Per-cluster override (optional – for differing policies):",
+  "+ Cluster-Override": "+ Cluster override", "eigener Wert": "custom value",
+  "Cluster-Name": "cluster name", "Faktor": "Factor",
+  "(0,05–1,0 · z. B. 0,5 = 50 % nutzbar)": "(0.05–1.0 · e.g. 0.5 = 50 % usable)",
   "Zeitzone der Anzeige": "Display time zone",
   "z. B. Europe/Berlin": "e.g. Europe/Berlin",
   "Alle angezeigten Zeiten (Stand, Log, die Abgleich-Uhrzeiten im ⟳-Menü, Mail-Zeitstempel) erscheinen in dieser Zeitzone. Der Abruf-Takt selbst ist davon unberührt (er rechnet in Sekunden). Leer = Zeitzone des Servers. IANA-Name, z. B. Europe/Berlin – die Sommer-/Winterzeit wird damit automatisch berücksichtigt.": "All displayed times (last update, log, the sync times in the ⟳ menu, mail timestamps) appear in this time zone. The refresh schedule itself is unaffected (it counts in seconds). Empty = the server's time zone. IANA name, e.g. Europe/Berlin – daylight saving is then handled automatically.",
@@ -8452,6 +8551,27 @@ def serve(args, password):
             parts = re.split(r"[,\n;]+", str(raw or ""))
         return [p.strip().lower() for p in parts if p.strip()][:30]
 
+    def _clean_vfac(v, default):
+        # vSAN-Nutzbar-Faktor: 0,05–1,0 (z. B. 0,5 = RAID-1, 0,75 = RAID-5 3+1).
+        try:
+            return round(min(1.0, max(0.05, float(v))), 4)
+        except (TypeError, ValueError):
+            return default
+
+    def _clean_overrides(raw):
+        # Faktor je Cluster (Override des globalen Standards).
+        out = {}
+        if isinstance(raw, dict):
+            for cl, v in list(raw.items())[:200]:
+                name = " ".join(str(cl or "").split())[:120]
+                try:
+                    f = float(v)
+                except (TypeError, ValueError):
+                    continue
+                if name and 0.05 <= f <= 1.0:
+                    out[name] = round(f, 4)
+        return out
+
     def load_storagecfg():
         raw = store.load("storagecfg", None) or {}
         def _pint(k):
@@ -8461,7 +8581,9 @@ def serve(args, password):
                 return 0
         return {"enabled": bool(raw.get("enabled")), "min_lun_gb": _pint("min_lun_gb"),
                 "max_lun_gb": _pint("max_lun_gb"),
-                "exclude_names": _clean_excl(raw.get("exclude_names"))}
+                "exclude_names": _clean_excl(raw.get("exclude_names")),
+                "vsan_factor": _clean_vfac(raw.get("vsan_factor"), args.vsan_factor),
+                "vsan_overrides": _clean_overrides(raw.get("vsan_overrides"))}
 
     storage_cfg = load_storagecfg()
 
@@ -8561,8 +8683,10 @@ def serve(args, password):
                 typ = oneline(d.get("type"), 40)
                 cap = round(_num(d.get("cap_gb")), 1)
                 used = min(round(_num(d.get("used_gb")), 1), cap)
-                # vSAN spiegelt: brutto zählt nur anteilig (wie bei collect()).
-                f = args.vsan_factor if "vsan" in (typ + nm).lower() else 1.0
+                # vSAN-Policy-Faktor (global + Cluster-Override, wie bei collect()).
+                _vf = (storage_cfg.get("vsan_factor") or args.vsan_factor)
+                _vf = (storage_cfg.get("vsan_overrides") or {}).get(name, _vf)
+                f = _vf if "vsan" in (typ + nm).lower() else 1.0
                 luns.append({"name": nm, "type": typ or "unbekannt",
                              "naa": oneline(d.get("naa"), 80),
                              "factor": f, "raw_cap_gb": cap,
@@ -9019,7 +9143,11 @@ def serve(args, password):
         try:
             if args.sample:
                 time.sleep(2)  # Demo: Ladezeit simulieren
-                clusters = build_summary(sample_data(), args.cpu_factor,
+                clusters = build_summary(sample_data(
+                                             storage_cfg.get("vsan_factor")
+                                             or args.vsan_factor,
+                                             storage_cfg.get("vsan_overrides") or {}),
+                                         args.cpu_factor,
                                          args.failover_hosts,
                                          args.tanzu_mhz_per_vcpu,
                                          storage_cfg.get("min_lun_gb", 0),
@@ -9045,7 +9173,9 @@ def serve(args, password):
                                      failover_hosts=args.failover_hosts,
                                      exclude_tag=args.exclude_tag,
                                      tag_property=args.tag_property,
-                                     vsan_factor=args.vsan_factor,
+                                     vsan_factor=storage_cfg.get("vsan_factor")
+                                                 or args.vsan_factor,
+                                     vsan_overrides=storage_cfg.get("vsan_overrides") or {},
                                      tanzu_mhz=args.tanzu_mhz_per_vcpu,
                                      vlan_hint=vlan_hint,
                                      min_lun_gb=storage_cfg.get("min_lun_gb", 0),
@@ -9597,7 +9727,11 @@ def serve(args, password):
                                 "min_lun_gb": storage_cfg.get("min_lun_gb", 0),
                                 "max_lun_gb": storage_cfg.get("max_lun_gb", 0),
                                 "exclude_names": ", ".join(
-                                    storage_cfg.get("exclude_names") or [])})
+                                    storage_cfg.get("exclude_names") or []),
+                                "vsan_factor": storage_cfg.get("vsan_factor",
+                                                               args.vsan_factor),
+                                "vsan_overrides": dict(
+                                    storage_cfg.get("vsan_overrides") or {})})
             elif route == "/api/netcfg":
                 if not self._require("admin"):
                     return
@@ -10641,24 +10775,33 @@ def serve(args, password):
                 except (TypeError, ValueError):
                     mx = 0
                 excl = _clean_excl(body.get("exclude_names"))
+                vfac = _clean_vfac(body.get("vsan_factor"), args.vsan_factor)
+                vovr = _clean_overrides(body.get("vsan_overrides"))
                 with storage_lock:
                     changed = (mn != storage_cfg.get("min_lun_gb", 0)
-                               or excl != (storage_cfg.get("exclude_names") or []))
+                               or excl != (storage_cfg.get("exclude_names") or [])
+                               or vfac != storage_cfg.get("vsan_factor")
+                               or vovr != (storage_cfg.get("vsan_overrides") or {}))
                     storage_cfg["enabled"] = on
                     storage_cfg["min_lun_gb"] = mn
                     storage_cfg["max_lun_gb"] = mx
                     storage_cfg["exclude_names"] = excl
+                    storage_cfg["vsan_factor"] = vfac
+                    storage_cfg["vsan_overrides"] = vovr
                     store.save("storagecfg", storage_cfg)
                 audit(s["user"], "Storage-Einstellungen",
                       ("Erweiterungen " + ("aktiv" if on else "inaktiv"))
                       + (f"; Mindest-LUN {mn} GB" if mn else "; keine Mindest-LUN")
                       + (f"; Max-LUN {mx} GB" if mx else "")
-                      + (f"; Namensfilter: {', '.join(excl)}" if excl else ""))
-                # Anzeige-Filter wirken in der Datensammlung -> gleich neu abrufen
+                      + (f"; Namensfilter: {', '.join(excl)}" if excl else "")
+                      + f"; vSAN-Faktor {vfac}"
+                      + (f" (Overrides: {len(vovr)})" if vovr else ""))
+                # Filter/Faktor wirken in der Datensammlung -> gleich neu abrufen
                 if changed and not state["refreshing"]:
                     threading.Thread(target=do_refresh, daemon=True).start()
                 self._json({"enabled": on, "min_lun_gb": mn, "max_lun_gb": mx,
-                            "exclude_names": ", ".join(excl)})
+                            "exclude_names": ", ".join(excl),
+                            "vsan_factor": vfac, "vsan_overrides": vovr})
             elif self.path == "/api/netcfg":
                 s = self._require("admin")
                 if not s:
@@ -11358,7 +11501,7 @@ def main():
         return
 
     if args.sample:
-        clusters = build_summary(sample_data(), args.cpu_factor,
+        clusters = build_summary(sample_data(args.vsan_factor), args.cpu_factor,
                                  args.failover_hosts, args.tanzu_mhz_per_vcpu)
     else:
         valid = [s for s in args.sources if s["url"] and s["user"]]
