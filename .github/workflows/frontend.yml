@@ -1,0 +1,25 @@
+# Lädt die ausgelieferte Seite in einem Headless-Browser, führt das eingebettete
+# JavaScript aus (alle Verwaltungs-Reiter + Render-Funktionen) und schlägt fehl,
+# sobald ein JS-Fehler auftritt. Fängt vor allem Parse-Fehler ab (z. B. eine
+# gerade " in einem deutschen String), die py_compile NICHT sieht, weil das
+# JS als String im Python-Skript liegt.
+# GitHub-Runner bringen Google Chrome bereits mit – keine Installation nötig.
+name: Frontend-Check
+
+on:
+  push:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  frontend:
+    name: Eingebettetes Frontend (Headless-Browser)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Frontend-Rauchtest (Headless-Chrome)
+        run: python3 tests/frontend_check.py
