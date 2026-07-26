@@ -2,16 +2,18 @@
 
 > 🇩🇪 [Deutsche Fassung: ARCHITEKTUR.md](ARCHITEKTUR.md)
 >
-> As of v2.29. The diagrams are Mermaid — GitHub renders them right in the
+> As of v2.30. The diagrams are Mermaid — GitHub renders them right in the
 > browser.
 
 ## Guiding idea
 
-A **single Python script** (`aria_kapa.py`, standard library only,
-Python 3.8+) is data collector, web server, calculation core and UI server in
-one. No pip, no build, no database server — a deliberate choice so the
-dashboard runs on any RHEL host without a package zoo and an update means
-swapping **one file**.
+A **Python script** (`aria_kapa.py`, standard library only, Python 3.8+) is
+data collector, web server, calculation core and UI server in one; since v2.30
+the frontend (HTML/CSS/JS) lives as **real files in the `frontend/` folder**
+next to it — reviewable and lintable, loaded at runtime. No pip, no build, no
+database server — a deliberate choice so the dashboard runs on any RHEL host
+without a package zoo and an update means swapping **a few files** (the script
++ `frontend/`).
 
 ```mermaid
 flowchart LR
@@ -273,7 +275,7 @@ Same artifact, container-first — decision guide in
 
 ## Deliberate decisions (mini ADRs)
 
-1. **Standard library only, one file** — operations without package
+1. **Standard library only, minimal footprint** — operations without package
    management, update = file swap; paid for with embedded templates.
 2. **German as source language + translation engine** instead of duplicated
    templates — one source to maintain, EN follows automatically; the API

@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script>/* Theme vor dem ersten Rendern setzen (kein Flackern). ?theme=light|dark
+   in der URL überstimmt einmalig (z. B. für Kiosk-Anzeigen), sonst gilt die
+   gespeicherte Wahl bzw. die Systemeinstellung. */
+try { var _t = new URLSearchParams(location.search).get("theme")
+            || localStorage.getItem("kapa_theme");
+  if (!_t && window.matchMedia && matchMedia("(prefers-color-scheme: light)").matches) _t = "light";
+  if (_t === "light") document.documentElement.setAttribute("data-theme", "light");
+} catch (e) {}</script>
+<title>Anmeldung – VMware Kapazitätsplanung</title>
+<style>
+  :root { --bg:#0f172a; --card:#1e293b; --line:#334155; --text:#e2e8f0;
+          --muted:#94a3b8; --accent:#38bdf8; --field:#0b1220; --accent-text:#0b1220; }
+  html[data-theme="light"] { --bg:#eef2f7; --card:#ffffff; --line:#d4dbe5;
+          --text:#1e293b; --muted:#5b6b7f; --accent:#0369a1; --field:#f6f8fb;
+          --accent-text:#ffffff; }
+  body { background:var(--bg); color:var(--text); font:14px/1.5 "Segoe UI",system-ui,sans-serif;
+         display:flex; align-items:center; justify-content:center; min-height:100vh; margin:0; }
+  .box { background:var(--card); border:1px solid var(--line); border-radius:12px;
+         padding:28px; width:340px; }
+  h1 { font-size:17px; margin:0 0 4px; color:var(--accent); }
+  p { color:var(--muted); font-size:12px; margin:0 0 16px; }
+  label { display:block; font-size:12px; color:var(--muted); margin:12px 0 4px; }
+  input { width:100%; box-sizing:border-box; background:var(--field); border:1px solid var(--line);
+          color:var(--text); border-radius:6px; padding:8px 10px; font-size:13px; }
+  input:focus { outline:none; border-color:var(--accent); }
+  button { width:100%; margin-top:18px; background:var(--accent); color:var(--accent-text); border:none;
+           border-radius:8px; padding:9px; font-size:13px; font-weight:600; cursor:pointer; }
+  .err { color:#ef4444; font-size:12px; margin-top:10px; min-height:16px; }
+</style>
+</head>
+<body>
+<form class="box" onsubmit="login(event)">
+  <h1>VMware Kapazitätsplanung</h1>
+  <p>Anmeldung mit Active-Directory-Konto</p>
+  <label>Benutzername</label>
+  <input id="u" autocomplete="username" placeholder="__LOGIN_HINT__" autofocus>
+  <label>Passwort</label>
+  <input id="p" type="password" autocomplete="current-password">
+  <button>Anmelden</button>
+  <div class="err" id="e"></div>
+  <p style="margin:14px 0 0;text-align:center">Version __VERSION__</p>
+  <p style="margin:6px 0 0;text-align:center;color:#64748b;font-size:11px">__CONTACT__</p>
+</form>
+<script>
+async function login(ev) {
+  ev.preventDefault();
+  const e = document.getElementById("e");
+  e.textContent = "";
+  try {
+    const r = await fetch("api/login", { method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({ username: document.getElementById("u").value.trim(),
+                             password: document.getElementById("p").value }) });
+    if (r.ok) { location.reload(); return; }
+    e.textContent = tr((await r.json()).error || "Anmeldung fehlgeschlagen.");
+  } catch (x) { e.textContent = tr("Server nicht erreichbar."); }
+}
+// Browsersprache nicht Deutsch -> englische Beschriftung (Werte bleiben intern)
+const L_EN = {
+  "Anmeldung – VMware Kapazitätsplanung": "Sign in – VMware Capacity Planning",
+  "VMware Kapazitätsplanung": "VMware Capacity Planning",
+  "Anmeldung mit Active-Directory-Konto": "Sign in with your Active Directory account",
+  "Benutzername": "Username", "Passwort": "Password", "Anmelden": "Sign in",
+  "vorname.nachname": "first.last",
+  "Active-Directory-Benutzername": "Active Directory user name",
+  "Anmeldung fehlgeschlagen.": "Sign-in failed.",
+  "Server nicht erreichbar.": "Server unreachable.",
+  "Benutzername oder Passwort falsch.": "Wrong username or password.",
+  "Die Eingabe im Benutzername-Feld sieht wie ein Passwort aus – bitte den Anmeldenamen eintragen.":
+    "The input in the username field looks like a password – please enter your sign-in name.",
+  "Zu viele Fehlversuche – bitte einige Minuten warten und erneut versuchen.":
+    "Too many failed attempts – please wait a few minutes and try again."
+};
+const IS_DE = (navigator.language || "de").toLowerCase().startsWith("de");
+function tr(s) { return IS_DE ? s : (L_EN[(s || "").trim()] || s); }
+if (!IS_DE) {
+  document.documentElement.lang = "en";
+  document.title = tr(document.title);
+  document.querySelectorAll("h1,p,label,button").forEach(el => {
+    if (!el.children.length) el.textContent = tr(el.textContent);
+  });
+  const u = document.getElementById("u");
+  if (u) u.placeholder = tr(u.placeholder);
+}
+</script>
+</body>
+</html>

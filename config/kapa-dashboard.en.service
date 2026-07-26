@@ -5,8 +5,8 @@
 # =============================================================================
 # Installation:
 #   sudo useradd --system --home /opt/kapa --shell /usr/sbin/nologin kapa
-#   sudo mkdir -p /opt/kapa && sudo cp aria_kapa.py /opt/kapa/
-#   sudo chown kapa:kapa /opt/kapa/aria_kapa.py
+#   sudo mkdir -p /opt/kapa && sudo cp -r aria_kapa.py frontend /opt/kapa/
+#   sudo chown -R kapa:kapa /opt/kapa/aria_kapa.py /opt/kapa/frontend
 #   # Runtime data DELIBERATELY outside /opt/kapa (CI/CD must not delete it):
 #   sudo mkdir -p /var/lib/kapa && sudo chown kapa:kapa /var/lib/kapa && sudo chmod 750 /var/lib/kapa
 #

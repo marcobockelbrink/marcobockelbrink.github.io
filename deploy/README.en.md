@@ -2,8 +2,9 @@
 
 > 🇩🇪 [Deutsche Fassung: README.md](README.md)
 
-The application is a single Python script (`aria_kapa.py`, standard library
-only, Python 3.8+). It ships as a container — choose by environment:
+The application is a Python script (`aria_kapa.py`) plus the `frontend/` folder
+(HTML/CSS/JS as files) — standard library only, Python 3.8+, no build. It ships
+as a container — choose by environment:
 
 | Variant | When | Directory |
 |---|---|---|

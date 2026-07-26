@@ -2,16 +2,18 @@
 
 > 🇬🇧 [English version: ARCHITECTURE.en.md](ARCHITECTURE.en.md)
 >
-> Stand: v2.29. Die Schaubilder sind Mermaid-Diagramme — GitHub rendert sie
+> Stand: v2.30. Die Schaubilder sind Mermaid-Diagramme — GitHub rendert sie
 > direkt im Browser.
 
 ## Leitidee
 
-Ein **einzelnes Python-Skript** (`aria_kapa.py`, nur Standardbibliothek,
-Python 3.8+) ist zugleich Datensammler, Webserver, Rechenkern und UI-Auslieferer.
-Kein pip, kein Build, keine Datenbank-Server — bewusst so gewählt, damit das
-Dashboard auf jedem RHEL-Host ohne Paket-Zoo läuft und ein Update aus dem
-Austausch **einer Datei** besteht.
+Ein **Python-Skript** (`aria_kapa.py`, nur Standardbibliothek, Python 3.8+) ist
+zugleich Datensammler, Webserver, Rechenkern und UI-Auslieferer; das Frontend
+(HTML/CSS/JS) liegt seit v2.30 als **echte Dateien im Ordner `frontend/`**
+daneben — review- und lintbar, zur Laufzeit geladen. Kein pip, kein Build,
+keine Datenbank-Server — bewusst so gewählt, damit das Dashboard auf jedem
+RHEL-Host ohne Paket-Zoo läuft und ein Update aus dem Austausch **weniger
+Dateien** (Skript + `frontend/`) besteht.
 
 ```mermaid
 flowchart LR
@@ -276,7 +278,7 @@ Dasselbe Artefakt, Container-first — Auswahlhilfe in
 
 ## Bewusste Entscheidungen (Kurz-ADRs)
 
-1. **Nur Standardbibliothek, eine Datei** — Betrieb ohne Paketmanagement,
+1. **Nur Standardbibliothek, minimaler Fußabdruck** — Betrieb ohne Paketmanagement,
    Update = Dateitausch; bezahlt mit eingebetteten Templates.
 2. **Deutsch als Quellsprache + Übersetzungs-Engine** statt doppelter
    Templates — eine Pflegequelle, EN folgt automatisch; API bleibt stabil

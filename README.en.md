@@ -23,7 +23,7 @@ the selector and column configuration (`python3 aria_kapa.py --sample --serve`).
 
 ## Feature overview
 
-A single Python script (standard library only, **no pip, no build**) that turns
+A Python script + `frontend/` folder (standard library only, **no pip, no build**) that turns
 Aria Operations data into a web dashboard. The UI language follows the browser:
 German browsers get German, everything else English — including the login page,
 the **API docs/OpenAPI spec** and the **CSV export** (headers/status values via

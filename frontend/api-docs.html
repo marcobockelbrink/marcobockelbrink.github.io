@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script>/* Theme vor dem ersten Rendern setzen (kein Flackern). ?theme=light|dark
+   in der URL überstimmt einmalig (z. B. für Kiosk-Anzeigen), sonst gilt die
+   gespeicherte Wahl bzw. die Systemeinstellung. */
+try { var _t = new URLSearchParams(location.search).get("theme")
+            || localStorage.getItem("kapa_theme");
+  if (!_t && window.matchMedia && matchMedia("(prefers-color-scheme: light)").matches) _t = "light";
+  if (_t === "light") document.documentElement.setAttribute("data-theme", "light");
+} catch (e) {}</script>
+<title>API-Dokumentation – VMware Kapazitätsplanung</title>
+<style>
+  :root { --bg:#0f172a; --card:#1e293b; --line:#334155; --text:#e2e8f0; --muted:#94a3b8;
+          --accent:#38bdf8; --ok:#22c55e; --get:#0ea5e9; --field:#0b1220; }
+  html[data-theme="light"] { --bg:#eef2f7; --card:#ffffff; --line:#d4dbe5;
+          --text:#1e293b; --muted:#5b6b7f; --accent:#0369a1; --ok:#15803d;
+          --get:#0284c7; --field:#f6f8fb; }
+  html[data-theme="light"] .btn { color:#ffffff; }
+  * { box-sizing:border-box; }
+  body { background:var(--bg); color:var(--text); font:14px/1.55 "Segoe UI",system-ui,sans-serif;
+         margin:0; padding:24px; }
+  .wrap { max-width:960px; margin:0 auto; }
+  h1 { font-size:20px; margin:0 0 2px; }
+  .sub { color:var(--muted); margin-bottom:20px; }
+  a { color:var(--accent); }
+  .aanum { width:70px; background:var(--field); border:1px solid var(--line);
+           color:var(--text); border-radius:6px; padding:4px 6px; text-align:center; }
+  .authbox { background:var(--card); border:1px solid var(--line); border-radius:12px;
+             padding:14px 16px; margin-bottom:20px; }
+  .authbox label { font-size:12px; color:var(--muted); display:block; margin-bottom:4px; }
+  .authbox input { width:100%; background:var(--field); border:1px solid var(--line); color:var(--text);
+                   border-radius:8px; padding:9px 12px; font-size:13px; font-family:monospace; }
+  .hint { color:var(--muted); font-size:12px; margin-top:6px; }
+  .ep { background:var(--card); border:1px solid var(--line); border-radius:12px;
+        margin-bottom:14px; overflow:hidden; }
+  .ephead { display:flex; align-items:center; gap:10px; padding:12px 16px; cursor:pointer; }
+  .method { font-weight:700; font-size:12px; padding:3px 8px; border-radius:6px;
+            background:rgba(14,165,233,.15); color:var(--get); letter-spacing:.5px; }
+  .method.post { background:rgba(34,197,94,.15); color:var(--ok); }
+  .path { font-family:monospace; font-size:14px; }
+  .summary { color:var(--muted); margin-left:auto; font-size:13px; }
+  .epbody { padding:0 16px 16px; border-top:1px solid var(--line); }
+  .epbody p { color:var(--muted); }
+  table { border-collapse:collapse; width:100%; font-size:13px; margin:8px 0; }
+  th, td { text-align:left; padding:6px 10px; border-bottom:1px solid var(--line); vertical-align:top; }
+  th { color:var(--muted); font-weight:600; }
+  td input { background:var(--field); border:1px solid var(--line); color:var(--text);
+             border-radius:6px; padding:5px 8px; font-size:13px; width:100%; }
+  .btn { background:var(--accent); color:#08131f; border:none; border-radius:8px;
+         padding:8px 14px; font-size:13px; font-weight:600; cursor:pointer; margin-top:6px; }
+  pre { background:var(--field); border:1px solid var(--line); border-radius:8px; padding:12px;
+        overflow:auto; font-size:12px; max-height:360px; }
+  .status { font-weight:600; margin:8px 0 4px; }
+  .foot { color:var(--muted); font-size:12px; margin-top:24px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>API-Dokumentation <span style="color:var(--muted);font-weight:400">· v__VERSION__</span></h1>
+  <div class="sub">Lesende REST-API unter <code>/api/v1/</code> ·
+    <a href="openapi.json">OpenAPI-Spec (JSON)</a> – importierbar in Swagger Editor/Postman.</div>
+
+  <div class="authbox">
+    <label for="tok">Bearer-Token (im Dashboard unter „Verwaltung → API-Tokens" erzeugen)</label>
+    <input id="tok" placeholder="kapa_…" autocomplete="off" spellcheck="false">
+    <div class="hint">Wird nur lokal im Browser gespeichert und bei „Ausführen" als
+      <code>Authorization: Bearer …</code> mitgeschickt. Angemeldete Admins können auch ohne
+      Token testen (Session-Cookie).</div>
+  </div>
+
+  <div id="eps"></div>
+  <div class="foot">Self-contained – kein externes Swagger-UI/CDN. Details je Feld: siehe OpenAPI-Spec.</div>
+</div>
+<script>
+const BASE = location.pathname.replace(/\/docs\/?$/, "");   // /api/v1  (auch hinter Proxy)
+const tokEl = document.getElementById("tok");
+try { tokEl.value = localStorage.getItem("kapa_api_token") || ""; } catch (e) {}
+tokEl.addEventListener("input", () => { try { localStorage.setItem("kapa_api_token", tokEl.value); } catch (e) {} });
+
+function esc(s){ return String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+
+// Browsersprache nicht Deutsch -> englische Beschriftung. Die Endpunkt-Texte
+// kommen bereits lokalisiert aus openapi.json (Accept-Language, serverseitig).
+const IS_DE = (navigator.language || "de").toLowerCase().startsWith("de");
+const L_EN = {
+  "API-Dokumentation – VMware Kapazitätsplanung": "API documentation – VMware Capacity Planning",
+  "API-Dokumentation": "API documentation",
+  "Lesende REST-API unter": "Read-only REST API at",
+  "OpenAPI-Spec (JSON)": "OpenAPI spec (JSON)",
+  "– importierbar in Swagger Editor/Postman.": "– importable into Swagger Editor/Postman.",
+  "Bearer-Token (im Dashboard unter „Verwaltung → API-Tokens\" erzeugen)":
+    "Bearer token (create it in the dashboard under „Administration → API tokens“)",
+  "Wird nur lokal im Browser gespeichert und bei „Ausführen\" als":
+    "Stored only locally in the browser and sent along on „Run“ as",
+  "mitgeschickt. Angemeldete Admins können auch ohne Token testen (Session-Cookie).":
+    ". Signed-in admins can also test without a token (session cookie).",
+  "Self-contained – kein externes Swagger-UI/CDN. Details je Feld: siehe OpenAPI-Spec.":
+    "Self-contained – no external Swagger UI/CDN. Field details: see the OpenAPI spec.",
+  "Parameter": "Parameter", "Bedeutung": "Meaning", "Wert (optional)": "Value (optional)",
+  "Ausführen": "Run", "OpenAPI-Spec nicht ladbar.": "Could not load the OpenAPI spec.",
+  "Fehler: ": "Error: ", "JSON-Body (optional)": "JSON body (optional)", "Pfad": "path"
+};
+function tr(s) { return IS_DE ? s : (L_EN[(s || "").replace(/\s+/g, " ").trim()] || s); }
+if (!IS_DE) {
+  document.documentElement.lang = "en";
+  document.title = tr(document.title);
+  const walk = n => {
+    if (n.nodeType === 3) {
+      const lead = n.data.match(/^\s*/)[0], tail = n.data.match(/\s*$/)[0];
+      const t = tr(n.data);
+      if (t !== n.data) n.data = lead + t + tail;
+      return;
+    }
+    if (n.nodeType !== 1 || /^(SCRIPT|STYLE|PRE|CODE|INPUT)$/.test(n.nodeName)) return;
+    let c = n.firstChild;
+    while (c) { const nx = c.nextSibling; walk(c); c = nx; }
+  };
+  walk(document.body);
+}
+
+fetch("openapi.json").then(r => r.json()).then(spec => {
+  const box = document.getElementById("eps");
+  Object.keys(spec.paths).forEach(p => {
+    ["get", "post"].forEach(m => {
+      const op = spec.paths[p][m]; if (!op) return;
+      const id = m + "_" + p.replace(/\W+/g, "_");
+      const params = (op.parameters || []).filter(pa => pa.in !== "path");
+      const pathParams = (op.parameters || []).filter(pa => pa.in === "path");
+      const prows = params.concat(pathParams).map(pa => `<tr><td style="width:130px"><code>${esc(pa.name)}</code>${pa.in === "path" ? ' <span style="color:var(--muted)">(' + tr("Pfad") + ')</span>' : ''}</td>
+        <td>${esc(pa.description || "")}${pa.schema && pa.schema.enum ? ' <span style="color:var(--muted)">('+pa.schema.enum.map(esc).join(" | ")+')</span>' : ''}</td>
+        <td style="width:180px"><input data-p="${esc(pa.name)}" data-in="${esc(pa.in)}" data-ep="${id}" placeholder="${pa.schema && pa.schema.enum ? esc(pa.schema.enum[0]) : ''}"></td></tr>`).join("");
+      const ptable = prows ? `<table><tr><th>${tr("Parameter")}</th><th>${tr("Bedeutung")}</th><th>${tr("Wert (optional)")}</th></tr>${prows}</table>` : "";
+      const bodyBox = (m === "post") ? `<div style="margin-top:6px">
+        <label style="font-size:12px;color:var(--muted)">${tr("JSON-Body (optional)")}</label>
+        <textarea id="body_${id}" style="width:100%;min-height:70px;background:var(--field);border:1px solid var(--line);color:var(--text);border-radius:8px;padding:8px;font-family:monospace;font-size:12px" placeholder='{"comment": "..."}'></textarea></div>` : "";
+      box.insertAdjacentHTML("beforeend", `<div class="ep">
+        <div class="ephead" onclick="var b=this.nextElementSibling; b.style.display = b.style.display==='none'?'':'none';">
+          <span class="method${m === "post" ? " post" : ""}">${m.toUpperCase()}</span><span class="path">${esc(p)}</span>
+          <span class="summary">${esc(op.summary || "")}</span></div>
+        <div class="epbody" style="display:none">
+          <p>${esc(op.description || "")}</p>
+          ${ptable}${bodyBox}
+          <button class="btn" onclick="run('${id}','${esc(p)}','${m}')">${tr("Ausführen")}</button>
+          <div class="status" id="st_${id}"></div>
+          <pre id="out_${id}" style="display:none"></pre>
+        </div></div>`);
+    });
+  });
+}).catch(() => { document.getElementById("eps").textContent = tr("OpenAPI-Spec nicht ladbar."); });
+
+function run(id, path, method) {
+  const st = document.getElementById("st_" + id), out = document.getElementById("out_" + id);
+  const qs = [];
+  let p2 = path;
+  document.querySelectorAll(`input[data-ep="${id}"]`).forEach(i => {
+    const v = i.value.trim();
+    if (!v) return;
+    if (i.dataset.in === "path") p2 = p2.replace("{" + i.dataset.p + "}", encodeURIComponent(v));
+    else qs.push(encodeURIComponent(i.dataset.p) + "=" + encodeURIComponent(v));
+  });
+  const url = BASE + p2.replace(/^\/api\/v1/, "") + (qs.length ? "?" + qs.join("&") : "");
+  const h = {};
+  if (tokEl.value.trim()) h["Authorization"] = "Bearer " + tokEl.value.trim();
+  const opts = { headers: h, method: (method || "get").toUpperCase() };
+  const bEl = document.getElementById("body_" + id);
+  if (bEl && bEl.value.trim()) { h["Content-Type"] = "application/json"; opts.body = bEl.value; }
+  st.textContent = "… " + url;
+  fetch(url, opts).then(async r => {
+    const ct = r.headers.get("content-type") || "";
+    const body = await r.text();
+    st.textContent = "HTTP " + r.status + " · " + url;
+    out.style.display = "";
+    out.textContent = ct.includes("json") ? JSON.stringify(JSON.parse(body), null, 2) : body;
+  }).catch(e => { st.textContent = tr("Fehler: ") + e.message; out.style.display = "none"; });
+}
+</script>
+</body>
+</html>

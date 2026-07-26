@@ -2,9 +2,9 @@
 
 > 🇬🇧 [English version: README.en.md](README.en.md)
 
-Die Anwendung ist ein einzelnes Python-Skript (`aria_kapa.py`, nur
-Standardbibliothek, Python 3.8+). Auslieferung als Container — wähle nach
-Umgebung:
+Die Anwendung ist ein Python-Skript (`aria_kapa.py`) plus der `frontend/`-Ordner
+(HTML/CSS/JS als Dateien) — nur Standardbibliothek, Python 3.8+, kein Build.
+Auslieferung als Container — wähle nach Umgebung:
 
 | Variante | Wann | Verzeichnis |
 |---|---|---|

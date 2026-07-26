@@ -99,7 +99,7 @@ Then, as an admin in the dashboard: "Import reservations (JSON)".
 
 ## Restoring on a new host
 
-1. Clone the repository or copy `aria_kapa.py` to `/opt/kapa/`
+1. Clone the repository or copy `aria_kapa.py` **and the `frontend/` folder** to `/opt/kapa/`
 2. Install as documented in the comments of `config/kapa-dashboard.service`
    (user, `/etc/kapa/kapa.ini`, `/etc/kapa/aria.pass`, nginx snippet)
 3. Extract the backup into `/opt/kapa/data` as above — roles and

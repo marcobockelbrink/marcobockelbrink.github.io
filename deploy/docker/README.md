@@ -28,7 +28,7 @@ geht auf GitHub unter *Package → Package settings → Change visibility*.
 ## Selbst bauen
 
 Alternativ lokal bauen. Der Build-**Context ist die Projektwurzel** (dort liegt
-`aria_kapa.py`); die Dockerfile kopiert ausschließlich dieses Skript ins Image:
+`aria_kapa.py`); die Dockerfile kopiert dieses Skript **und den `frontend/`-Ordner** ins Image:
 
 ```bash
 # aus der Projektwurzel

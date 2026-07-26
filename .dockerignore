@@ -1,6 +1,8 @@
-# Das Image braucht ausschließlich aria_kapa.py (stdlib-only). Alles andere aus
-# dem Build-Kontext ausschließen — schnellere Builds, kleinerer Kontext, kein
-# versehentliches Einschleppen von Docs/Screenshots/Präsentationen/.git.
-# The image only needs aria_kapa.py (stdlib-only); exclude everything else.
+# Das Image braucht aria_kapa.py + den frontend/-Ordner (HTML/CSS/JS als Dateien
+# seit v2.30). Alles andere aus dem Build-Kontext ausschließen — schnellere
+# Builds, kein versehentliches Einschleppen von Docs/Screenshots/Präsentationen.
+# The image needs aria_kapa.py + the frontend/ folder; exclude everything else.
 *
 !aria_kapa.py
+!frontend/
+!frontend/**
