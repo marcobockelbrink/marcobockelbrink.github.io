@@ -1,0 +1,27 @@
+# Test-AD (Samba DC, Domäne KAPA.LOCAL) für echte LDAPS-Tests der
+# Kapa-AD-Anbindung. NUR für Entwicklung — Passwörter sind Testwerte.
+#
+#   docker compose up -d      # Erststart provisioniert (~1 Minute)
+#   python3 ../ldap_live.py   # bzw. aus der Projektwurzel: tests/ldap_live.py
+#   docker compose down -v    # aufräumen (löscht auch die Domäne)
+services:
+  testad:
+    build: .
+    container_name: kapa-testad
+    hostname: dc1
+    # Samba setzt NT-ACLs als security.*-xattrs — dafür braucht der
+    # Container CAP_SYS_ADMIN (sonst Access Denied bei der Provisionierung).
+    cap_add:
+      - SYS_ADMIN
+    ports:
+      - "6360:636"        # LDAPS (Host-Port 6360, um lokale Konflikte zu vermeiden)
+    volumes:
+      - samba-data:/var/lib/samba
+    healthcheck:
+      test: ["CMD", "samba-tool", "user", "list"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+
+volumes:
+  samba-data:
