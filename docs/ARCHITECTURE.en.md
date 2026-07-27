@@ -68,8 +68,8 @@ in the INI but in `.pass` files (root:kapa, 0640).
 flowchart TB
     subgraph HTTP["ThreadingHTTPServer (one thread per request)"]
         R1["Page routes<br/>/ /reservierungen /genehmigungen<br/>/archiv /verwaltung /log"]
-        R2["Session API<br/>/api/* (cookie)"]
-        R3["v1 API<br/>/api/v1/* (bearer/session)<br/>read + per-token write permissions"]
+        R2["ONE path space /api/v1/* (v3)<br/>session cookie: entire UI<br/>bearer token: stable contract"]
+        R3["authorization kept separate:<br/>team/role checks per session,<br/>write scopes per token; admin never via token<br/>(old /api/* paths remain as aliases)"]
         R4["/healthz (no auth)"]
     end
 

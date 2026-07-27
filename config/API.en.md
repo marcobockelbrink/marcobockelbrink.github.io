@@ -8,9 +8,12 @@
 > Note: JSON field names and status values are German — they are part of the
 > stable v1 contract.
 
-The dashboard provides a stable REST API at `/api/v1/`. External applications
-authenticate with a **bearer token** that admins create in the
-"Administration" tab ("API tokens" section). The token is shown only once;
+The dashboard serves its API at `/api/v1/` — since v3.0 **one path space
+for everything**: the endpoints described here form the stable contract for
+external applications (**bearer token**); in addition the same path space
+serves the entire web UI via session cookie (administration endpoints
+deliberately require a sign-in, never a token). Admins create bearer tokens
+in the "Administration → API" tab. The token is shown only once;
 only a SHA-256 hash is stored. Tokens are individually revocable; every
 creation/revocation and invalid access lands in the audit log.
 
@@ -97,8 +100,10 @@ reservations and Tanzu namespaces, as in the UI.
 ### GET /api/v1/status
 
 ```json
-{"version": "2.3", "updated": "14.07.2026 19:00",
- "refreshing": false, "next": 1234}
+{"version": "3.1.1", "updated": "27.07.2026 12:00",
+ "refreshing": false, "next": 1234,
+ "progress": "", "error": null,
+ "tiers": {"vms": "27.07.2026 12:00", "network": "…", "storage": "…"}}
 ```
 
 `next` = seconds until the next automatic refresh.

@@ -3,5 +3,5 @@ name: kapa-dashboard
 description: VMware Kapazitätsplanung (Aria Operations Dashboard) / VMware Capacity Planning
 type: application
 version: 1.2.0
-appVersion: "3.0.0"
+appVersion: "3.1.1"
 home: https://github.com/marcobockelbrink/vmware

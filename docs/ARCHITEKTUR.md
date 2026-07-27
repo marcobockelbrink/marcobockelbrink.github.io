@@ -69,8 +69,8 @@ Secrets liegen nie in der INI, sondern in `.pass`-Dateien (root:kapa, 0640).
 flowchart TB
     subgraph HTTP["ThreadingHTTPServer (ein Thread je Request)"]
         R1["Seiten-Routen<br/>/ /reservierungen /genehmigungen<br/>/archiv /verwaltung /log"]
-        R2["Session-API<br/>/api/* (Cookie)"]
-        R3["v1-API<br/>/api/v1/* (Bearer/Session)<br/>lesend + Schreibrechte je Token"]
+        R2["EIN Pfadraum /api/v1/* (v3)<br/>Session-Cookie: komplette UI<br/>Bearer-Token: stabiler Vertrag"]
+        R3["Autorisierung getrennt:<br/>Team-/Rollen-Prüfung je Session,<br/>Schreibrechte je Token; Admin nie per Token<br/>(alte /api/*-Pfade als Alias aktiv)"]
         R4["/healthz (ohne Auth)"]
     end
 

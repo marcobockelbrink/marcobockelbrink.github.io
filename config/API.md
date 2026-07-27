@@ -6,9 +6,12 @@
 > „Ausführen", offline lauffähig) · **OpenAPI-Spec:** `/api/v1/openapi.json`
 > (Import in Swagger Editor/Postman). Diese Datei ist die Textfassung.
 
-Das Dashboard stellt unter `/api/v1/` eine stabile, lesende REST-API bereit.
-Externe Anwendungen authentifizieren sich mit einem **Bearer-Token**, das
-Admins im Tab „Verwaltung" erzeugen (Abschnitt „API-Tokens"). Das Token wird
+Das Dashboard stellt unter `/api/v1/` seine API bereit — seit v3.0 **ein
+Pfadraum für alles**: Die hier beschriebenen Endpunkte bilden den stabilen
+Vertrag für externe Anwendungen (**Bearer-Token**); zusätzlich bedient
+derselbe Pfadraum mit Session-Cookie die komplette Weboberfläche
+(Verwaltungs-Endpunkte bewusst nur mit Anmeldung, nie per Token).
+Bearer-Tokens erzeugen Admins im Reiter „Verwaltung → API". Das Token wird
 nur einmal angezeigt; gespeichert wird ausschließlich ein SHA-256-Hash.
 Tokens sind einzeln widerrufbar; jede Erstellung/Widerruf und ungültige
 Zugriffe landen im Audit-Log.
@@ -94,8 +97,10 @@ Reservierungen und Tanzu-Namespaces, wie im UI.
 ### GET /api/v1/status
 
 ```json
-{"version": "0.6", "updated": "14.07.2026 19:00",
- "refreshing": false, "next": 1234}
+{"version": "3.1.1", "updated": "27.07.2026 12:00",
+ "refreshing": false, "next": 1234,
+ "progress": "", "error": null,
+ "tiers": {"vms": "27.07.2026 12:00", "network": "…", "storage": "…"}}
 ```
 
 `next` = Sekunden bis zur nächsten automatischen Aktualisierung.

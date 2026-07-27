@@ -525,7 +525,7 @@ values** and the **OpenAPI descriptions**, however, follow `Accept-Language`
 keep getting German, so existing consumers see no change.
 
 **Interactive docs in the dashboard**: at **`/api/v1/docs`** (also linked from
-"Administration → API tokens") — a self-contained, offline-capable
+"Administration → API") — a self-contained, offline-capable
 Swagger-style page with a "Run" button per endpoint. The machine-readable
 **OpenAPI 3.0 spec** lives at **`/api/v1/openapi.json`** and imports into
 Swagger Editor, Postman etc. Text version: [`config/API.en.md`](config/API.en.md).

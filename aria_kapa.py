@@ -1880,8 +1880,12 @@ def serve(args, password):
         t0 = time.time()
         n = len(sources)
         label = ", ".join(s["name"] or s["url"] for s in sources) or "Demo"
+        # Sprechende Bereichs-Namen fürs Log — die gestaffelten Abrufe laufen
+        # zu unterschiedlichen Zeiten, im Log soll stehen, WAS gelesen wurde.
+        _TL = {"vms": "Kapazität (VMs/CPU/RAM/Tanzu)", "network": "Netzwerk",
+               "storage": "Storage"}
         tier_note = ("alle Bereiche" if not skip_tiers else
-                     "nur " + ", ".join(sorted(run)))
+                     "nur " + ", ".join(_TL.get(t, t) for t in sorted(run)))
         print(f"Aria-Abruf gestartet ({label}) – {tier_note} ...", file=sys.stderr)
         # VLAN-Cache: bekannte Portgruppen-VLANs aus dem letzten Stand
         # wiederverwenden (spart einen API-Aufruf je Portgruppe); einmal am
@@ -1975,14 +1979,16 @@ def serve(args, password):
             dur = time.time() - t0
             nvm = sum(c.get("vmCount", 0) for c in clusters)
             src_note = f" aus {n} Quellen" if not args.sample and n > 1 else ""
-            detail = f"{len(clusters)} Cluster, {nvm} VMs{src_note} in {dur:.1f} s"
+            detail = (f"{tier_note} · {len(clusters)} Cluster, "
+                      f"{nvm} VMs{src_note} in {dur:.1f} s")
             print(f"Aria-Abruf beendet: {detail}", file=sys.stderr)
             audit(None, "Aria-Abruf beendet", detail)
         except Exception as e:
             dur = time.time() - t0
             state["error"] = str(e)
             print(f"Aria-Abruf FEHLGESCHLAGEN nach {dur:.1f} s: {e}", file=sys.stderr)
-            audit(None, "Aria-Abruf fehlgeschlagen", f"nach {dur:.1f} s: {e}")
+            audit(None, "Aria-Abruf fehlgeschlagen",
+                  f"{tier_note} · nach {dur:.1f} s: {e}")
         finally:
             state["last"] = time.time()
             state["refreshing"] = False

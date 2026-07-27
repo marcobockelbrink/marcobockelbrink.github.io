@@ -553,7 +553,7 @@ v1-Vertrags und bleiben deutsch. **CSV-Spalten/Statuswerte** und die
 Deutsch, bestehende Consumer sehen keine Änderung.
 
 **Interaktive Doku im Dashboard**: unter **`/api/v1/docs`** (auch verlinkt im Tab
-„Verwaltung → API-Tokens") – eine selbst-enthaltene, offline lauffähige
+„Verwaltung → API") – eine selbst-enthaltene, offline lauffähige
 Swagger-artige Seite mit „Ausführen"-Knopf je Endpunkt. Die maschinenlesbare
 **OpenAPI-3.0-Spec** liegt unter **`/api/v1/openapi.json`** und lässt sich in
 Swagger Editor, Postman o. Ä. importieren. Textfassung: [`config/API.md`](config/API.md).
