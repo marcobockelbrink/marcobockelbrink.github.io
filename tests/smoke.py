@@ -138,6 +138,15 @@ _bad = {os.path.basename(p): m for p, m in _miss.items() if m}
 check("Keine undefinierten Modul-Globals (Import beim Auslagern vergessen)",
       not _bad, str(_bad))
 
+# Unit-Tests des Rechenkerns (tests/unit.py) mitlaufen lassen — ein
+# Einstiegspunkt (smoke) deckt damit auch die Mathematik ab.
+_ut = subprocess.run([sys.executable,
+                      os.path.join(ROOT, "tests", "unit.py")],
+                     capture_output=True, text=True, timeout=60)
+check("Unit-Tests Rechenkern (tests/unit.py)", _ut.returncode == 0,
+      (_ut.stderr or _ut.stdout).strip().splitlines()[-1]
+      if (_ut.stderr or _ut.stdout) else "")
+
 # Regressionstest für den v3.2-Login-Bug: ldap_bind gegen einen LOKALEN
 # Lauscher (Verbindung kommt zustande, TLS-Handshake läuft ins Leere) —
 # der ssl-Codepfad wird also wirklich betreten. Erwartet: SSL-/Timeout-
@@ -902,6 +911,21 @@ try:
                     headers={"Accept-Language": "en-US"})
     check("Benutzerhandbuch: englischer Zwilling via Accept-Language",
           se == 200 and b"User guide" in be and b"New request" in be)
+
+    print("== v3.3: ETag + healthz-Tiers ==")
+    s1, b1, h1 = req("GET", "/api/v1/data")
+    _etag = h1.get("ETag") or ""
+    check("Daten-Endpunkt liefert ETag + Cache-Control no-cache",
+          s1 == 200 and _etag.startswith('W/"')
+          and "no-cache" in (h1.get("Cache-Control") or ""))
+    s2, b2, _ = req("GET", "/api/v1/data", headers={"If-None-Match": _etag})
+    check("Unveränderte Daten -> 304 ohne Body", s2 == 304 and not b2)
+    s3, _, _ = req("GET", "/api/v1/data", headers={"If-None-Match": 'W/"x"'})
+    check("Fremder ETag -> normales 200", s3 == 200)
+    sh, bh, _ = req("GET", "/healthz")
+    check("healthz nennt Alter je Teilbereich (vms/network/storage)",
+          sh == 200 and set((bh.get("tiers_age_seconds") or {}).keys())
+          == {"vms", "network", "storage"})
 
     print("== v3: EIN Pfadraum /api/v1/* ==")
     # v1/status trägt jetzt zusätzlich die UI-Felder (additiv erweitert).

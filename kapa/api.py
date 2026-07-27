@@ -180,7 +180,8 @@ def make_handler(app):
                 self.send_header("Content-Encoding", encoding)
             self.send_header("Vary", "Accept-Encoding")
             self.send_header("Content-Length", str(len(data)))
-            self.send_header("Cache-Control", "no-store")
+            if "Cache-Control" not in (headers or {}):
+                self.send_header("Cache-Control", "no-store")
             # Sicherheits-Header (Defense-in-depth): Clickjacking verhindern,
             # MIME-Sniffing abschalten, Skripte/Objekte auf same-origin begrenzen
             # (fängt zusätzlich einen etwaigen HTML-Injection-Ausbruch ab).
@@ -197,9 +198,27 @@ def make_handler(app):
             self.end_headers()
             self.wfile.write(data)
 
-        def _json(self, obj, code=200, headers=None):
-            self._send(json.dumps(obj, ensure_ascii=False),
-                       "application/json; charset=utf-8", code, headers)
+        def _json(self, obj, code=200, headers=None, etag=False):
+            body = json.dumps(obj, ensure_ascii=False)
+            if etag and code == 200:
+                # Schwacher ETag über den (unkomprimierten) Inhalt: unveränderte
+                # Poll-Antworten kosten nur noch ein 304 statt des vollen Bodys.
+                # "no-cache" (statt no-store) heißt: speichern erlaubt, aber vor
+                # jeder Verwendung revalidieren — fetch() macht das transparent.
+                tag = 'W/"' + hashlib.sha256(body.encode()).hexdigest()[:20] + '"'
+                if tag in (self.headers.get("If-None-Match") or ""):
+                    self.send_response(304)
+                    self.send_header("ETag", tag)
+                    self.send_header("Cache-Control", "no-cache")
+                    self.send_header("Vary", "Accept-Encoding")
+                    self.end_headers()
+                    return
+                h = dict(headers or {})
+                h["ETag"] = tag
+                h.setdefault("Cache-Control", "no-cache")
+                return self._send(body, "application/json; charset=utf-8",
+                                  code, h)
+            self._send(body, "application/json; charset=utf-8", code, headers)
 
         MAX_BODY = 2 * 1024 * 1024   # 2 MiB – reicht für große Reservierungs-Importe
 
@@ -355,7 +374,7 @@ def make_handler(app):
             if not s:
                 return
             self._json({"updated": state["updated"],
-                        "clusters": clusters_for(s)})
+                        "clusters": clusters_for(s)}, etag=True)
 
         def _get_status(self):
             if not self._require():
@@ -375,7 +394,7 @@ def make_handler(app):
                 return
             with res_lock:
                 prune_reservations()
-                self._json(visible_res(s))
+                self._json(visible_res(s), etag=True)
 
         def _get_openapi(self):
             self._send(json.dumps(openapi_spec(self._lang()), ensure_ascii=False, indent=2),
@@ -403,14 +422,19 @@ def make_handler(app):
         def _get_healthz(self):
             # Monitoring-Endpunkt: bewusst OHNE Authentifizierung, dafür
             # nur unkritische Betriebsdaten (keine Cluster-/Nutzerdaten).
-            age = (int(time.time() - state["last"]) if state.get("last")
-                   else None)
+            now = time.time()
+            age = int(now - state["last"]) if state.get("last") else None
             self._json({
                 "status": ("error" if state.get("error")
                            and not state.get("clusters") else "ok"),
                 "version": VERSION,
                 "updated": state["updated"] or None,
                 "data_age_seconds": age,
+                # Alter je gestaffeltem Teilbereich — so kann das Monitoring
+                # alarmieren, wenn z. B. nur der Storage-Abruf hängt.
+                "tiers_age_seconds": {t: (int(now - tier_last[t])
+                                          if tier_last.get(t) else None)
+                                      for t in TIERS},
                 "refreshing": bool(state["refreshing"]),
                 "clusters": len(state.get("clusters") or []),
                 "error": state.get("error") or None})
@@ -473,7 +497,8 @@ def make_handler(app):
                     self._send(data_csv(cl, self._lang()),
                                "text/csv; charset=utf-8")
                 else:
-                    self._json({"updated": state["updated"], "clusters": cl})
+                    self._json({"updated": state["updated"], "clusters": cl},
+                               etag=True)
             else:
                 with res_lock:
                     prune_reservations()
@@ -489,7 +514,7 @@ def make_handler(app):
                     self._send(res_csv(data, self._lang()),
                                "text/csv; charset=utf-8")
                 else:
-                    self._json(data)
+                    self._json(data, etag=True)
 
         def _get_tokens(self):
             if not self._require("admin"):

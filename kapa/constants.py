@@ -2,7 +2,7 @@
 """Zentrale Konstanten: Version, Rollen, Ereignisse, Sichtbarkeits-
 und Benachrichtigungs-Standards. Aus aria_kapa.py ausgelagert (v3.0)."""
 
-VERSION = "3.2.1"
+VERSION = "3.3.0"
 
 # Interne Rollen-Schlüssel (steuern die Rechte, unveränderlich) und ihre
 # Standard-Bezeichnungen. Die Bezeichnungen lassen sich auf der Verwaltungsseite
