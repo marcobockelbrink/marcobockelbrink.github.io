@@ -42,7 +42,7 @@ Cluster und Kommentare bleiben wie erfasst).
 - **Tanzu-/Kubernetes-Namespaces**: CPU-/RAM-**Reservierungen der vSphere-Namespaces**
   zählen automatisch gegen die freie Kapazität (wie genehmigte Reservierungen);
   Drilldown je Cluster, `tanzu-mhz-per-vcpu` für die MHz→vCPU-Umrechnung
-- **Cluster-Selektor**: vROps-Quellen-Filter + bis zu 3 kaskadierende Tag-Filter; **Filter-/Suchfelder**, **sortierbare Tabellen**
+- **Cluster-Selektor**: vROps-Quellen-Filter (Bezeichnung frei wählbar, z. B. „RZ-Standort") + bis zu 3 kaskadierende Tag-Filter; **Filter-/Suchfelder**, **sortierbare Tabellen**
 - **Seitenweises Blättern** in allen großen Listen (Kapazität, VLAN-Suche, Storage, Reservierungen, Genehmigungen, Archiv, Log): einheitliche Leiste mit **100 / 200 / 300 Einträgen pro Seite** – ein gemeinsamer Mechanismus für alle Tabellen
 - **Spalten ein-/ausblenden** in allen Datentabellen („⚙ Spalten", je Benutzer gespeichert)
 - **Hell/Dunkel-Modus**: ☀️/🌙-Knopf in der Kopfleiste, je Benutzer gespeichert;

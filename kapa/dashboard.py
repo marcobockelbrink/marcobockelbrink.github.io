@@ -646,7 +646,8 @@ def json_for_html(obj):
 def render_html(clusters, cpu_factor, serve_mode=False, updated=None, res_ttl=31,
                 failover_hosts=1, userinfo=None, teams=None, rolenames=None,
                 contact="", selector=None, backup=False, notify=None, prefs=None,
-                announce=None, tanzu_mhz=2500, vis=None, sources=None):
+                announce=None, tanzu_mhz=2500, vis=None, sources=None,
+                src_label=""):
     valid_days = res_ttl - 1 if res_ttl > 0 else 30
     resnote = (f"Neue Reservierungen gelten ab dem Anlagetag für {valid_days} Tage, "
                "zählen erst nach Genehmigung gegen die Kapazität und werden "
@@ -673,6 +674,7 @@ def render_html(clusters, cpu_factor, serve_mode=False, updated=None, res_ttl=31
             .replace("__USERINFO__", json_for_html(userinfo))
             .replace("__TEAMS__", json_for_html(teams or []))
             .replace("__SELECTOR__", json_for_html(selector or []))
+            .replace("__SRC_LABEL__", json_for_html(src_label or ""))
             .replace("__BACKUP__", "true" if backup else "false")
             .replace("__ROLENAMES__", json_for_html(rolenames or DEFAULT_ROLE_NAMES))
             .replace("__SOURCES__", json_for_html(sources or []))

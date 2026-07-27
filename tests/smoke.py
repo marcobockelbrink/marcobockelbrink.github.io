@@ -912,6 +912,22 @@ try:
     check("Benutzerhandbuch: englischer Zwilling via Accept-Language",
           se == 200 and b"User guide" in be and b"New request" in be)
 
+    print("== v3.4: Quellen-Label im Selektor ==")
+    sq, bq, _ = req("PUT", "/api/v1/selector",
+                    {"selector": [], "source_label": "RZ-Standort"})
+    check("Selektor: Quellen-Label speichern (neues Format)",
+          sq == 200 and bq.get("source_label") == "RZ-Standort")
+    sg, bg, _ = req("GET", "/api/v1/selector")
+    check("Selektor: Quellen-Label kommt im GET zurück",
+          sg == 200 and bg.get("source_label") == "RZ-Standort")
+    sr, br, _ = req("GET", "/", raw=True)
+    check("Hauptseite bettet das Quellen-Label ein",
+          sr == 200 and b"RZ-Standort" in br)
+    sa, ba, _ = req("PUT", "/api/v1/selector", [])   # Altformat: reine Liste
+    check("Selektor: altes Listen-Format bleibt gültig, Label unverändert",
+          sa == 200 and ba.get("source_label") == "RZ-Standort")
+    req("PUT", "/api/v1/selector", {"selector": [], "source_label": ""})
+
     print("== v3.3: ETag + healthz-Tiers ==")
     s1, b1, h1 = req("GET", "/api/v1/data")
     _etag = h1.get("ETag") or ""

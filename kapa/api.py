@@ -69,6 +69,7 @@ def make_handler(app):
     clean_teams = app.clean_teams
     clean_visibility = app.clean_visibility
     cluster_selector = app.cluster_selector
+    selector_src_label = app.selector_src_label
     clusters_for = app.clusters_for
     current_team = app.current_team
     data_csv = app.data_csv
@@ -360,6 +361,7 @@ def make_handler(app):
                                    userinfo=userinfo, teams=approval_teams,
                                    rolenames=role_names, contact=args.contact_info,
                                    selector=cluster_selector,
+                                   src_label=selector_src_label[0],
                                    backup=bool(args.backup_target),
                                    notify=notify_cfg,
                                    prefs=user_prefs(s["user"]) if s else {},
@@ -537,7 +539,8 @@ def make_handler(app):
             if not self._require("admin"):
                 return
             with selector_lock:
-                self._json({"selector": list(cluster_selector)})
+                self._json({"selector": list(cluster_selector),
+                            "source_label": selector_src_label[0]})
 
         def _get_rolenames(self):
             if not self._require("admin"):
@@ -1684,17 +1687,32 @@ def make_handler(app):
             if not s:
                 return
             body = self._body()
-            if not isinstance(body, list):
+            # Neues Format: {"selector": [...], "source_label": "..."} —
+            # die alte reine Liste bleibt aus Kompatibilität gültig
+            # (Quellen-Label dann unverändert).
+            if isinstance(body, dict):
+                raw = body.get("selector")
+                if not isinstance(raw, list):
+                    self._json({"error": "Liste von Tag-Kategorien erwartet"}, 400)
+                    return
+                src_lbl = " ".join(str(body.get("source_label") or "").split())[:40]
+            elif isinstance(body, list):
+                raw = body
+                src_lbl = selector_src_label[0]
+            else:
                 self._json({"error": "Liste von Tag-Kategorien erwartet"}, 400)
                 return
-            new = clean_selector(body)
+            new = clean_selector(raw)
             with selector_lock:
                 cluster_selector[:] = new
+                selector_src_label[0] = src_lbl
                 save_selector()
             audit(s["user"], "Cluster-Selektor geändert",
-                  " → ".join(f"{e['label']} ({e['category']})" for e in new)
-                  if new else "(keiner)")
-            self._json({"selector": list(cluster_selector)})
+                  (" → ".join(f"{e['label']} ({e['category']})" for e in new)
+                   if new else "(keiner)")
+                  + " · Quellen-Auswahl: " + (src_lbl or "Standard (vROps)"))
+            self._json({"selector": list(cluster_selector),
+                        "source_label": selector_src_label[0]})
 
         def _put_rolenames(self):
             s = self._require("admin")

@@ -529,6 +529,13 @@ try { var _t = new URLSearchParams(location.search).get("theme")
   erscheinen dann kaskadierende Auswahllisten (Stufe 2 zeigt nur Werte, die zur
   Wahl in Stufe 1 passen). Die Kategorien kommen aus den vorhandenen
   Cluster-Tags – sind noch keine Daten geladen, ist die Liste leer.</div>
+<div style="margin-bottom:10px">
+  <label style="font-size:12px;color:var(--muted)">Bezeichnung der Quellen-Auswahl im Selektor</label><br>
+  <input id="selSrcLbl" class="filterbox" style="max-width:280px"
+         placeholder="vROps (Standard)"
+         onkeydown="if(event.key==='Enter')saveSelector()">
+  <span class="hint" style="color:var(--muted);font-size:12px;margin-left:6px">z. B. Datenquelle oder RZ-Standort</span>
+</div>
 <div class="tablewrap">
 <table class="kt" id="seltable">
   <thead><tr><th style="width:60px">Stufe</th><th style="width:320px">Tag-Kategorie</th><th>Anzeigename im Selektor</th></tr></thead>
@@ -921,6 +928,7 @@ const TTL = __TTL__;
 const ME = __USERINFO__;   // {user, role} bei aktivierter AD-Anmeldung, sonst null
 let TEAMS = __TEAMS__;      // Genehmigungs-Teams in Prüfreihenfolge (leer = einstufig); auf der Verwaltungsseite pflegbar
 let SELECTOR = __SELECTOR__; // Tag-Kategorien des Cluster-Selektors (max 3, kaskadierend)
+let SRC_LABEL = __SRC_LABEL__; // Anzeigename der Quellen-Auswahl (leer = "vROps")
 let SEL_VALUES = {};         // gewählte Werte je Kategorie
 let SRC_FILTER = null;       // vROps-Quellen-Filter (null = Default ableiten)
 function clusterSources() {  // benannte vROps-Quellen im Datenbestand
@@ -993,7 +1001,7 @@ function renderClusterSelector() {
   if (!active.length && !srcs.length) { box.innerHTML = ""; box.style.display = "none"; return; }
   box.style.display = "";
   const cur = effectiveSrc();
-  const srcSel = srcs.length ? `<label>vROps
+  const srcSel = srcs.length ? `<label>${esc(SRC_LABEL || "vROps")}
     <select onchange="onSourceChange(this.value)">
       <option value="">alle</option>
       ${srcs.map(v => `<option value="${esc(v)}" ${cur === v ? "selected" : ""}>${esc(v)}</option>`).join("")}
@@ -2875,8 +2883,10 @@ function saveSelector() {
       category: document.getElementById("sel" + i).value,
       label: (document.getElementById("sellbl" + i).value || "").trim()
     })).filter(x => x.category);
-  apiSelector("PUT", list).then(d => {
+  const srcLbl = ((document.getElementById("selSrcLbl") || {}).value || "").trim();
+  apiSelector("PUT", { selector: list, source_label: srcLbl }).then(d => {
     if (d && d.selector) SELECTOR = d.selector;
+    if (d) SRC_LABEL = d.source_label || "";
     const cats = SELECTOR.map(s => s.category);
     Object.keys(SEL_VALUES).forEach(k => { if (!cats.includes(k)) delete SEL_VALUES[k]; });
     const st = document.getElementById("selSaved");
@@ -2885,6 +2895,8 @@ function saveSelector() {
   }).catch(() => notify("Speichern des Selektors fehlgeschlagen."));
 }
 function renderSelector() {
+  const sl = document.getElementById("selSrcLbl");
+  if (sl) sl.value = SRC_LABEL || "";
   const all = [...new Set([...tagCategories(), ...SELECTOR.map(s => s.category)])].sort();
   const rows = [0, 1, 2].map(i => {
     const cur = SELECTOR[i] || {category: "", label: ""};
@@ -3993,6 +4005,9 @@ const I18N = {
 "Bis zu 3 Stufen, jede Stufe eine Tag-Kategorie. In der Kapazitätsübersicht erscheinen dann kaskadierende Auswahllisten (Stufe 2 zeigt nur Werte, die zur Wahl in Stufe 1 passen). Die Kategorien kommen aus den vorhandenen Cluster-Tags – sind noch keine Daten geladen, ist die Liste leer.":
   "Up to 3 levels, each level one tag category. The capacity view then shows cascading dropdowns (level 2 only shows values matching the level-1 choice). Categories come from the existing cluster tags – if no data is loaded yet, the list is empty.",
 "Stufe": "Level", "Tag-Kategorie": "Tag category", "Anzeigename im Selektor": "Display name in selector",
+"Bezeichnung der Quellen-Auswahl im Selektor": "Label of the source picker in the selector",
+"vROps (Standard)": "vROps (default)",
+"z. B. Datenquelle oder RZ-Standort": "e.g. data source or DC site",
 "Anzeigename (leer = Kategorie)": "Display name (empty = category)",
 "Kategorie derzeit in keinem Cluster-Tag": "category currently in no cluster tag",
 "Noch keine Tag-Kategorien – erst nach dem ersten Aria-Abruf verfügbar.": "No tag categories yet – available after the first Aria refresh.",

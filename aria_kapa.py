@@ -302,14 +302,23 @@ def serve(args, password):
                 out.append({"category": cat, "label": label})
         return out[:3]
 
+    # Anzeigename der Quellen-Auswahl im Selektor (leer = Standard „vROps") —
+    # als 1-Element-Liste, damit Handler/Threads dieselbe Referenz teilen.
+    selector_src_label = [""]
+
     def load_selector():
         d = store.load("selector", None)
-        if isinstance(d, list):
+        if isinstance(d, list):                # Altformat: nur die Stufen
             return clean_selector(d)
+        if isinstance(d, dict):                # neues Format (seit v3.4)
+            selector_src_label[0] = " ".join(
+                str(d.get("source_label") or "").split())[:40]
+            return clean_selector(d.get("entries") or [])
         return []
 
     def save_selector():
-        store.save("selector", cluster_selector)
+        store.save("selector", {"source_label": selector_src_label[0],
+                                "entries": cluster_selector})
 
     cluster_selector = load_selector()
 
@@ -2130,6 +2139,7 @@ def serve(args, password):
     app.clean_autoapprove = clean_autoapprove; app.clean_import_clusters = clean_import_clusters; app.clean_prefs = clean_prefs
     app.clean_selector = clean_selector; app.clean_sources = clean_sources; app.clean_storage_req = clean_storage_req
     app.clean_teams = clean_teams; app.clean_visibility = clean_visibility; app.cluster_selector = cluster_selector
+    app.selector_src_label = selector_src_label
     app.clusters_for = clusters_for; app.current_team = current_team; app.data_csv = data_csv
     app.do_refresh = do_refresh; app.effective_sources = effective_sources; app.emit_auto_events = emit_auto_events
     app.fire_webhooks = fire_webhooks; app.group_role = group_role; app.has_group_entries = has_group_entries
