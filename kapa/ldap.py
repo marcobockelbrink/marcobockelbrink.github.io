@@ -2,6 +2,8 @@
 """Active Directory (LDAP) — Simple Bind, memberOf, Attribut- und
 Gruppen-Mitglieder-Abfrage, nur mit der Standardbibliothek (eigener
 minimaler BER/DER-Kodierer). Aus aria_kapa.py ausgelagert (v3.0)."""
+
+import ssl
 import urllib.parse
 
 

@@ -81,6 +81,88 @@ def wait_up(timeout=30):
     raise RuntimeError("Server kam nicht hoch — siehe " + LOG)
 
 
+# ------------------------------------------------- Statische Prüfungen ----
+# Fängt die Auslagerungs-Fehlerklasse „Name genutzt, aber Import beim
+# Modul-Schnitt vergessen" (py_compile sieht das nicht, zur Laufzeit knallt
+# es erst im selten getesteten Pfad — z. B. ssl beim echten AD-Login).
+print("== Statische Prüfungen ==")
+import ast as _ast
+import builtins as _bi
+import glob as _glob
+
+
+def _undefined_globals(path):
+    tree = _ast.parse(open(path, encoding="utf-8").read())
+    defined = set(dir(_bi)) | {"__file__", "__name__", "__doc__"}
+    for nd in _ast.walk(tree):
+        if isinstance(nd, _ast.Import):
+            for a in nd.names:
+                defined.add((a.asname or a.name).split(".")[0])
+        elif isinstance(nd, _ast.ImportFrom):
+            for a in nd.names:
+                defined.add(a.asname or a.name)
+        elif isinstance(nd, (_ast.FunctionDef, _ast.AsyncFunctionDef,
+                             _ast.ClassDef)):
+            defined.add(nd.name)
+        elif isinstance(nd, (_ast.Assign, _ast.AnnAssign, _ast.AugAssign)):
+            tg = nd.targets if isinstance(nd, _ast.Assign) else [nd.target]
+            for t in tg:
+                for n in _ast.walk(t):
+                    if isinstance(n, _ast.Name):
+                        defined.add(n.id)
+        elif isinstance(nd, (_ast.For, _ast.comprehension)):
+            for n in _ast.walk(nd.target):
+                if isinstance(n, _ast.Name):
+                    defined.add(n.id)
+        elif isinstance(nd, _ast.ExceptHandler) and nd.name:
+            defined.add(nd.name)
+        elif isinstance(nd, _ast.With):
+            for it in nd.items:
+                if it.optional_vars:
+                    for n in _ast.walk(it.optional_vars):
+                        if isinstance(n, _ast.Name):
+                            defined.add(n.id)
+        elif isinstance(nd, _ast.arg):
+            defined.add(nd.arg)
+        elif isinstance(nd, _ast.Global):
+            defined.update(nd.names)
+    used = {n.id for n in _ast.walk(tree)
+            if isinstance(n, _ast.Name) and isinstance(n.ctx, _ast.Load)}
+    return sorted(used - defined)
+
+
+_miss = {p: _undefined_globals(p)
+         for p in sorted(_glob.glob(os.path.join(ROOT, "kapa", "*.py")))
+         + [APP]}
+_bad = {os.path.basename(p): m for p, m in _miss.items() if m}
+check("Keine undefinierten Modul-Globals (Import beim Auslagern vergessen)",
+      not _bad, str(_bad))
+
+# Regressionstest für den v3.2-Login-Bug: ldap_bind gegen einen LOKALEN
+# Lauscher (Verbindung kommt zustande, TLS-Handshake läuft ins Leere) —
+# der ssl-Codepfad wird also wirklich betreten. Erwartet: SSL-/Timeout-
+# Fehler, NIE ein NameError (fehlender Import).
+try:
+    sys.path.insert(0, ROOT)
+    from kapa.ldap import ldap_bind as _lb
+    _lsock = socket.socket()
+    _lsock.bind(("127.0.0.1", 0))
+    _lsock.listen(1)
+    _lport = _lsock.getsockname()[1]
+    try:
+        _lb(f"ldaps://127.0.0.1:{_lport}", "u@x.local", "pw", timeout=2)
+        _ldap_ok, _ldap_msg = True, "kein Fehler (unerwartet, aber ok)"
+    except NameError as e:
+        _ldap_ok, _ldap_msg = False, f"NameError: {e}"
+    except Exception as e:
+        _ldap_ok, _ldap_msg = True, type(e).__name__
+    finally:
+        _lsock.close()
+except Exception as e:
+    _ldap_ok, _ldap_msg = False, f"Import: {e}"
+check("ldap_bind (ldaps) erreicht den TLS-Pfad ohne NameError",
+      _ldap_ok, _ldap_msg)
+
 # ----------------------------------------------------------------- Start ----
 PORT = free_port()
 BASE = f"http://127.0.0.1:{PORT}"

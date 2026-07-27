@@ -3,6 +3,7 @@
 Sammlung) und SqliteStore (eine DB-Datei), plus data_path/-Migration.
 Aus aria_kapa.py ausgelagert (v3.0)."""
 import json
+import threading
 import os
 import sys
 import tempfile

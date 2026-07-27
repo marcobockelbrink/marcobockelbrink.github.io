@@ -2,6 +2,7 @@
 """Datenabfrage aus vROps (collect), Zusammenfassung je Cluster
 (build_summary), Uplink-/Namensfilter und die Demo-Daten
 (sample_data). Aus aria_kapa.py ausgelagert (v3.0)."""
+import json
 import re
 import sys
 
