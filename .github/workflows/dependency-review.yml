@@ -1,12 +1,29 @@
-# Prüft bei jedem Pull Request nach main die Änderungen an Abhängigkeiten
-# (hier v. a. GitHub-Actions über den Dependency-Graph) und blockt den PR,
-# wenn eine bekannte Schwachstelle (ab „high") oder eine unerwünschte Lizenz
-# hinzukäme – BEVOR sie in main landet. Kostenlos für öffentliche Repos.
+# Prüft Änderungen an Abhängigkeiten (hier v. a. GitHub-Actions über den
+# Dependency-Graph) und schlägt an, wenn eine bekannte Schwachstelle (ab
+# „high") oder eine unerwünschte Lizenz hinzukäme.
+#   - Pull Request nach main: blockt den PR – BEVOR es in main landet.
+#   - Push auf main: prüft die Spanne des Pushes (before → after), damit
+#     auch direkte Pushes abgedeckt sind und das Badge einen Status hat.
+#   - Manuell (workflow_dispatch): Vergleich frei wählbar (Standard:
+#     letzter Release-Tag → main).
+# Kostenlos für öffentliche Repos.
 name: Dependency-Review
 
 on:
   pull_request:
     branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      base-ref:
+        description: "Vergleichs-Basis (Tag/SHA/Branch)"
+        required: false
+        default: "v3.0"
+      head-ref:
+        description: "Zu prüfender Stand"
+        required: false
+        default: "main"
 
 permissions:
   contents: read
@@ -15,6 +32,8 @@ jobs:
   review:
     name: Abhängigkeiten prüfen
     runs-on: ubuntu-latest
+    # Bei einem Force-Push/Branch-Neuanlage gibt es kein sinnvolles "before".
+    if: github.event_name != 'push' || github.event.before != '0000000000000000000000000000000000000000'
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
@@ -23,3 +42,6 @@ jobs:
         with:
           fail-on-severity: high
           comment-summary-in-pr: on-failure
+          # Nur außerhalb von PRs nötig – dort liest die Action base/head selbst.
+          base-ref: ${{ github.event_name == 'push' && github.event.before || (github.event_name == 'workflow_dispatch' && inputs.base-ref) || '' }}
+          head-ref: ${{ github.event_name == 'push' && github.sha || (github.event_name == 'workflow_dispatch' && inputs.head-ref) || '' }}
