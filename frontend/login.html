@@ -52,7 +52,7 @@ async function login(ev) {
   const e = document.getElementById("e");
   e.textContent = "";
   try {
-    const r = await fetch("api/login", { method: "POST",
+    const r = await fetch("api/v1/login", { method: "POST",
       headers: {"Content-Type": "application/json"},
       body: JSON.stringify({ username: document.getElementById("u").value.trim(),
                              password: document.getElementById("p").value }) });

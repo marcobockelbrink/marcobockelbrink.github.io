@@ -2,18 +2,22 @@
 
 > 🇩🇪 [Deutsche Fassung: ARCHITEKTUR.md](ARCHITEKTUR.md)
 >
-> As of v2.30. The diagrams are Mermaid — GitHub renders them right in the
+> As of v3.0. The diagrams are Mermaid — GitHub renders them right in the
 > browser.
 
 ## Guiding idea
 
-A **Python script** (`aria_kapa.py`, standard library only, Python 3.8+) is
-data collector, web server, calculation core and UI server in one; since v2.30
-the frontend (HTML/CSS/JS) lives as **real files in the `frontend/` folder**
-next to it — reviewable and lintable, loaded at runtime. No pip, no build, no
-database server — a deliberate choice so the dashboard runs on any RHEL host
-without a package zoo and an update means swapping **a few files** (the script
-+ `frontend/`).
+Since **v3.0** the application consists of three review-friendly parts:
+`aria_kapa.py` (entry point, serve setup, background threads, domain logic),
+the **`kapa/` backend package** (ten modules: HTTP handlers with dispatch
+tables, vROps client, data collection, data store, LDAP, mail, backup,
+delivery, constants, helpers) and the **`frontend/` folder** (HTML/CSS/JS as
+real files, loaded at runtime). The UI talks exclusively to the JSON API under
+**one path space `/api/v1/`** (API-first: session cookie for the web UI,
+bearer tokens for external applications — separate authorization, one
+contract). Still standard library only (Python 3.8+): no pip, no build, no
+database server — the dashboard runs on any RHEL host without a package zoo,
+and an update means swapping the script + `kapa/` + `frontend/`.
 
 ```mermaid
 flowchart LR

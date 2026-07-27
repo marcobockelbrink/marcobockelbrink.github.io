@@ -29,6 +29,7 @@ RUN microdnf install -y python3 tzdata \
 
 WORKDIR /opt/kapa
 COPY --chown=1001:0 aria_kapa.py /opt/kapa/aria_kapa.py
+COPY --chown=1001:0 kapa/ /opt/kapa/kapa/
 # Frontend (HTML/CSS/JS) liegt seit v2.30 als Dateien neben dem Skript.
 COPY --chown=1001:0 frontend/ /opt/kapa/frontend/
 

@@ -28,7 +28,7 @@ is done on GitHub under *Package → Package settings → Change visibility*.
 ## Building yourself
 
 Alternatively build locally. The build **context is the project root** (that
-is where `aria_kapa.py` lives); the Dockerfile copies this script **and the `frontend/` folder** into
+is where `aria_kapa.py` lives); the Dockerfile copies this script **with the `kapa/` and `frontend/` folders** into
 the image:
 
 ```bash

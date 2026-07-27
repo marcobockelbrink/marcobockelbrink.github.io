@@ -9,6 +9,8 @@ on:
     branches: [main]
     paths:
       - aria_kapa.py
+      - kapa/**
+      - frontend/**
       - .github/workflows/pages.yml
   workflow_dispatch:
 

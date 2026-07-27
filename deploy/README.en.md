@@ -2,7 +2,7 @@
 
 > 🇩🇪 [Deutsche Fassung: README.md](README.md)
 
-The application is a Python script (`aria_kapa.py`) plus the `frontend/` folder
+The application is a Python script (`aria_kapa.py`) plus the `kapa/` backend package and the `frontend/` folder
 (HTML/CSS/JS as files) — standard library only, Python 3.8+, no build. It ships
 as a container — choose by environment:
 

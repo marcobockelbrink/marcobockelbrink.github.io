@@ -187,7 +187,7 @@ try { var _t = new URLSearchParams(location.search).get("theme")
 <div class="sub">
   <button class="btn" onclick="showInfo('infoCalc','Info Kapa-Berechnung')">ℹ Info Kapa-Berechnung</button>
   <button class="btn" onclick="showInfo('infoHelp','Hilfe')">? Hilfe</button>
-  <span style="color:var(--muted);font-size:12px;margin-left:8px">Stand: <span id="stand">26.07.2026 22:59</span></span>
+  <span style="color:var(--muted);font-size:12px;margin-left:8px">Stand: <span id="stand">27.07.2026 10:33</span></span>
 </div>
 <div id="infoCalc" style="display:none">Quelle: VMware Aria Operations · CPU-Überprovisionierung: Faktor 6 (physische Cores) · RAM 1:1 · alle VMs inkl. powered-off · „frei" berücksichtigt genehmigte Reservierungen · Ausfallreserve (N+1): größter Host je Cluster abgezogen</div>
 <div id="infoHelp" style="display:none">Klick auf den Clusternamen zeigt Details und Reservierungen. Neue Reservierungen gelten ab dem Anlagetag für 30 Tage, zählen erst nach Genehmigung gegen die Kapazität und werden nach 31 Tagen automatisch entfernt. Speicherung lokal im Browser.<div style="margin-top:12px">📖 <a href="reviewer-handbuch" target="_blank" rel="noopener">Reviewer-Handbuch öffnen</a></div></div>
@@ -394,7 +394,7 @@ try { var _t = new URLSearchParams(location.search).get("theme")
   <label style="font-size:12px;color:var(--muted)">Cluster
     <select id="statCluster" class="filterbox" style="margin-left:4px;max-width:260px" onchange="renderStats()">
       <option value="">alle</option></select></label>
-  <a class="btn" id="statCsvBtn" href="api/history?days=730&format=csv"
+  <a class="btn" id="statCsvBtn" href="api/v1/history?days=730&format=csv"
      download="kapa-statistik.csv" title="Historie als CSV (Semikolon, für Excel)">CSV exportieren</a>
   <span id="statInfo" style="font-size:12px;color:var(--muted);margin-left:auto"></span>
 </div>
@@ -698,7 +698,7 @@ try { var _t = new URLSearchParams(location.search).get("theme")
   bewusst aus. Ein erneuter Import unter demselben Namen <b>ersetzt</b> die
   Quelle.</div>
 <div style="margin-bottom:14px">
-  <a class="btn" href="api/import/powercli" download="kapa_export.ps1"
+  <a class="btn" href="api/v1/import/powercli" download="kapa_export.ps1"
      title="PowerCLI-Skript, das das Import-JSON erzeugt">⬇ PowerCLI-Skript (kapa_export.ps1)</a>
   <span style="color:var(--muted);font-size:12px;margin-left:8px">
     Aufruf: <code>.\kapa_export.ps1 -Server vcenter.insel.local</code></span>
@@ -746,7 +746,7 @@ try { var _t = new URLSearchParams(location.search).get("theme")
 </table>
 </div>
 <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:8px">
-  <a class="btn" href="api/import/reservations/beispiel" download="kapa-import-beispiel.csv"
+  <a class="btn" href="api/v1/import/reservations/beispiel" download="kapa-import-beispiel.csv"
      title="Vorlage mit Kopfzeile und zwei Beispielzeilen – in Excel öffnen und befüllen">⬇ Beispiel-CSV (Vorlage)</a>
   <label class="btn">CSV-Datei wählen &amp; importieren<input
     type="file" accept=".csv,text/csv" hidden onchange="importKapaCsv(event)"></label>
@@ -905,7 +905,7 @@ try { var _t = new URLSearchParams(location.search).get("theme")
 <div class="pgbar" id="pager_ltable"></div>
 </div>
 <div class="hovercard" id="hovercard"></div>
-<div class="foot">VMware Kapazitätsplanung · Version 2.30.0</div>
+<div class="foot">VMware Kapazitätsplanung · Version 3.0.0</div>
 <script>
 let CLUSTERS = [{"name": "Cluster-01", "hostCount": 3, "cores": 64, "spareCores": 48, "spareRamGb": 1024, "vcpuCap": 384, "vcpuUsed": 370, "vcpuFree": 14, "ramCap": 1024, "ramUsed": 1504, "ramFree": -480, "storageCap": 51500.0, "storageUsed": 28531.0, "storageFree": 22969.0, "datastores": [{"name": "vsan-cl1", "type": "vSAN", "naa": "", "cap_gb": 20000.0, "used_gb": 11819.0, "raw_cap_gb": 40000.0, "factor": 0.5}, {"name": "FC-LUN-102", "type": "VMFS", "naa": "naa.60060160a1b0200380c84a1b4", "cap_gb": 8000.0, "used_gb": 3332.0, "raw_cap_gb": 8000.0, "factor": 1.0}, {"name": "FC-LUN-104", "type": "VMFS", "naa": "naa.60060160a1b04005a72bcaaab", "cap_gb": 8000.0, "used_gb": 4288.0, "raw_cap_gb": 8000.0, "factor": 1.0}, {"name": "FC-LUN-105", "type": "VMFS", "naa": "naa.60060160a1b0500b327cead9a", "cap_gb": 8000.0, "used_gb": 5389.0, "raw_cap_gb": 8000.0, "factor": 1.0}, {"name": "FC-LUN-101", "type": "VMFS", "naa": "naa.60060160a1b0100da42d41900", "cap_gb": 2000.0, "used_gb": 1269.0, "raw_cap_gb": 2000.0, "factor": 1.0}, {"name": "FC-LUN-103", "type": "VMFS", "naa": "naa.60060160a1b030090f15c560c", "cap_gb": 2000.0, "used_gb": 947.0, "raw_cap_gb": 2000.0, "factor": 1.0}, {"name": "app-service-1", "type": "VMFS", "naa": "naa.60060160a1f07d01e1f9328e", "cap_gb": 2000.0, "used_gb": 778.0, "raw_cap_gb": 2000.0, "factor": 1.0}, {"name": "template-store-1", "type": "VMFS", "naa": "naa.60060160a1f03e818b676d9a", "cap_gb": 1000.0, "used_gb": 471.0, "raw_cap_gb": 1000.0, "factor": 1.0}, {"name": "iso-library-1", "type": "NFS", "naa": "", "cap_gb": 500.0, "used_gb": 238.0, "raw_cap_gb": 500.0, "factor": 1.0}], "vmCount": 52, "vmOff": 5, "tags": ["Standort: RZ-Nord", "Umgebung: Produktion", "Betreuung: Team Netzwerk", "Kapa_Filter: Nein"], "portgroups": [{"name": "dvSwitch-Cluster-01-DVUplinks", "vlan": "0-4094"}, {"name": "PG-DMZ-10.1.22.0_24-VLAN102", "vlan": "102"}, {"name": "PG-Mgmt-10.1.20.0_24-VLAN100", "vlan": "100"}, {"name": "PG-Prod-10.1.21.0_24-VLAN101", "vlan": "101"}], "workload": 52, "source": "RZ-Nord", "namespaces": [{"name": "ns-webshop-prod", "cpu_mhz": 20000, "vcpu": 8, "ram_gb": 96.0}, {"name": "ns-ci-runner", "cpu_mhz": 8000, "vcpu": 4, "ram_gb": 32.0}], "tanzuVcpu": 12, "tanzuRamGb": 128.0, "hosts": [{"name": "esx101.firma.local", "cores": 32, "ram_gb": 1024, "wwpns": ["20:00:00:25:b5:01:01:00", "20:00:00:25:b5:01:01:01"]}, {"name": "esx102.firma.local", "cores": 48, "ram_gb": 512, "wwpns": ["20:00:00:25:b5:01:02:00", "20:00:00:25:b5:01:02:01"]}, {"name": "esx103.firma.local", "cores": 32, "ram_gb": 512, "wwpns": ["20:00:00:25:b5:01:03:00", "20:00:00:25:b5:01:03:01"]}], "vms": [{"name": "vm-1001", "vcpu": 16, "ram_gb": 64, "on": false, "disk_gb": 1140}, {"name": "vm-1002", "vcpu": 8, "ram_gb": 8, "on": false, "disk_gb": 240}, {"name": "vm-1003", "vcpu": 4, "ram_gb": 16, "on": true, "disk_gb": 310}, {"name": "vm-1004", "vcpu": 2, "ram_gb": 64, "on": true, "disk_gb": 930}, {"name": "vm-1005", "vcpu": 16, "ram_gb": 64, "on": true, "disk_gb": 1140}, {"name": "vm-1006", "vcpu": 8, "ram_gb": 64, "on": true, "disk_gb": 1020}, {"name": "vm-1007", "vcpu": 2, "ram_gb": 16, "on": true, "disk_gb": 280}, {"name": "vm-1008", "vcpu": 4, "ram_gb": 16, "on": true, "disk_gb": 310}, {"name": "vm-1009", "vcpu": 4, "ram_gb": 8, "on": false, "disk_gb": 180}, {"name": "vm-1010", "vcpu": 2, "ram_gb": 16, "on": true, "disk_gb": 280}, {"name": "vm-1011", "vcpu": 8, "ram_gb": 16, "on": true, "disk_gb": 370}, {"name": "vm-1012", "vcpu": 16, "ram_gb": 32, "on": true, "disk_gb": 740}, {"name": "vm-1013", "vcpu": 8, "ram_gb": 8, "on": true, "disk_gb": 240}, {"name": "vm-1014", "vcpu": 16, "ram_gb": 64, "on": true, "disk_gb": 1140}, {"name": "vm-1015", "vcpu": 4, "ram_gb": 64, "on": true, "disk_gb": 960}, {"name": "vm-1016", "vcpu": 2, "ram_gb": 8, "on": true, "disk_gb": 150}, {"name": "vm-1017", "vcpu": 4, "ram_gb": 8, "on": true, "disk_gb": 180}, {"name": "vm-1018", "vcpu": 2, "ram_gb": 32, "on": true, "disk_gb": 530}, {"name": "vm-1019", "vcpu": 16, "ram_gb": 16, "on": true, "disk_gb": 490}, {"name": "vm-1020", "vcpu": 4, "ram_gb": 16, "on": true, "disk_gb": 310}, {"name": "vm-1021", "vcpu": 16, "ram_gb": 8, "on": true, "disk_gb": 360}, {"name": "vm-1022", "vcpu": 4, "ram_gb": 64, "on": true, "disk_gb": 960}, {"name": "vm-1023", "vcpu": 4, "ram_gb": 32, "on": true, "disk_gb": 560}, {"name": "vm-1024", "vcpu": 16, "ram_gb": 64, "on": true, "disk_gb": 1140}, {"name": "vm-1025", "vcpu": 4, "ram_gb": 8, "on": true, "disk_gb": 180}, {"name": "vm-1026", "vcpu": 2, "ram_gb": 16, "on": true, "disk_gb": 280}, {"name": "vm-1027", "vcpu": 2, "ram_gb": 16, "on": true, "disk_gb": 280}, {"name": "vm-1028", "vcpu": 8, "ram_gb": 16, "on": true, "disk_gb": 370}, {"name": "vm-1029", "vcpu": 8, "ram_gb": 32, "on": true, "disk_gb": 620}, {"name": "vm-1030", "vcpu": 16, "ram_gb": 32, "on": true, "disk_gb": 740}, {"name": "vm-1031", "vcpu": 4, "ram_gb": 16, "on": true, "disk_gb": 310}, {"name": "vm-1032", "vcpu": 8, "ram_gb": 16, "on": true, "disk_gb": 370}, {"name": "vm-1033", "vcpu": 8, "ram_gb": 64, "on": true, "disk_gb": 1020}, {"name": "vm-1034", "vcpu": 4, "ram_gb": 16, "on": true, "disk_gb": 310}, {"name": "vm-1035", "vcpu": 2, "ram_gb": 8, "on": true, "disk_gb": 150}, {"name": "vm-1036", "vcpu": 4, "ram_gb": 16, "on": true, "disk_gb": 310}, {"name": "vm-1037", "vcpu": 8, "ram_gb": 64, "on": false, "disk_gb": 1020}, {"name": "vm-1038", "vcpu": 8, "ram_gb": 64, "on": true, "disk_gb": 1020}, {"name": "vm-1039", "vcpu": 8, "ram_gb": 16, "on": true, "disk_gb": 370}, {"name": "vm-1040", "vcpu": 2, "ram_gb": 8, "on": true, "disk_gb": 150}, {"name": "vm-1041", "vcpu": 8, "ram_gb": 16, "on": true, "disk_gb": 370}, {"name": "vm-1042", "vcpu": 4, "ram_gb": 8, "on": true, "disk_gb": 180}, {"name": "vm-1043", "vcpu": 4, "ram_gb": 32, "on": false, "disk_gb": 560}, {"name": "vm-1044", "vcpu": 16, "ram_gb": 16, "on": true, "disk_gb": 490}, {"name": "vm-1045", "vcpu": 4, "ram_gb": 64, "on": true, "disk_gb": 960}, {"name": "vm-1046", "vcpu": 16, "ram_gb": 16, "on": true, "disk_gb": 490}, {"name": "vm-1047", "vcpu": 8, "ram_gb": 64, "on": true, "disk_gb": 1020}, {"name": "vm-1048", "vcpu": 4, "ram_gb": 16, "on": true, "disk_gb": 310}, {"name": "vm-1049", "vcpu": 8, "ram_gb": 8, "on": true, "disk_gb": 240}, {"name": "vm-1050", "vcpu": 8, "ram_gb": 8, "on": true, "disk_gb": 240}, {"name": "vm-1051", "vcpu": 4, "ram_gb": 16, "on": true, "disk_gb": 310}, {"name": "vm-1052", "vcpu": 4, "ram_gb": 64, "on": true, "disk_gb": 960}]}, {"name": "Cluster-02", "hostCount": 5, "cores": 176, "spareCores": 64, "spareRamGb": 1024, "vcpuCap": 1056, "vcpuUsed": 672, "vcpuFree": 384, "ramCap": 3328, "ramUsed": 2768, "ramFree": 560, "storageCap": 35500.0, "storageUsed": 23790.0, "storageFree": 11710.0, "datastores": [{"name": "vsan-cl2", "type": "vSAN", "naa": "", "cap_gb": 20000.0, "used_gb": 12021.0, "raw_cap_gb": 40000.0, "factor": 0.5}, {"name": "FC-LUN-202", "type": "VMFS", "naa": "naa.60060160a2b02008dcd0fc913", "cap_gb": 8000.0, "used_gb": 5737.0, "raw_cap_gb": 8000.0, "factor": 1.0}, {"name": "FC-LUN-201", "type": "VMFS", "naa": "naa.60060160a2b010044807ce107", "cap_gb": 4000.0, "used_gb": 3163.0, "raw_cap_gb": 4000.0, "factor": 1.0}, {"name": "app-service-2", "type": "VMFS", "naa": "naa.60060160a2f07d0114c75c27", "cap_gb": 2000.0, "used_gb": 1745.0, "raw_cap_gb": 2000.0, "factor": 1.0}, {"name": "template-store-2", "type": "VMFS", "naa": "naa.60060160a2f03e824875e6a4", "cap_gb": 1000.0, "used_gb": 677.0, "raw_cap_gb": 1000.0, "factor": 1.0}, {"name": "iso-library-2", "type": "NFS", "naa": "", "cap_gb": 500.0, "used_gb": 447.0, "raw_cap_gb": 500.0, "factor": 1.0}], "vmCount": 99, "vmOff": 14, "tags": ["Standort: RZ-Sued", "Umgebung: Test", "Betreuung: Team Betrieb", "Kapa_Filter: Nein"], "portgroups": [{"name": "dvSwitch-Cluster-02-DVUplinks", "vlan": "0-4094"}, {"name": "PG-Backup-10.2.30.0_24-VLAN200", "vlan": "200"}, {"name": "PG-Backup-10.2.31.0_24-VLAN201", "vlan": "201"}, {"name": "PG-Mgmt-10.2.32.0_24-VLAN202", "vlan": "202"}, {"name": "PG-Test-10.2.33.0_24-VLAN203", "vlan": "203"}], "workload": 61, "source": "RZ-Nord", "namespaces": [], "tanzuVcpu": 0, "tanzuRamGb": 0, "hosts": [{"name": "esx201.firma.local", "cores": 64, "ram_gb": 768, "wwpns": ["20:00:00:25:b5:02:01:00", "20:00:00:25:b5:02:01:01"]}, {"name": "esx202.firma.local", "cores": 32, "ram_gb": 1024, "wwpns": ["20:00:00:25:b5:02:02:00", "20:00:00:25:b5:02:02:01"]}, {"name": "esx203.firma.local", "cores": 32, "ram_gb": 1024, "wwpns": ["20:00:00:25:b5:02:03:00", "20:00:00:25:b5:02:03:01"]}, {"name": "esx204.firma.local", "cores": 64, "ram_gb": 1024, "wwpns": ["20:00:00:25:b5:02:04:00", "20:00:00:25:b5:02:04:01"]}, {"name": "esx205.firma.local", "cores": 48, "ram_gb": 512, "wwpns": ["20:00:00:25:b5:02:05:00", "20:00:00:25:b5:02:05:01"]}], "vms": [{"name": "vm-2001", "vcpu": 8, "ram_gb": 16, "on": false, "disk_gb": 370}, {"name": "vm-2002", "vcpu": 16, "ram_gb": 32, "on": true, "disk_gb": 740}, {"name": "vm-2003", "vcpu": 8, "ram_gb": 32, "on": true, "disk_gb": 620}, {"name": "vm-2004", "vcpu": 2, "ram_gb": 8, "on": false, "disk_gb": 150}, {"name": "vm-2005", "vcpu": 16, "ram_gb": 16, "on": true, "disk_gb": 490}, {"name": "vm-2006", "vcpu": 2, "ram_gb": 16, "on": true, "disk_gb": 280}, {"name": "vm-2007", "vcpu": 8, "ram_gb": 32, "on": true, "disk_gb": 620}, {"name": "vm-2008", "vcpu": 4, "ram_gb": 16, "on": true, "disk_gb": 310}, {"name": "vm-2009", "vcpu": 2, "ram_gb": 32, "on": true, "disk_gb": 530}, {"name": "vm-2010", "vcpu": 8, "ram_gb": 8, "on": false, "disk_gb": 240}, {"name": "vm-2011", "vcpu": 8, "ram_gb": 8, "on": true, "disk_gb": 240}, {"name": "vm-2012", "vcpu": 4, "ram_gb": 16, "on": true, "disk_gb": 310}, {"name": "vm-2013", "vcpu": 8, "ram_gb": 16, "on": true, "disk_gb": 370}, {"name": "vm-2014", "vcpu": 2, "ram_gb": 16, "on": true, "disk_gb": 280}, {"name": "vm-2015", "vcpu": 8, "ram_gb": 16, "on": true, "disk_gb": 370}, {"name": "vm-2016", "vcpu": 8, "ram_gb": 16, "on": true, "disk_gb": 370}, {"name": "vm-2017", "vcpu": 16, "ram_gb": 64, "on": true, "disk_gb": 1140}, {"name": "vm-2018", "vcpu": 8, "ram_gb": 16, "on": true, "disk_gb": 370}, {"name": "vm-2019", "vcpu": 4, "ram_gb": 8, "on": true, "disk_gb": 180}, {"name": "vm-2020", "vcpu": 8, "ram_gb": 8, "on": true, "disk_gb": 240}, {"name": "vm-2021", "vcpu": 2, "ram_gb": 8, "on": true, "disk_gb": 150}, {"name": "vm-2022", "vcpu": 8, "ram_gb": 64, "on": true, "disk_gb": 1020}, {"name": "vm-2023", "vcpu": 8, "ram_gb": 8, "on": true, "disk_gb": 240}, {"name": "vm-2024", "vcpu": 2, "ram_gb": 64, "on": false, "disk_gb": 930}, {"name": "vm-2025", "vcpu": 4, "ram_gb": 32, "on": true, "disk_gb": 560}, {"name": "vm-2026", "vcpu": 8, "ram_gb": 16, "on": true, "disk_gb": 370}, {"name": "vm-2027", "vcpu": 2, "ram_gb": 64, "on": false, "disk_gb": 930}, {"name": "vm-2028", "vcpu": 16, "ram_gb": 64, "on": true, "disk_gb": 1140}, {"name": "vm-2029", "vcpu": 4, "ram_gb": 16, "on": true, "disk_gb": 310}, {"name": "vm-2030", "vcpu": 16, "ram_gb": 16, "on": true, "disk_gb": 490}, {"name": "vm-2031", "vcpu": 8, "ram_gb": 16, "on": true, "disk_gb": 370}, {"name": "vm-2032", "vcpu": 4, "ram_gb": 32, "on": true, "disk_gb": 560}, {"name": "vm-2033", "vcpu": 2, "ram_gb": 8, "on": true, "disk_gb": 150}, {"name": "vm-2034", "vcpu": 8, "ram_gb": 8, "on": false, "disk_gb": 240}, {"name": "vm-2035", "vcpu": 4, "ram_gb": 64, "on": true, "disk_gb": 960}, {"name": "vm-2036", "vcpu": 4, "ram_gb": 8, "on": true, "disk_gb": 180}, {"name": "vm-2037", "vcpu": 4, "ram_gb": 16, "on": true, "disk_gb": 310}, {"name": "vm-2038", "vcpu": 8, "ram_gb": 16, "on": true, "disk_gb": 370}, {"name": "vm-2039", "vcpu": 16, "ram_gb": 64, "on": false, "disk_gb": 1140}, {"name": "vm-2040", "vcpu": 8, "ram_gb": 16, "on": true, "disk_gb": 370}, {"name": "vm-2041", "vcpu": 2, "ram_gb": 16, "on": true, "disk_gb": 280}, {"name": "vm-2042", "vcpu": 2, "ram_gb": 64, "on": true, "disk_gb": 930}, {"name": "vm-2043", "vcpu": 4, "ram_gb": 64, "on": true, "disk_gb": 960}, {"name": "vm-2044", "vcpu": 4, "ram_gb": 16, "on": true, "disk_gb": 310}, {"name": "vm-2045", "vcpu": 4, "ram_gb": 64, "on": true, "disk_gb": 960}, {"name": "vm-2046", "vcpu": 2, "ram_gb": 8, "on": true, "disk_gb": 150}, {"name": "vm-2047", "vcpu": 4, "ram_gb": 8, "on": false, "disk_gb": 180}, {"name": "vm-2048", "vcpu": 4, "ram_gb": 16, "on": true, "disk_gb": 310}, {"name": "vm-2049", "vcpu": 8, "ram_gb": 64, "on": true, "disk_gb": 1020}, {"name": "vm-2050", "vcpu": 8, "ram_gb": 8, "on": true, "disk_gb": 240}, {"name": "vm-2051", "vcpu": 16, "ram_gb": 16, "on": true, "disk_gb": 490}, {"name": "vm-2052", "vcpu": 4, "ram_gb": 64, "on": true, "disk_gb": 960}, {"name": "vm-2053", "vcpu": 8, "ram_gb": 16, "on": false, "disk_gb": 370}, {"name": "vm-2054", "vcpu": 4, "ram_gb": 8, "on": true, "disk_gb": 180}, {"name": "vm-2055", "vcpu": 4, "ram_gb": 16, "on": true, "disk_gb": 310}, {"name": "vm-2056", "vcpu": 4, "ram_gb": 64, "on": true, "disk_gb": 960}, {"name": "vm-2057", "vcpu": 8, "ram_gb": 64, "on": true, "disk_gb": 1020}, {"name": "vm-2058", "vcpu": 4, "ram_gb": 16, "on": true, "disk_gb": 310}, {"name": "vm-2059", "vcpu": 4, "ram_gb": 32, "on": false, "disk_gb": 560}, {"name": "vm-2060", "vcpu": 16, "ram_gb": 16, "on": true, "disk_gb": 490}, {"name": "vm-2061", "vcpu": 8, "ram_gb": 16, "on": true, "disk_gb": 370}, {"name": "vm-2062", "vcpu": 16, "ram_gb": 8, "on": true, "disk_gb": 360}, {"name": "vm-2063", "vcpu": 2, "ram_gb": 32, "on": true, "disk_gb": 530}, {"name": "vm-2064", "vcpu": 8, "ram_gb": 16, "on": true, "disk_gb": 370}, {"name": "vm-2065", "vcpu": 4, "ram_gb": 16, "on": false, "disk_gb": 310}, {"name": "vm-2066", "vcpu": 4, "ram_gb": 32, "on": true, "disk_gb": 560}, {"name": "vm-2067", "vcpu": 2, "ram_gb": 16, "on": true, "disk_gb": 280}, {"name": "vm-2068", "vcpu": 8, "ram_gb": 32, "on": true, "disk_gb": 620}, {"name": "vm-2069", "vcpu": 8, "ram_gb": 16, "on": true, "disk_gb": 370}, {"name": "vm-2070", "vcpu": 2, "ram_gb": 16, "on": true, "disk_gb": 280}, {"name": "vm-2071", "vcpu": 4, "ram_gb": 8, "on": true, "disk_gb": 180}, {"name": "vm-2072", "vcpu": 8, "ram_gb": 16, "on": true, "disk_gb": 370}, {"name": "vm-2073", "vcpu": 4, "ram_gb": 32, "on": true, "disk_gb": 560}, {"name": "vm-2074", "vcpu": 8, "ram_gb": 8, "on": true, "disk_gb": 240}, {"name": "vm-2075", "vcpu": 8, "ram_gb": 16, "on": true, "disk_gb": 370}, {"name": "vm-2076", "vcpu": 16, "ram_gb": 32, "on": false, "disk_gb": 740}, {"name": "vm-2077", "vcpu": 8, "ram_gb": 16, "on": true, "disk_gb": 370}, {"name": "vm-2078", "vcpu": 2, "ram_gb": 16, "on": true, "disk_gb": 280}, {"name": "vm-2079", "vcpu": 16, "ram_gb": 8, "on": true, "disk_gb": 360}, {"name": "vm-2080", "vcpu": 4, "ram_gb": 64, "on": true, "disk_gb": 960}, {"name": "vm-2081", "vcpu": 8, "ram_gb": 16, "on": true, "disk_gb": 370}, {"name": "vm-2082", "vcpu": 4, "ram_gb": 64, "on": true, "disk_gb": 960}, {"name": "vm-2083", "vcpu": 8, "ram_gb": 32, "on": true, "disk_gb": 620}, {"name": "vm-2084", "vcpu": 4, "ram_gb": 64, "on": true, "disk_gb": 960}, {"name": "vm-2085", "vcpu": 8, "ram_gb": 64, "on": true, "disk_gb": 1020}, {"name": "vm-2086", "vcpu": 4, "ram_gb": 16, "on": true, "disk_gb": 310}, {"name": "vm-2087", "vcpu": 8, "ram_gb": 64, "on": true, "disk_gb": 1020}, {"name": "vm-2088", "vcpu": 8, "ram_gb": 32, "on": true, "disk_gb": 620}, {"name": "vm-2089", "vcpu": 4, "ram_gb": 64, "on": true, "disk_gb": 960}, {"name": "vm-2090", "vcpu": 16, "ram_gb": 16, "on": true, "disk_gb": 490}, {"name": "vm-2091", "vcpu": 4, "ram_gb": 64, "on": true, "disk_gb": 960}, {"name": "vm-2092", "vcpu": 8, "ram_gb": 16, "on": false, "disk_gb": 370}, {"name": "vm-2093", "vcpu": 4, "ram_gb": 16, "on": true, "disk_gb": 310}, {"name": "vm-2094", "vcpu": 4, "ram_gb": 16, "on": false, "disk_gb": 310}, {"name": "vm-2095", "vcpu": 4, "ram_gb": 32, "on": true, "disk_gb": 560}, {"name": "vm-2096", "vcpu": 2, "ram_gb": 32, "on": true, "disk_gb": 530}, {"name": "vm-2097", "vcpu": 16, "ram_gb": 64, "on": true, "disk_gb": 1140}, {"name": "vm-2098", "vcpu": 16, "ram_gb": 32, "on": true, "disk_gb": 740}, {"name": "vm-2099", "vcpu": 4, "ram_gb": 16, "on": true, "disk_gb": 310}]}, {"name": "Cluster-03", "hostCount": 6, "cores": 224, "spareCores": 64, "spareRamGb": 1024, "vcpuCap": 1344, "vcpuUsed": 370, "vcpuFree": 974, "ramCap": 3584, "ramUsed": 1168, "ramFree": 2416, "storageCap": 49500.0, "storageUsed": 31800.0, "storageFree": 17700.0, "datastores": [{"name": "vsan-cl3", "type": "vSAN", "naa": "", "cap_gb": 40000.0, "used_gb": 26227.0, "raw_cap_gb": 80000.0, "factor": 0.5}, {"name": "FC-LUN-301", "type": "VMFS", "naa": "naa.60060160a3b01006b224ef38d", "cap_gb": 4000.0, "used_gb": 2537.0, "raw_cap_gb": 4000.0, "factor": 1.0}, {"name": "FC-LUN-302", "type": "VMFS", "naa": "naa.60060160a3b02004dc546fa9d", "cap_gb": 2000.0, "used_gb": 910.0, "raw_cap_gb": 2000.0, "factor": 1.0}, {"name": "app-service-3", "type": "VMFS", "naa": "naa.60060160a3f07d021ce9810d", "cap_gb": 2000.0, "used_gb": 1311.0, "raw_cap_gb": 2000.0, "factor": 1.0}, {"name": "template-store-3", "type": "VMFS", "naa": "naa.60060160a3f03e817dbe2c3b", "cap_gb": 1000.0, "used_gb": 574.0, "raw_cap_gb": 1000.0, "factor": 1.0}, {"name": "iso-library-3", "type": "NFS", "naa": "", "cap_gb": 500.0, "used_gb": 241.0, "raw_cap_gb": 500.0, "factor": 1.0}], "vmCount": 49, "vmOff": 3, "tags": ["Standort: RZ-Nord", "Umgebung: Test", "Betreuung: Team Betrieb", "Kapa_Filter: Nein"], "portgroups": [{"name": "dvSwitch-Cluster-03-DVUplinks", "vlan": "0-4094"}, {"name": "PG-Backup-10.3.44.0_24-VLAN304", "vlan": "304"}, {"name": "PG-Mgmt-10.3.42.0_24-VLAN302", "vlan": "302"}, {"name": "PG-Prod-10.3.40.0_24-VLAN300", "vlan": "300"}, {"name": "PG-Prod-10.3.41.0_24-VLAN301", "vlan": "301"}, {"name": "PG-Test-10.3.43.0_24-VLAN303", "vlan": "303"}, {"name": "PG-Test-10.3.45.0_24-VLAN305", "vlan": "305"}], "workload": 61, "source": "RZ-Sued", "namespaces": [{"name": "ns-data-analytics", "cpu_mhz": 12000, "vcpu": 5, "ram_gb": 64.0}], "tanzuVcpu": 5, "tanzuRamGb": 64.0, "hosts": [{"name": "esx301.firma.local", "cores": 64, "ram_gb": 512, "wwpns": ["20:00:00:25:b5:03:01:00", "20:00:00:25:b5:03:01:01"]}, {"name": "esx302.firma.local", "cores": 48, "ram_gb": 768, "wwpns": ["20:00:00:25:b5:03:02:00", "20:00:00:25:b5:03:02:01"]}, {"name": "esx303.firma.local", "cores": 32, "ram_gb": 1024, "wwpns": ["20:00:00:25:b5:03:03:00", "20:00:00:25:b5:03:03:01"]}, {"name": "esx304.firma.local", "cores": 48, "ram_gb": 512, "wwpns": ["20:00:00:25:b5:03:04:00", "20:00:00:25:b5:03:04:01"]}, {"name": "esx305.firma.local", "cores": 48, "ram_gb": 768, "wwpns": ["20:00:00:25:b5:03:05:00", "20:00:00:25:b5:03:05:01"]}, {"name": "esx306.firma.local", "cores": 48, "ram_gb": 1024, "wwpns": ["20:00:00:25:b5:03:06:00", "20:00:00:25:b5:03:06:01"]}], "vms": [{"name": "vm-3001", "vcpu": 4, "ram_gb": 16, "on": true, "disk_gb": 310}, {"name": "vm-3002", "vcpu": 16, "ram_gb": 16, "on": true, "disk_gb": 490}, {"name": "vm-3003", "vcpu": 2, "ram_gb": 32, "on": true, "disk_gb": 530}, {"name": "vm-3004", "vcpu": 8, "ram_gb": 32, "on": true, "disk_gb": 620}, {"name": "vm-3005", "vcpu": 4, "ram_gb": 32, "on": true, "disk_gb": 560}, {"name": "vm-3006", "vcpu": 8, "ram_gb": 8, "on": true, "disk_gb": 240}, {"name": "vm-3007", "vcpu": 8, "ram_gb": 32, "on": true, "disk_gb": 620}, {"name": "vm-3008", "vcpu": 4, "ram_gb": 16, "on": true, "disk_gb": 310}, {"name": "vm-3009", "vcpu": 8, "ram_gb": 64, "on": true, "disk_gb": 1020}, {"name": "vm-3010", "vcpu": 8, "ram_gb": 64, "on": true, "disk_gb": 1020}, {"name": "vm-3011", "vcpu": 8, "ram_gb": 16, "on": true, "disk_gb": 370}, {"name": "vm-3012", "vcpu": 8, "ram_gb": 8, "on": true, "disk_gb": 240}, {"name": "vm-3013", "vcpu": 16, "ram_gb": 32, "on": true, "disk_gb": 740}, {"name": "vm-3014", "vcpu": 8, "ram_gb": 16, "on": true, "disk_gb": 370}, {"name": "vm-3015", "vcpu": 8, "ram_gb": 8, "on": true, "disk_gb": 240}, {"name": "vm-3016", "vcpu": 8, "ram_gb": 64, "on": true, "disk_gb": 1020}, {"name": "vm-3017", "vcpu": 2, "ram_gb": 32, "on": true, "disk_gb": 530}, {"name": "vm-3018", "vcpu": 8, "ram_gb": 16, "on": false, "disk_gb": 370}, {"name": "vm-3019", "vcpu": 8, "ram_gb": 16, "on": true, "disk_gb": 370}, {"name": "vm-3020", "vcpu": 4, "ram_gb": 16, "on": true, "disk_gb": 310}, {"name": "vm-3021", "vcpu": 8, "ram_gb": 16, "on": true, "disk_gb": 370}, {"name": "vm-3022", "vcpu": 8, "ram_gb": 16, "on": true, "disk_gb": 370}, {"name": "vm-3023", "vcpu": 8, "ram_gb": 8, "on": true, "disk_gb": 240}, {"name": "vm-3024", "vcpu": 2, "ram_gb": 16, "on": true, "disk_gb": 280}, {"name": "vm-3025", "vcpu": 2, "ram_gb": 8, "on": true, "disk_gb": 150}, {"name": "vm-3026", "vcpu": 4, "ram_gb": 16, "on": true, "disk_gb": 310}, {"name": "vm-3027", "vcpu": 8, "ram_gb": 16, "on": true, "disk_gb": 370}, {"name": "vm-3028", "vcpu": 8, "ram_gb": 8, "on": true, "disk_gb": 240}, {"name": "vm-3029", "vcpu": 4, "ram_gb": 32, "on": true, "disk_gb": 560}, {"name": "vm-3030", "vcpu": 4, "ram_gb": 16, "on": true, "disk_gb": 310}, {"name": "vm-3031", "vcpu": 16, "ram_gb": 8, "on": true, "disk_gb": 360}, {"name": "vm-3032", "vcpu": 4, "ram_gb": 16, "on": true, "disk_gb": 310}, {"name": "vm-3033", "vcpu": 2, "ram_gb": 16, "on": true, "disk_gb": 280}, {"name": "vm-3034", "vcpu": 8, "ram_gb": 32, "on": true, "disk_gb": 620}, {"name": "vm-3035", "vcpu": 4, "ram_gb": 8, "on": true, "disk_gb": 180}, {"name": "vm-3036", "vcpu": 16, "ram_gb": 16, "on": true, "disk_gb": 490}, {"name": "vm-3037", "vcpu": 4, "ram_gb": 64, "on": true, "disk_gb": 960}, {"name": "vm-3038", "vcpu": 8, "ram_gb": 8, "on": true, "disk_gb": 240}, {"name": "vm-3039", "vcpu": 8, "ram_gb": 16, "on": false, "disk_gb": 370}, {"name": "vm-3040", "vcpu": 16, "ram_gb": 16, "on": false, "disk_gb": 490}, {"name": "vm-3041", "vcpu": 8, "ram_gb": 32, "on": true, "disk_gb": 620}, {"name": "vm-3042", "vcpu": 4, "ram_gb": 32, "on": true, "disk_gb": 560}, {"name": "vm-3043", "vcpu": 8, "ram_gb": 16, "on": true, "disk_gb": 370}, {"name": "vm-3044", "vcpu": 16, "ram_gb": 16, "on": true, "disk_gb": 490}, {"name": "vm-3045", "vcpu": 8, "ram_gb": 32, "on": true, "disk_gb": 620}, {"name": "vm-3046", "vcpu": 16, "ram_gb": 64, "on": true, "disk_gb": 1140}, {"name": "vm-3047", "vcpu": 4, "ram_gb": 8, "on": true, "disk_gb": 180}, {"name": "vm-3048", "vcpu": 8, "ram_gb": 16, "on": true, "disk_gb": 370}, {"name": "vm-3049", "vcpu": 8, "ram_gb": 64, "on": true, "disk_gb": 1020}]}];
 const FACTOR = 6;
@@ -1044,7 +1044,7 @@ function saveColPrefs() {
   if (USE_SERVER_PREFS) {
     clearTimeout(_prefsTimer);
     _prefsTimer = setTimeout(() => {
-      fetch("api/prefs", { method: "PUT", headers: { "Content-Type": "application/json" },
+      fetch("api/v1/prefs", { method: "PUT", headers: { "Content-Type": "application/json" },
         body: JSON.stringify(prefsBody()) }).catch(() => {});
     }, 400);
   } else {
@@ -1070,7 +1070,7 @@ function toggleTheme() {
   PREFS.theme = t;
   applyTheme(t);
   if (USE_SERVER_PREFS)
-    fetch("api/prefs", { method: "PUT", headers: { "Content-Type": "application/json" },
+    fetch("api/v1/prefs", { method: "PUT", headers: { "Content-Type": "application/json" },
       body: JSON.stringify(prefsBody()) }).catch(() => {});
 }
 // Init: Server-Einstellung gewinnt (gilt über Geräte hinweg); sonst bleibt,
@@ -1096,7 +1096,7 @@ function closeAnnounce() {
   if (USE_SERVER_PREFS) {
     PREFS = PREFS || {};
     PREFS.announce_seen = ANNOUNCE.id;
-    fetch("api/prefs", { method: "PUT", headers: { "Content-Type": "application/json" },
+    fetch("api/v1/prefs", { method: "PUT", headers: { "Content-Type": "application/json" },
       body: JSON.stringify(prefsBody()) }).catch(() => {});
   } else {
     try { localStorage.setItem("kapa_announce_seen", ANNOUNCE.id); } catch (e) {}
@@ -1172,7 +1172,7 @@ function canDecide(r) {
   return false;
 }
 async function logout() {
-  try { await fetch("api/logout", { method: "POST" }); } catch (e) {}
+  try { await fetch("api/v1/logout", { method: "POST" }); } catch (e) {}
   location.reload();
 }
 
@@ -1187,7 +1187,7 @@ if (!SERVE) {
 }
 function saveLocal() { try { localStorage.setItem(LS_KEY, JSON.stringify(RES)); } catch (e) {} }
 async function apiRes(method, path, body) {
-  const r = await fetch("api/reservations" + (path || ""), {
+  const r = await fetch("api/v1/reservations" + (path || ""), {
     method: method, headers: {"Content-Type": "application/json"},
     body: body ? JSON.stringify(body) : undefined });
   if (!r.ok) throw new Error("HTTP " + r.status);
@@ -1801,7 +1801,7 @@ function setView(v) {
 // ---- API-Tokens (Verwaltung) ----
 let TOKENS = {};
 async function apiTokens(method, path, body) {
-  const r = await fetch("api/tokens" + (path || ""), {
+  const r = await fetch("api/v1/tokens" + (path || ""), {
     method: method, headers: {"Content-Type": "application/json"},
     body: body ? JSON.stringify(body) : undefined });
   if (!r.ok) throw new Error("HTTP " + r.status);
@@ -1818,7 +1818,7 @@ function runBackup() {
   btn.disabled = true;
   st.style.color = "var(--muted)";
   st.textContent = "Backup läuft … (kann einen Moment dauern)";
-  fetch("api/backup", { method: "POST" })
+  fetch("api/v1/backup", { method: "POST" })
     .then(r => r.json())
     .then(d => {
       if (d.error) { st.style.color = "var(--crit)"; st.textContent = "Fehlgeschlagen: " + d.error; }
@@ -1881,7 +1881,7 @@ function renderTokenTable() {
 function setTokenScope(id) {
   const get = sc => { const el = document.querySelector(`input[data-tid="${CSS.escape(id)}"][data-scope="${sc}"]`);
                       return !!(el && el.checked); };
-  fetch("api/tokens/" + encodeURIComponent(id), { method: "PUT",
+  fetch("api/v1/tokens/" + encodeURIComponent(id), { method: "PUT",
       headers: {"Content-Type": "application/json"},
       body: JSON.stringify({ write_res: get("res"), write_approve: get("approve"), write_storage: get("storage") }) })
     .then(r => r.ok ? r.json() : Promise.reject())
@@ -1892,7 +1892,7 @@ function setTokenScope(id) {
 // ---- Audit-Log (nur Admins) ----
 let LOGS = [];
 function loadLog() {
-  fetch("api/log").then(r => r.json())
+  fetch("api/v1/log").then(r => r.json())
     .then(d => { if (Array.isArray(d)) { LOGS = d; if (VIEW === "log") render(); } })
     .catch(() => {});
 }
@@ -1981,7 +1981,7 @@ function renderLogTable() {
 // ---- Verwaltung: AD-Benutzer → Rollen ----
 let ROLES = {};   // {benutzer: rolle}
 async function apiRoles(method, path, body) {
-  const r = await fetch("api/roles" + (path || ""), {
+  const r = await fetch("api/v1/roles" + (path || ""), {
     method: method, headers: {"Content-Type": "application/json"},
     body: body ? JSON.stringify(body) : undefined });
   if (!r.ok) throw new Error("HTTP " + r.status);
@@ -2015,7 +2015,7 @@ const _grpChecking = {};
 function checkGroup(cn) {
   if (_grpChecking[cn]) return;
   _grpChecking[cn] = true;
-  fetch("api/ad/group-members", { method: "POST",
+  fetch("api/v1/ad/group-members", { method: "POST",
       headers: {"Content-Type": "application/json"}, body: JSON.stringify({ cn: cn }) })
     .then(r => r.json())
     .then(d => {
@@ -2053,7 +2053,7 @@ function saveEditRole(u) {
 }
 // ---- Genehmigungs-Teams (Prüfreihenfolge) ----
 async function apiTeams(method, body) {
-  const r = await fetch("api/teams", {
+  const r = await fetch("api/v1/teams", {
     method: method, headers: {"Content-Type": "application/json"},
     body: body ? JSON.stringify(body) : undefined });
   if (!r.ok) throw new Error("HTTP " + r.status);
@@ -2094,7 +2094,7 @@ function saveTeamRename(i) {
   const val = (document.getElementById("teamEdit").value || "").trim();
   const old = TEAMS[i];
   if (!val || val === old) { TEAM_EDIT = -1; render(); return; }
-  fetch("api/teams/rename", { method: "POST", headers: {"Content-Type": "application/json"},
+  fetch("api/v1/teams/rename", { method: "POST", headers: {"Content-Type": "application/json"},
     body: JSON.stringify({ old: old, new: val }) })
     .then(r => { if (!r.ok) throw new Error(); return r.json(); })
     .then(d => { if (d && d.teams) TEAMS = d.teams;
@@ -2132,7 +2132,7 @@ function renderTeams() {
 
 // ---- Mail-Benachrichtigungen (Matrix Rolle × Ereignis) ----
 async function apiNotify(method, body) {
-  const r = await fetch("api/notify", { method: method,
+  const r = await fetch("api/v1/notify", { method: method,
     headers: {"Content-Type": "application/json"},
     body: body ? JSON.stringify(body) : undefined });
   if (!r.ok) throw new Error("HTTP " + r.status);
@@ -2234,7 +2234,7 @@ function resetMailTemplate() {
 // ---- Ankündigung pflegen (Verwaltung -> Ankündigung) ----
 let ANN_CFG = null;
 function loadAnnounce() {
-  fetch("api/announce").then(r => r.ok ? r.json() : null).then(d => {
+  fetch("api/v1/announce").then(r => r.ok ? r.json() : null).then(d => {
     if (d && d.announce) { ANN_CFG = d.announce; if (VIEW === "adm") renderAnnounce(); }
   }).catch(() => {});
 }
@@ -2256,7 +2256,7 @@ function saveAnnounce() {
     title: (document.getElementById("annCfgTitle") || {}).value || "",
     text: (document.getElementById("annCfgText") || {}).value || "",
     active: !!(document.getElementById("annCfgActive") || {}).checked };
-  fetch("api/announce", { method: "PUT",
+  fetch("api/v1/announce", { method: "PUT",
       headers: {"Content-Type": "application/json"},
       body: JSON.stringify(body) })
     .then(r => r.ok ? r.json() : Promise.reject())
@@ -2273,7 +2273,7 @@ const VIS_LABELS = { workload: "Workload %", hosts: "Host-Liste",
   storage: "Storage-Drilldown (LUNs)", tags: "vSphere-Tags",
   decided_by: "Entschieden von", statistik: "Statistik (Trends)" };
 function loadVisibility() {
-  fetch("api/visibility").then(r => r.ok ? r.json() : null).then(d => {
+  fetch("api/v1/visibility").then(r => r.ok ? r.json() : null).then(d => {
     if (d && d.visibility) { VIS_CFG = d; if (VIEW === "adm") renderVisibility(); }
   }).catch(() => {});
 }
@@ -2295,7 +2295,7 @@ function saveVisibility() {
     const r = cb.getAttribute("data-visrole"), f = cb.getAttribute("data-visfeat");
     (body[r] = body[r] || {})[f] = cb.checked;
   });
-  fetch("api/visibility", { method: "PUT",
+  fetch("api/v1/visibility", { method: "PUT",
       headers: {"Content-Type": "application/json"},
       body: JSON.stringify(body) })
     .then(r => r.ok ? r.json() : Promise.reject())
@@ -2365,7 +2365,7 @@ function saveStorageCfg() {
   const mxTb = parseFloat((document.getElementById("storMaxLun") || {}).value) || 0;
   const mx = Math.round(mxTb * 1024);   // Eingabe in TB, Speicherung in GB
   const vfac = parseFloat((document.getElementById("vsanFactor") || {}).value) || 0.5;
-  fetch("api/storagecfg", { method: "PUT", headers: {"Content-Type":"application/json"},
+  fetch("api/v1/storagecfg", { method: "PUT", headers: {"Content-Type":"application/json"},
       body: JSON.stringify({ enabled: on, min_lun_gb: mn, max_lun_gb: mx, exclude_names: ex,
                              vsan_factor: vfac, vsan_overrides: collectVsanOverrides() }) })
     .then(r => r.ok ? r.json() : Promise.reject())
@@ -2379,7 +2379,7 @@ function saveStorageCfg() {
     .catch(() => notify("Speichern fehlgeschlagen."));
 }
 function loadStorageCfg() {
-  fetch("api/storagecfg").then(r => r.ok ? r.json() : null).then(d => {
+  fetch("api/v1/storagecfg").then(r => r.ok ? r.json() : null).then(d => {
     if (!d) return;
     const el = document.getElementById("storEnabled");
     if (el) el.checked = !!d.enabled;
@@ -2399,7 +2399,7 @@ function loadStorageCfg() {
 
 // ---- Netzwerk-Filter pflegen (Verwaltung -> Netzwerk) ----
 function loadNetCfg() {
-  fetch("api/netcfg").then(r => r.ok ? r.json() : null).then(d => {
+  fetch("api/v1/netcfg").then(r => r.ok ? r.json() : null).then(d => {
     if (!d) return;
     const nx = document.getElementById("netExclNames");
     if (nx && document.activeElement !== nx) nx.value = d.exclude_names || "";
@@ -2410,7 +2410,7 @@ function loadNetCfg() {
 function saveNetCfg() {
   const nx = (document.getElementById("netExclNames") || {}).value || "";
   const vx = (document.getElementById("netExclVlans") || {}).value || "";
-  fetch("api/netcfg", { method: "PUT", headers: {"Content-Type":"application/json"},
+  fetch("api/v1/netcfg", { method: "PUT", headers: {"Content-Type":"application/json"},
       body: JSON.stringify({ exclude_names: nx, exclude_vlans: vx }) })
     .then(r => r.ok ? r.json() : Promise.reject(new Error("HTTP " + r.status)))
     .then(d => {
@@ -2429,7 +2429,7 @@ function saveNetCfg() {
 
 // ---- Abruf-Intervalle (Verwaltung -> Backup & Konfiguration) ----
 function loadRefreshCfg() {
-  fetch("api/refreshcfg").then(r => r.ok ? r.json() : null).then(d => {
+  fetch("api/v1/refreshcfg").then(r => r.ok ? r.json() : null).then(d => {
     if (!d) return;
     [["rcVms","vms"],["rcNetwork","network"],["rcStorage","storage"]].forEach(([id, k]) => {
       const el = document.getElementById(id);
@@ -2450,7 +2450,7 @@ function showServerNow(now, tz) {
 function saveRefreshCfg() {
   const val = id => parseInt((document.getElementById(id) || {}).value) || 0;
   const tz = ((document.getElementById("rcTz") || {}).value || "").trim();
-  fetch("api/refreshcfg", { method: "PUT", headers: {"Content-Type":"application/json"},
+  fetch("api/v1/refreshcfg", { method: "PUT", headers: {"Content-Type":"application/json"},
       body: JSON.stringify({ vms: val("rcVms"), network: val("rcNetwork"),
                              storage: val("rcStorage"), tz: tz }) })
     .then(r => r.ok ? r.json() : r.json().then(e => Promise.reject(e)))
@@ -2464,7 +2464,7 @@ function saveRefreshCfg() {
 // ---- Statistik: Trends aus der Tages-Historie (selbst gezeichnete SVGs) ----
 let HISTORY = null;   // {tag: {cluster: {n,on,vcpu,ram,disk,nd,ramU,ramC,stU,stC,hr,src}}}
 function loadHistory() {
-  fetch("api/history?days=730").then(r => r.ok ? r.json() : Promise.reject())
+  fetch("api/v1/history?days=730").then(r => r.ok ? r.json() : Promise.reject())
     .then(d => { HISTORY = d.days || {}; fillStatClusters(); renderStats(); })
     .catch(() => { const b = document.getElementById("statCharts");
       if (b) b.innerHTML = `<div class="hint" style="color:var(--muted)">Noch keine Statistik-Daten (erster Snapshot entsteht mit dem nächsten Datenabruf).</div>`; });
@@ -2582,7 +2582,7 @@ const WEBHOOK_EVENTS = [
   ["storage_done","Storage-Anfrage erledigt"],["imported","Offline-Quelle importiert"]];
 let WEBHOOKS = [];
 function loadWebhooks() {
-  fetch("api/webhooks").then(r => r.ok ? r.json() : null).then(d => {
+  fetch("api/v1/webhooks").then(r => r.ok ? r.json() : null).then(d => {
     if (d && Array.isArray(d.endpoints)) { WEBHOOKS = d.endpoints; renderWebhooks(); }
   }).catch(() => {});
 }
@@ -2621,7 +2621,7 @@ function collectWebhooks() {
   }).filter(Boolean);
 }
 function saveWebhooks() {
-  fetch("api/webhooks", { method:"PUT", headers:{"Content-Type":"application/json"},
+  fetch("api/v1/webhooks", { method:"PUT", headers:{"Content-Type":"application/json"},
       body: JSON.stringify({ endpoints: collectWebhooks() }) })
     .then(r => r.ok ? r.json() : Promise.reject())
     .then(d => { if (d.endpoints) { WEBHOOKS = d.endpoints; renderWebhooks(); }
@@ -2635,7 +2635,7 @@ function testWebhook(btn) {
   if (!url) return notify("Bitte zuerst eine Ziel-URL eintragen.");
   const secret = (tr.querySelector(".whSecret")||{}).value || "";
   btn.disabled = true; const old = btn.textContent; btn.textContent = "…";
-  fetch("api/webhooks/test", { method:"POST", headers:{"Content-Type":"application/json"},
+  fetch("api/v1/webhooks/test", { method:"POST", headers:{"Content-Type":"application/json"},
       body: JSON.stringify({ url: url, secret: secret }) })
     .then(r => r.json())
     .then(d => notify(d.ok ? ("✓ Test gesendet – Empfänger antwortete mit HTTP " + d.status)
@@ -2646,7 +2646,7 @@ function testWebhook(btn) {
 // ---- Offline-Quellen (Verwaltung -> Import) ----
 let IMPORTS = [];
 function loadImports() {
-  fetch("api/import").then(r => r.ok ? r.json() : null).then(d => {
+  fetch("api/v1/import").then(r => r.ok ? r.json() : null).then(d => {
     if (d && d.sources) { IMPORTS = d.sources; renderImports(); }
   }).catch(() => {});
 }
@@ -2674,7 +2674,7 @@ function importOffline(ev) {
     if (clusters && !Array.isArray(clusters)) clusters = [clusters];
     if (!Array.isArray(clusters) || !clusters.length) { notify("Ungültige Datei: es fehlt die clusters-Liste."); return; }
     if (st) st.textContent = "importiere …";
-    fetch("api/import", { method: "POST", headers: {"Content-Type":"application/json"},
+    fetch("api/v1/import", { method: "POST", headers: {"Content-Type":"application/json"},
         body: JSON.stringify({ source: src, clusters: clusters }) })
       .then(r => r.json().then(j => ({ ok: r.ok, j: j })))
       .then(x => {
@@ -2695,7 +2695,7 @@ function importKapaCsv(ev) {
   const st = document.getElementById("kapaCsvStatus");
   if (st) st.textContent = "importiere …";
   f.text().then(t =>
-    fetch("api/import/reservations", { method: "POST",
+    fetch("api/v1/import/reservations", { method: "POST",
         headers: {"Content-Type": "application/json"},
         body: JSON.stringify({ csv: t }) })
       .then(r => r.json().then(j => ({ ok: r.ok, j: j })))
@@ -2720,7 +2720,7 @@ function delImport(name) {
     message: "Quelle „" + name + "“ samt ihrer Cluster aus der Übersicht entfernen?\n" +
              "Bestehende Kapazitätsanfragen auf diese Cluster bleiben erhalten." })
     .then(ok => { if (!ok) return;
-      fetch("api/import/" + encodeURIComponent(name), { method: "DELETE" })
+      fetch("api/v1/import/" + encodeURIComponent(name), { method: "DELETE" })
         .then(r => r.ok ? r.json() : Promise.reject(new Error("HTTP " + r.status)))
         .then(() => { loadImports(); pollStatus(); })
         .catch(e => notify("Löschen fehlgeschlagen" +
@@ -2730,7 +2730,7 @@ function delImport(name) {
 // ---- Auto-Freigabe pflegen (Verwaltung -> Auto-Freigabe) ----
 let AA_CFG = null;
 function loadAutoApprove() {
-  fetch("api/autoapprove").then(r => r.ok ? r.json() : null).then(d => {
+  fetch("api/v1/autoapprove").then(r => r.ok ? r.json() : null).then(d => {
     if (d && d.autoapprove) { AA_CFG = d.autoapprove; if (VIEW === "adm") renderAutoApprove(); }
   }).catch(() => {});
 }
@@ -2756,7 +2756,7 @@ function saveAutoApprove() {
   document.querySelectorAll("input[data-aateam]").forEach(cb => {
     if (cb.checked) teams[cb.getAttribute("data-aateam")] = true;
   });
-  fetch("api/autoapprove", { method: "PUT",
+  fetch("api/v1/autoapprove", { method: "PUT",
       headers: {"Content-Type": "application/json"},
       body: JSON.stringify({ enabled: !!(document.getElementById("aaEnabled") || {}).checked,
         min_cpu_pct: num("aaCpu"), min_ram_pct: num("aaRam"),
@@ -2781,7 +2781,7 @@ function previewAnnounce() {
 function previewMail() {
   const th = (document.getElementById("tplHtml") || {}).value || "";
   const ts = (document.getElementById("tplSubject") || {}).value || "";
-  fetch("api/mail-preview", { method: "PUT",
+  fetch("api/v1/mail-preview", { method: "PUT",
       headers: {"Content-Type": "application/json"},
       body: JSON.stringify({ template_html: th, template_subject: ts }) })
     .then(r => r.ok ? r.json() : Promise.reject())
@@ -2812,7 +2812,7 @@ function setAdmTab(t) {
 }
 let CONFIG = null;
 function loadConfig() {
-  fetch("api/config").then(r => r.ok ? r.json() : null).then(d => {
+  fetch("api/v1/config").then(r => r.ok ? r.json() : null).then(d => {
     if (d && d.config) { CONFIG = d.config; if (VIEW === "adm") { renderConfig("configSheet"); renderConfig("configMail", "Mail / SMTP"); } }
   }).catch(() => {});
 }
@@ -2832,7 +2832,7 @@ function renderConfig(containerId, onlyGroup) {
 
 // ---- Cluster-Selektor konfigurieren ----
 async function apiSelector(method, body) {
-  const r = await fetch("api/selector", { method: method,
+  const r = await fetch("api/v1/selector", { method: method,
     headers: {"Content-Type": "application/json"},
     body: body ? JSON.stringify(body) : undefined });
   if (!r.ok) throw new Error("HTTP " + r.status);
@@ -2881,7 +2881,7 @@ function renderSelector() {
 
 // ---- Rollen-Bezeichnungen frei umbenennen ----
 async function apiRoleNames(method, body) {
-  const r = await fetch("api/rolenames", {
+  const r = await fetch("api/v1/rolenames", {
     method: method, headers: {"Content-Type": "application/json"},
     body: body ? JSON.stringify(body) : undefined });
   if (!r.ok) throw new Error("HTTP " + r.status);
@@ -3128,7 +3128,7 @@ function vlanIndex() {
 let STOR = { enabled: false, requests: [] };
 const CAN_STORAGE = IS_ADMIN || ROLE === "reviewer";   // wer anfragen darf
 function loadStorage() {
-  fetch("api/storage-requests").then(r => r.ok ? r.json() : null).then(d => {
+  fetch("api/v1/storage-requests").then(r => r.ok ? r.json() : null).then(d => {
     if (d) { STOR = d; if (VIEW === "stor") renderStorage(); }
   }).catch(() => {});
 }
@@ -3188,7 +3188,7 @@ function renderStorage() {
   reSort("stortable"); renderColMenu("stortable"); applyCols("stortable");
 }
 function toggleStorDone(id, done) {
-  fetch("api/storage-request/" + encodeURIComponent(id), { method: "PUT",
+  fetch("api/v1/storage-request/" + encodeURIComponent(id), { method: "PUT",
       headers: {"Content-Type":"application/json"}, body: JSON.stringify({ done: done }) })
     .then(r => r.ok ? r.json() : Promise.reject())
     .then(d => { if (d.requests) { STOR.requests = d.requests; renderStorage(); } })
@@ -3198,7 +3198,7 @@ function delStorReq(id) {
   askConfirm({ title: "Storage-Anfrage löschen", okLabel: "✕ Löschen", okClass: "danger",
     message: "Diese Storage-Anfrage wirklich löschen? Das lässt sich nicht rückgängig machen." })
     .then(ok => { if (!ok) return;
-      fetch("api/storage-request/" + encodeURIComponent(id), { method: "DELETE" })
+      fetch("api/v1/storage-request/" + encodeURIComponent(id), { method: "DELETE" })
         .then(r => r.ok ? r.json() : Promise.reject())
         .then(d => { if (d.requests) { STOR.requests = d.requests; renderStorage(); } })
         .catch(() => notify("Löschen fehlgeschlagen.")); });
@@ -3247,7 +3247,7 @@ function openStorReq(cluster, lun, naa, curGb, resId, resName) {
       }
       if (STOR.max_lun_gb && want > STOR.max_lun_gb)
         return notify("Die Größe überschreitet das Maximum von " + fmt(Math.round(STOR.max_lun_gb / 1024 * 10) / 10) + " TB.");
-      fetch("api/storage-request", { method: "POST", headers: {"Content-Type":"application/json"}, body: JSON.stringify(body) })
+      fetch("api/v1/storage-request", { method: "POST", headers: {"Content-Type":"application/json"}, body: JSON.stringify(body) })
         .then(r => r.ok ? r.json() : r.json().then(e => Promise.reject(e)))
         .then(d => { loadStorage(); notify("Storage-Erweiterung angefragt."); })
         .catch(e => notify((e && e.error) || "Anfrage fehlgeschlagen."));
@@ -3497,7 +3497,7 @@ let nextRefresh = null;   // Zeitpunkt (ms) der nächsten automatischen Aktualis
 
 async function refreshData(parts) {
   try {
-    await fetch("api/refresh", { method: "POST",
+    await fetch("api/v1/refresh", { method: "POST",
       headers: {"Content-Type": "application/json"},
       body: parts ? JSON.stringify({ parts: parts }) : undefined });
     pollStatus();
@@ -3508,7 +3508,7 @@ async function refreshData(parts) {
 let _reloaded401 = false;
 async function pollStatus() {
   let s, resp;
-  try { resp = await fetch("api/status"); s = await resp.json(); } catch (e) { return; }
+  try { resp = await fetch("api/v1/status"); s = await resp.json(); } catch (e) { return; }
   // Session abgelaufen/Server neu gestartet: einmalig neu laden -> Anmeldemaske
   // statt dauerhaft "Nicht angemeldet" in der Statuszeile.
   if (resp.status === 401 && ME && !_reloaded401) {
@@ -3530,7 +3530,7 @@ async function pollStatus() {
   if (!s.refreshing && s.updated &&
       s.updated !== document.getElementById("stand").textContent) {
     try {
-      const d = await (await fetch("api/data")).json();
+      const d = await (await fetch("api/v1/data")).json();
       CLUSTERS = d.clusters || [];
       document.getElementById("stand").textContent = d.updated || "";
       render();

@@ -22,7 +22,7 @@ im Selektor und Spalten-Konfiguration (`python3 aria_kapa.py --sample --serve`).
 
 ## Funktionsüberblick
 
-Ein Python-Skript + `frontend/`-Ordner (nur Standardbibliothek, **kein pip, kein Build**),
+Ein Python-Skript + `kapa/`-Backend-Paket + `frontend/`-Ordner (nur Standardbibliothek, **kein pip, kein Build**),
 das die Aria-Operations-Daten als Web-Dashboard aufbereitet. Die
 **Oberflächensprache folgt dem Browser**: Deutsch bleibt Deutsch, jede andere
 Browsersprache bekommt Englisch — inklusive Login, **API-Doku/OpenAPI-Spec**

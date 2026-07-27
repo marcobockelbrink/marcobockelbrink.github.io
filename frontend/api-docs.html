@@ -60,8 +60,12 @@ try { var _t = new URLSearchParams(location.search).get("theme")
 <body>
 <div class="wrap">
   <h1>API-Dokumentation <span style="color:var(--muted);font-weight:400">· v__VERSION__</span></h1>
-  <div class="sub">Lesende REST-API unter <code>/api/v1/</code> ·
+  <div class="sub">REST-API unter <code>/api/v1/</code> ·
     <a href="openapi.json">OpenAPI-Spec (JSON)</a> – importierbar in Swagger Editor/Postman.</div>
+  <div class="sub">Ein Pfadraum, zwei Zugänge: Die hier dokumentierten Endpunkte bilden den
+    stabilen Token-Vertrag (Bearer). Zusätzlich bedient <code>/api/v1/</code> mit
+    Session-Cookie die komplette Weboberfläche – Verwaltungs-Endpunkte sind bewusst
+    nur mit Anmeldung nutzbar, nie per Token.</div>
 
   <div class="authbox">
     <label for="tok">Bearer-Token (im Dashboard unter „Verwaltung → API-Tokens" erzeugen)</label>
@@ -88,9 +92,13 @@ const IS_DE = (navigator.language || "de").toLowerCase().startsWith("de");
 const L_EN = {
   "API-Dokumentation – VMware Kapazitätsplanung": "API documentation – VMware Capacity Planning",
   "API-Dokumentation": "API documentation",
-  "Lesende REST-API unter": "Read-only REST API at",
+  "REST-API unter": "REST API at",
   "OpenAPI-Spec (JSON)": "OpenAPI spec (JSON)",
   "– importierbar in Swagger Editor/Postman.": "– importable into Swagger Editor/Postman.",
+  "Ein Pfadraum, zwei Zugänge: Die hier dokumentierten Endpunkte bilden den stabilen Token-Vertrag (Bearer). Zusätzlich bedient":
+    "One path space, two access modes: the endpoints documented here form the stable token contract (Bearer). In addition,",
+  "mit Session-Cookie die komplette Weboberfläche – Verwaltungs-Endpunkte sind bewusst nur mit Anmeldung nutzbar, nie per Token.":
+    "serves the entire web UI via session cookie – administration endpoints deliberately require a sign-in, never a token.",
   "Bearer-Token (im Dashboard unter „Verwaltung → API-Tokens\" erzeugen)":
     "Bearer token (create it in the dashboard under „Administration → API tokens“)",
   "Wird nur lokal im Browser gespeichert und bei „Ausführen\" als":
