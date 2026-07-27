@@ -101,7 +101,12 @@ def openapi_spec(lang="de"):
                             "version": {"type": "string"}, "updated": {"type": "string"},
                             "refreshing": {"type": "boolean"},
                             "next": {"type": "integer", "nullable": True,
-                                     "description": T("Sekunden bis zur nächsten Aktualisierung", "seconds until the next refresh")}}},
+                                     "description": T("Sekunden bis zur nächsten Aktualisierung", "seconds until the next refresh")},
+                            "progress": {"type": "string",
+                                         "description": T("Fortschrittstext während eines Abrufs", "progress text while a refresh runs")},
+                            "error": {"type": "string", "nullable": True},
+                            "tiers": {"type": "object",
+                                      "description": T("Stand je Teilbereich (vms/network/storage)", "per-area freshness (vms/network/storage)")}}},
                         "Data": {"type": "object", "properties": {
                             "updated": {"type": "string"},
                             "clusters": {"type": "array", "items": {"$ref": "#/components/schemas/Cluster"}}}}},
