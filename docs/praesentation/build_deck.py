@@ -234,10 +234,10 @@ text(s, 0.6, 1.9, 12.1, 0.5,
      [[("In rund zwei Wochen entstanden — ", 14.5, MUTED, False),
        ("vollständig mit einer KI (Claude) geschrieben.", 14.5, ACCENT, True)]])
 stats = [
-    ("106", "Releases"), ("175", "Commits"),
-    ("11.392", "Zeilen Code · 1 Datei"), ("0", "Fremd-Abhängigkeiten"),
-    ("98", "automatisierte Smoke-Checks"), ("5", "Security-Scanner in der CI"),
-    ("630+", "Übersetzungen · DE ↔ EN"), ("12", "Verwaltungs-Bereiche"),
+    ("110", "Releases"), ("192", "Commits"),
+    ("12.100+", "Zeilen Code · API-first"), ("0", "Fremd-Abhängigkeiten"),
+    ("105", "automatisierte Smoke-Checks"), ("5", "Security-Scanner in der CI"),
+    ("660+", "Übersetzungen · DE ↔ EN"), ("12", "Verwaltungs-Bereiche"),
 ]
 tw, th, gx = 2.8, 1.9, 0.31
 xs = [0.6 + i * (tw + gx) for i in range(4)]
@@ -256,14 +256,14 @@ s = slide()
 head(s, "FAZIT", "Warum das überzeugt")
 cols = [
     ("Betrieb & Kosten", [
-        "Eine einzige Python-Datei — kein Build, keine Datenbank, keine Fremd-Pakete",
-        "Läuft auf jedem RHEL-Host; ein Update = eine Datei austauschen"]),
+        "Nur Python-Standardbibliothek — kein Build, keine Datenbank, keine Fremd-Pakete",
+        "Läuft auf jedem RHEL-Host; ein Update = wenige Dateien austauschen"]),
     ("Sicherheit & Compliance", [
         "AD-Anmeldung, rollenbasierte Sichtbarkeit, quellenbezogene Filter",
         "5 unabhängige Security-Scanner in der CI, geschützter main-Branch"]),
     ("Reichweite", [
         "Zweisprachig DE/EN, offline- und proxy-fähig",
-        "Lesende API für Grafana, CMDB & Co."]),
+        "API-first (v3.0): eine API für Oberfläche und externe Systeme — Grafana, CMDB & Co."]),
     ("Entwicklung & Reife", [
         "Mit einer KI (Claude · Anthropic) entwickelt — hohes Tempo, konsequente Tests",
         "Über 100 Releases, Reviewer-Handbuch, Architektur-Doku inklusive"]),
