@@ -187,7 +187,7 @@ try { var _t = new URLSearchParams(location.search).get("theme")
 <div class="sub">
   <button class="btn" onclick="showInfo('infoCalc','Info Kapa-Berechnung')">ℹ Info Kapa-Berechnung</button>
   <button class="btn" onclick="showInfo('infoHelp','Hilfe')">? Hilfe</button>
-  <span style="color:var(--muted);font-size:12px;margin-left:8px">Stand: <span id="stand">27.07.2026 10:33</span></span>
+  <span style="color:var(--muted);font-size:12px;margin-left:8px">Stand: <span id="stand">27.07.2026 15:29</span></span>
 </div>
 <div id="infoCalc" style="display:none">Quelle: VMware Aria Operations · CPU-Überprovisionierung: Faktor 6 (physische Cores) · RAM 1:1 · alle VMs inkl. powered-off · „frei" berücksichtigt genehmigte Reservierungen · Ausfallreserve (N+1): größter Host je Cluster abgezogen</div>
 <div id="infoHelp" style="display:none">Klick auf den Clusternamen zeigt Details und Reservierungen. Neue Reservierungen gelten ab dem Anlagetag für 30 Tage, zählen erst nach Genehmigung gegen die Kapazität und werden nach 31 Tagen automatisch entfernt. Speicherung lokal im Browser.<div style="margin-top:12px">📖 <a href="reviewer-handbuch" target="_blank" rel="noopener">Reviewer-Handbuch öffnen</a></div></div>
@@ -426,16 +426,16 @@ try { var _t = new URLSearchParams(location.search).get("theme")
 <div id="admView" style="display:none">
 <div class="tabs subtabs">
   <span class="tab active" id="atabUsers" onclick="setAdmTab('users')">Benutzer &amp; Rollen</span>
-  <span class="tab" id="atabSel" onclick="setAdmTab('sel')">Cluster-Selektor</span>
-  <span class="tab" id="atabMail" onclick="setAdmTab('mail')">Mail</span>
-  <span class="tab" id="atabHooks" onclick="setAdmTab('hooks')">Webhooks</span>
-  <span class="tab" id="atabAnn" onclick="setAdmTab('ann')">Ankündigung</span>
   <span class="tab" id="atabAuto" onclick="setAdmTab('auto')">Freigabe</span>
   <span class="tab" id="atabVis" onclick="setAdmTab('vis')">Sichtbarkeit</span>
-  <span class="tab" id="atabStorCfg" onclick="setAdmTab('storcfg')">Storage</span>
+  <span class="tab" id="atabAnn" onclick="setAdmTab('ann')">Ankündigung</span>
+  <span class="tab" id="atabSel" onclick="setAdmTab('sel')">Cluster-Selektor</span>
   <span class="tab" id="atabNet" onclick="setAdmTab('net')">Netzwerk</span>
+  <span class="tab" id="atabStorCfg" onclick="setAdmTab('storcfg')">Storage</span>
   <span class="tab" id="atabImp" onclick="setAdmTab('imp')">Import</span>
   <span class="tab" id="atabTok" onclick="setAdmTab('tok')">API-Tokens</span>
+  <span class="tab" id="atabHooks" onclick="setAdmTab('hooks')">Webhooks</span>
+  <span class="tab" id="atabMail" onclick="setAdmTab('mail')">Mail</span>
   <span class="tab" id="atabConf" onclick="setAdmTab('conf')">Backup &amp; Konfiguration</span>
 </div>
 
