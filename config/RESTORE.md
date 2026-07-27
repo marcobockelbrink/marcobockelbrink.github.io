@@ -99,7 +99,7 @@ Dann als Admin im Dashboard: „Reservierungen importieren (JSON)".
 
 ## Wiederherstellung auf einem neuen Host
 
-1. Repository klonen bzw. `aria_kapa.py` **und den Ordner `frontend/`** nach `/opt/kapa/` kopieren
+1. Repository klonen bzw. `aria_kapa.py` **mit den Ordnern `kapa/` und `frontend/`** nach `/opt/kapa/` kopieren
 2. Installation gemäß Kommentar in `config/kapa-dashboard.service`
    (Benutzer, `/etc/kapa/kapa.ini`, `/etc/kapa/aria.pass`, nginx-Snippet)
 3. Backup wie oben nach `/opt/kapa/data` entpacken — die Rollen- und

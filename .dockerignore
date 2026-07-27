@@ -1,8 +1,10 @@
 # Das Image braucht aria_kapa.py + den frontend/-Ordner (HTML/CSS/JS als Dateien
-# seit v2.30). Alles andere aus dem Build-Kontext ausschließen — schnellere
+# seit v2.30) + das kapa/-Paket (Backend-Module seit v3.0). Alles andere aus dem Build-Kontext ausschließen — schnellere
 # Builds, kein versehentliches Einschleppen von Docs/Screenshots/Präsentationen.
-# The image needs aria_kapa.py + the frontend/ folder; exclude everything else.
+# The image needs aria_kapa.py + the kapa/ package + the frontend/ folder; exclude everything else.
 *
 !aria_kapa.py
+!kapa/
+!kapa/**
 !frontend/
 !frontend/**

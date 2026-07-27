@@ -2,7 +2,7 @@
 
 > 🇬🇧 [English version: README.en.md](README.en.md)
 
-Die Anwendung ist ein Python-Skript (`aria_kapa.py`) plus der `frontend/`-Ordner
+Die Anwendung ist ein Python-Skript (`aria_kapa.py`) plus das Backend-Paket `kapa/` und der `frontend/`-Ordner
 (HTML/CSS/JS als Dateien) — nur Standardbibliothek, Python 3.8+, kein Build.
 Auslieferung als Container — wähle nach Umgebung:
 

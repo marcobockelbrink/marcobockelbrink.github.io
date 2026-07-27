@@ -2,18 +2,23 @@
 
 > 🇬🇧 [English version: ARCHITECTURE.en.md](ARCHITECTURE.en.md)
 >
-> Stand: v2.30. Die Schaubilder sind Mermaid-Diagramme — GitHub rendert sie
+> Stand: v3.0. Die Schaubilder sind Mermaid-Diagramme — GitHub rendert sie
 > direkt im Browser.
 
 ## Leitidee
 
-Ein **Python-Skript** (`aria_kapa.py`, nur Standardbibliothek, Python 3.8+) ist
-zugleich Datensammler, Webserver, Rechenkern und UI-Auslieferer; das Frontend
-(HTML/CSS/JS) liegt seit v2.30 als **echte Dateien im Ordner `frontend/`**
-daneben — review- und lintbar, zur Laufzeit geladen. Kein pip, kein Build,
-keine Datenbank-Server — bewusst so gewählt, damit das Dashboard auf jedem
-RHEL-Host ohne Paket-Zoo läuft und ein Update aus dem Austausch **weniger
-Dateien** (Skript + `frontend/`) besteht.
+Seit **v3.0** besteht die Anwendung aus drei review-freundlichen Teilen:
+`aria_kapa.py` (Einstieg, Serve-Setup, Hintergrund-Threads, Fachlogik), das
+**Backend-Paket `kapa/`** (zehn Module: HTTP-Handler mit Dispatch-Tabellen,
+vROps-Client, Datensammlung, Datenablage, LDAP, Mail, Backup, Auslieferung,
+Konstanten, Helfer) und der **`frontend/`-Ordner** (HTML/CSS/JS als echte
+Dateien, zur Laufzeit geladen). Die UI spricht ausschließlich die JSON-API
+unter **einem Pfadraum `/api/v1/`** (API-first: Session-Cookie für die
+Oberfläche, Bearer-Token für externe Anwendungen — getrennte Autorisierung,
+gleicher Vertrag). Weiterhin nur Standardbibliothek (Python 3.8+): kein pip,
+kein Build, keine Datenbank-Server — das Dashboard läuft auf jedem RHEL-Host
+ohne Paket-Zoo, ein Update ist der Austausch von Skript + `kapa/` +
+`frontend/`.
 
 ```mermaid
 flowchart LR
