@@ -2,7 +2,7 @@
 
 > 🇬🇧 [English version: ARCHITECTURE.en.md](ARCHITECTURE.en.md)
 >
-> Stand: v3.0. Die Schaubilder sind Mermaid-Diagramme — GitHub rendert sie
+> Stand: v3.5. Die Schaubilder sind Mermaid-Diagramme — GitHub rendert sie
 > direkt im Browser.
 
 ## Leitidee
