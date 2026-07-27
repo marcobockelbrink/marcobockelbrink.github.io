@@ -645,11 +645,12 @@ try { var _t = new URLSearchParams(location.search).get("theme")
     oninput="vsanFactorToPreset('vsanFactor','vsanPolicy')">
   <span style="color:var(--muted);font-size:12px">(0,05–1,0 · z. B. 0,5 = 50 % nutzbar)</span>
 </div>
-<div class="hint" style="color:var(--muted);margin:4px 0 6px">Override je Cluster (optional – für abweichende Policies):</div>
+<div class="hint" style="color:var(--muted);margin:4px 0 6px">Override je Cluster (optional – für abweichende Policies). Einfach lostippen: vorgeschlagen werden nur Cluster mit vSAN-Datastores.</div>
 <table class="kt" id="vsanOvrTable" style="max-width:560px;margin-bottom:8px">
   <thead><tr><th>Cluster</th><th>Policy</th><th class="num">Faktor</th><th class="nosort"></th></tr></thead>
   <tbody id="vsanOvrBody"></tbody>
 </table>
+<datalist id="vsanClusterList"></datalist>
 <button class="btn" onclick="addVsanOverride()">+ Cluster-Override</button>
 <div style="margin-top:14px"></div>
 <button class="btn approve" onclick="saveStorageCfg()">✓ Speichern &amp; anwenden</button>
@@ -2338,9 +2339,17 @@ function vsanFactorToPreset(facId, selId) {
     if (o.value && !m && Math.abs(parseFloat(o.value) - f) < 0.005) { sel.value = o.value; m = true; } });
   if (!m) sel.value = "";
 }
+// Vorschlagsliste: nur Cluster, die tatsächlich vSAN-Datastores haben.
+function fillVsanClusterList() {
+  const dl = document.getElementById("vsanClusterList"); if (!dl) return;
+  const names = (CLUSTERS || [])
+    .filter(c => (c.datastores || []).some(isVsanLun))
+    .map(c => c.name).sort((a, b) => a.localeCompare(b));
+  dl.innerHTML = names.map(n => `<option value="${esc(n)}"></option>`).join("");
+}
 function vsanOvrRow(cl, f) {
   return `<tr>
-    <td><input class="filterbox vovrCl" style="width:160px" value="${esc(cl)}" placeholder="Cluster-Name"></td>
+    <td><input class="filterbox vovrCl" list="vsanClusterList" style="width:180px" value="${esc(cl)}" placeholder="Cluster suchen …"></td>
     <td><select class="filterbox vovrPol" style="width:auto" onchange="const t=this.closest('tr').querySelector('.vovrFac'); if(this.value) t.value=this.value">${vsanOptions(f)}</select></td>
     <td class="num"><input class="filterbox vovrFac" type="number" min="0.05" max="1" step="0.01" style="width:80px" value="${f}"></td>
     <td><button class="del" title="Override entfernen" onclick="this.closest('tr').remove()">✕</button></td>
@@ -2348,11 +2357,13 @@ function vsanOvrRow(cl, f) {
 }
 function renderVsanOverrides(ovr) {
   const tb = document.getElementById("vsanOvrBody"); if (!tb) return;
+  fillVsanClusterList();
   const rows = Object.entries(ovr || {});
   tb.innerHTML = rows.length ? rows.map(([cl,f]) => vsanOvrRow(cl, f)).join("") : "";
 }
 function addVsanOverride() {
   const tb = document.getElementById("vsanOvrBody");
+  fillVsanClusterList();   // Cluster-Daten können sich seit dem Rendern geändert haben
   if (tb) tb.insertAdjacentHTML("beforeend", vsanOvrRow("", 0.5));
 }
 function collectVsanOverrides() {
@@ -3658,10 +3669,10 @@ const I18N = {
   "vROps liefert für vSAN keinen sauberen Nutzbar-nach-RAID-Wert, nur die physische Roh- und Belegt-Kapazität. Die Auslastung in % stimmt damit ohnehin; der Faktor rechnet nur die absolute nutzbare Kapazität aus der Policy (Annahme): RAID-1 ≈ 50 %, RAID-5 ≈ 75 % (3+1) bzw. 67 % (2+1), RAID-6 ≈ 67 %. Bei gemischten Policies je Cluster den passenden Standard wählen.":
     "vROps provides no clean usable-after-RAID value for vSAN, only the physical raw and used capacity. Utilization in % is therefore already correct; the factor only derives the absolute usable capacity from the policy (an assumption): RAID-1 ≈ 50 %, RAID-5 ≈ 75 % (3+1) or 67 % (2+1), RAID-6 ≈ 67 %. For mixed policies, pick the right default per cluster.",
   "Standard-Policy:": "Default policy:",
-  "Override je Cluster (optional – für abweichende Policies):":
-    "Per-cluster override (optional – for differing policies):",
+  "Override je Cluster (optional – für abweichende Policies). Einfach lostippen: vorgeschlagen werden nur Cluster mit vSAN-Datastores.":
+    "Per-cluster override (optional – for differing policies). Just start typing: only clusters with vSAN datastores are suggested.",
   "+ Cluster-Override": "+ Cluster override", "eigener Wert": "custom value",
-  "Cluster-Name": "cluster name", "Faktor": "Factor",
+  "Cluster suchen …": "Search cluster …", "Faktor": "Factor",
   "(0,05–1,0 · z. B. 0,5 = 50 % nutzbar)": "(0.05–1.0 · e.g. 0.5 = 50 % usable)",
   "Zeitzone der Anzeige": "Display time zone",
   "z. B. Europe/Berlin": "e.g. Europe/Berlin",
