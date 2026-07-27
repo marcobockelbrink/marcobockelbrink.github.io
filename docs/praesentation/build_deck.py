@@ -222,8 +222,8 @@ for img, cap_t, cap_s in montage:
     cx += 4.16
 text(s, 0.6, 6.6, 12.15, 0.5,
      [[("Außerdem: ", 12, ACCENT, True),
-       ("Webhooks · Hell-/Dunkel-Modus · SFTP-Backup · Mail & Erinnerungen · "
-        "Auto-Freigabe · Reviewer-Handbuch · Zeitzone · Blättern",
+       ("Webhooks · Hell-/Dunkel-Modus · SFTP-Backup · Mails & Erinnerungen · "
+        "Auto-Freigabe · Handbücher im Produkt · Import & Export · signierte Releases",
         12, MUTED, False)]], line_spacing=1.05)
 footer(s, 7)
 
@@ -234,10 +234,10 @@ text(s, 0.6, 1.9, 12.1, 0.5,
      [[("In rund zwei Wochen entstanden — ", 14.5, MUTED, False),
        ("vollständig mit einer KI (Claude) geschrieben.", 14.5, ACCENT, True)]])
 stats = [
-    ("110", "Releases"), ("192", "Commits"),
-    ("12.100+", "Zeilen Code · API-first"), ("0", "Fremd-Abhängigkeiten"),
-    ("105", "automatisierte Smoke-Checks"), ("5", "Security-Scanner in der CI"),
-    ("660+", "Übersetzungen · DE ↔ EN"), ("12", "Verwaltungs-Bereiche"),
+    ("122", "Releases · alle signiert"), ("208", "Commits"),
+    ("12.400+", "Zeilen Code · API-first"), ("0", "Fremd-Abhängigkeiten"),
+    ("139", "automatisierte Tests"), ("5", "Security-Scanner in der CI"),
+    ("665+", "Übersetzungen · DE ↔ EN"), ("12", "Verwaltungs-Bereiche"),
 ]
 tw, th, gx = 2.8, 1.9, 0.31
 xs = [0.6 + i * (tw + gx) for i in range(4)]
@@ -266,7 +266,7 @@ cols = [
         "API-first (v3.0): eine API für Oberfläche und externe Systeme — Grafana, CMDB & Co."]),
     ("Entwicklung & Reife", [
         "Mit einer KI (Claude · Anthropic) entwickelt — hohes Tempo, konsequente Tests",
-        "Über 100 Releases, Reviewer-Handbuch, Architektur-Doku inklusive"]),
+        "Über 120 signierte Releases, Handbücher im Produkt, Architektur-Doku inklusive"]),
 ]
 positions = [(0.6, 2.35), (6.9, 2.35), (0.6, 4.55), (6.9, 4.55)]
 for (title, items), (x, y) in zip(cols, positions):
