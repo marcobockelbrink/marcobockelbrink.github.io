@@ -18,7 +18,7 @@ amd64 + arm64) and published as a GitHub package:
 ```bash
 docker pull ghcr.io/marcobockelbrink/kapa-dashboard:latest
 # or a fixed version (recommended for production, targeted rollbacks):
-docker pull ghcr.io/marcobockelbrink/kapa-dashboard:3.4.1
+docker pull ghcr.io/marcobockelbrink/kapa-dashboard:3.4.2
 ```
 
 While the package is **private**, sign in to the registry first (PAT with
@@ -39,7 +39,7 @@ podman build -f deploy/docker/Dockerfile -t kapa-dashboard:latest .
 ```
 
 Optionally also tag a fixed version (for targeted rollbacks), e.g.
-`-t kapa-dashboard:latest -t kapa-dashboard:3.4.1`. The app version is always
+`-t kapa-dashboard:latest -t kapa-dashboard:3.4.2`. The app version is always
 shown in the footer/login and via `aria_kapa.py --version`.
 
 ## Running

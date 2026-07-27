@@ -18,7 +18,7 @@ amd64 + arm64) und als GitHub Package veröffentlicht:
 ```bash
 docker pull ghcr.io/marcobockelbrink/kapa-dashboard:latest
 # oder eine feste Version (empfohlen für Produktion, gezielte Rollbacks):
-docker pull ghcr.io/marcobockelbrink/kapa-dashboard:3.4.1
+docker pull ghcr.io/marcobockelbrink/kapa-dashboard:3.4.2
 ```
 
 Solange das Package **privat** ist, vorher am Registry anmelden (PAT mit

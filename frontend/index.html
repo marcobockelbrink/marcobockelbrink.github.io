@@ -1511,7 +1511,9 @@ function exportRes() {
 function importRes(ev) {
   const f = ev.target.files[0]; if (!f) return;
   f.text().then(t => {
-    const d = JSON.parse(t);
+    let d;
+    try { d = JSON.parse(t); }
+    catch (e) { notify("Ungültige Datei (kein JSON)."); return; }
     if (!Array.isArray(d)) { notify("Ungültige Datei."); return; }
     if (SERVE) apiRes("PUT", "", d).then(setRes).catch(resFail);
     else { RES = d; saveLocal(); render(); }
@@ -4079,6 +4081,7 @@ const I18N = {
 "Reservierungen konnten nicht auf dem Server gespeichert werden.": "Reservations could not be saved on the server.",
 "Datei konnte nicht gelesen werden.": "File could not be read.",
 "Ungültige Datei.": "Invalid file.",
+"Ungültige Datei (kein JSON).": "Invalid file (not JSON).",
 "Alte Reservierungen übernehmen?": "Adopt old reservations?",
 "Benutzername oder Passwort falsch.": "Wrong username or password.",
 "Zu viele Fehlversuche – bitte einige Minuten warten und erneut versuchen.": "Too many failed attempts – please wait a few minutes and try again.",
