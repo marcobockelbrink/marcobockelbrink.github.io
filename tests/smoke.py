@@ -11,6 +11,7 @@ Exit-Code 0 = alles grün. Gedacht als Sicherheitsnetz vor jedem Release.
 import gzip
 import json
 import os
+import re
 import shutil
 import socket
 import subprocess
@@ -133,6 +134,7 @@ def _undefined_globals(path):
 
 _miss = {p: _undefined_globals(p)
          for p in sorted(_glob.glob(os.path.join(ROOT, "kapa", "*.py")))
+         + sorted(_glob.glob(os.path.join(ROOT, "tests", "*.py")))
          + [APP]}
 _bad = {os.path.basename(p): m for p, m in _miss.items() if m}
 check("Keine undefinierten Modul-Globals (Import beim Auslagern vergessen)",
@@ -566,6 +568,11 @@ try:
           and ic.get("imported") is True
           and ic.get("vcpuCap") > 0 and ic.get("hostCount") == 2
           and any(t.startswith("Import:") for t in ic.get("tags") or []))
+    # v3.4.1: Import-Datum am Cluster (fürs Mouseover im Quellen-Selektor)
+    check("Import-Cluster trägt imported_on (TT.MM.JJJJ)",
+          ic is not None and re.match(r"^\d{2}\.\d{2}\.\d{4}$",
+                                      ic.get("imported_on") or ""),
+          str(ic.get("imported_on") if ic else None))
     st, lst, _ = req("GET", "/api/import")
     check("Import-Quellenliste", st == 200 and len(lst["sources"]) == 1
           and lst["sources"][0]["vms"] == 1)

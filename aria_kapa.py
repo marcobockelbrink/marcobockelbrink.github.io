@@ -1505,6 +1505,7 @@ def serve(args, password):
             for c in cl:
                 c["source"] = src
                 c["imported"] = True   # Auto-Freigabe überspringt statische Daten
+                c["imported_on"] = when_de   # fürs UI: „Offline-Import: <Datum>"
             result.extend(cl)
         return result
 

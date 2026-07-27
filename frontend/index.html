@@ -1001,10 +1001,18 @@ function renderClusterSelector() {
   if (!active.length && !srcs.length) { box.innerHTML = ""; box.style.display = "none"; return; }
   box.style.display = "";
   const cur = effectiveSrc();
+  // Offline-Quellen: Import-Datum als Mouseover — bei statischen Beständen
+  // ist das Datenalter die entscheidende Information.
+  const impDates = {};
+  (CLUSTERS || []).forEach(c => {
+    if (c.imported && c.source) impDates[c.source] = c.imported_on || "";
+  });
+  const srcTip = v => (v in impDates)
+    ? ` title="Offline-Import: ${esc(impDates[v] || "Datum unbekannt")}"` : "";
   const srcSel = srcs.length ? `<label>${esc(SRC_LABEL || "vROps")}
-    <select onchange="onSourceChange(this.value)">
+    <select onchange="onSourceChange(this.value)"${srcTip(cur)}>
       <option value="">alle</option>
-      ${srcs.map(v => `<option value="${esc(v)}" ${cur === v ? "selected" : ""}>${esc(v)}</option>`).join("")}
+      ${srcs.map(v => `<option value="${esc(v)}"${srcTip(v)} ${cur === v ? "selected" : ""}>${esc(v)}${v in impDates ? " ⏱" : ""}</option>`).join("")}
     </select></label>` : "";
   const any = SRC_FILTER !== null || SELECTOR.some(s => SEL_VALUES[s.category]);
   box.innerHTML = '<span class="sellabel">Cluster-Selektor:</span>' + srcSel +
