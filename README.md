@@ -453,6 +453,10 @@ Detailkarte eines Clusters; Export/Import als JSON.
   Freigabe-/Ablehnen-Schaltflächen. Oben verlinkt ein **Reviewer-Handbuch**
   (eigene, zweisprachige Doku-Seite unter `/reviewer-handbuch`, auch im
   „? Hilfe"-Popup) die wichtigsten Abläufe für Prüfer – später erweiterbar.
+- **Benutzerhandbuch** für alle Rollen (`/benutzerhandbuch`, englisch
+  `/user-guide`): Schritt-für-Schritt-Anleitung von der Anmeldung über
+  „Kapazität anfragen" bis Storno/Archiv – zweisprachig, mit den
+  konfigurierten Rollennamen, verlinkt im Footer und im „? Hilfe"-Popup.
 - **Ablehnungen** bleiben 31 Tage (ab Ablehnung) als Historie sichtbar
   (Status „abgelehnt"; im Mouseover steht, in welcher Stufe abgelehnt wurde).
 - **Storno**: Anfragen lassen sich nicht löschen, sondern **stornieren**. Das

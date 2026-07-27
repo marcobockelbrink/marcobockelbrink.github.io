@@ -28,7 +28,8 @@ from kapa.backup import sftp_backup, backup_rotate
 from kapa.ldap import (ldap_bind, ldap_member_of, ldap_user_attr,
                        ldap_group_members)
 from kapa.dashboard import (API_DOCS_HTML, LOGIN_TEMPLATE, POWERCLI_PS1,
-                            openapi_spec, render_html, reviewer_doc_html)
+                            openapi_spec, render_html, reviewer_doc_html,
+                            user_doc_html)
 
 
 def make_handler(app):
@@ -391,6 +392,14 @@ def make_handler(app):
                                          role_names.get("reviewer") or "Reviewer"),
                        "text/html; charset=utf-8")
 
+        def _get_user_doc(self):
+            # Benutzerhandbuch für alle Rollen (Schwester des Reviewer-
+            # Handbuchs) — zweisprachig, mit den konfigurierten Rollennamen.
+            with rolenames_lock:
+                rn = dict(role_names)
+            self._send(user_doc_html(self._lang(), VERSION, rn),
+                       "text/html; charset=utf-8")
+
         def _get_healthz(self):
             # Monitoring-Endpunkt: bewusst OHNE Authentifizierung, dafür
             # nur unkritische Betriebsdaten (keine Cluster-/Nutzerdaten).
@@ -705,6 +714,9 @@ def make_handler(app):
             "/reviewer-handbuch": _get_reviewer_doc,
             "/reviewer-handbuch/": _get_reviewer_doc,
             "/reviewer-handbook": _get_reviewer_doc,
+            "/benutzerhandbuch": _get_user_doc,
+            "/benutzerhandbuch/": _get_user_doc,
+            "/user-guide": _get_user_doc,
             "/healthz": _get_healthz,
             "/api/v1/reservations": _get_v1_group, "/api/v1/data": _get_v1_group,
             "/api/v1/status": _get_v1_group,

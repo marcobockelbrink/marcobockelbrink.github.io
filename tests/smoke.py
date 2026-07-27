@@ -811,6 +811,16 @@ try:
             proc2.kill()
         shutil.rmtree(DATA2, ignore_errors=True)
 
+    print("== Benutzerhandbuch ==")
+    su, bu, _ = req("GET", "/benutzerhandbuch", raw=True)
+    check("Benutzerhandbuch: 200 + Inhalt (DE)",
+          su == 200 and "Benutzerhandbuch".encode() in bu
+          and "Neue Anfrage".encode("utf-8") in bu.replace(b"\xe2\x80\x9e", b""))
+    se, be, _ = req("GET", "/user-guide", raw=True,
+                    headers={"Accept-Language": "en-US"})
+    check("Benutzerhandbuch: englischer Zwilling via Accept-Language",
+          se == 200 and b"User guide" in be and b"New request" in be)
+
     print("== v3: EIN Pfadraum /api/v1/* ==")
     # v1/status trägt jetzt zusätzlich die UI-Felder (additiv erweitert).
     st1, b1, _ = req("GET", "/api/v1/status")

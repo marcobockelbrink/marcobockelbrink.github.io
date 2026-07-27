@@ -432,6 +432,10 @@ detail card; export/import as JSON.
   **reviewer handbook** (its own bilingual doc page at `/reviewer-handbuch`,
   also in the "? Help" popup) links the key workflows for reviewers — extendable
   later.
+- **User guide** for all roles (`/benutzerhandbuch`, English `/user-guide`):
+  step-by-step from signing in through "requesting capacity" to
+  cancel/archive — bilingual, uses the configured role names, linked in the
+  footer and the "? Help" popup.
 - **Rejections** stay visible for 31 days (from rejection) as history
   (status "rejected"; the mouseover shows at which stage).
 - **Cancellation**: requests cannot be deleted, only **cancelled**. Allowed

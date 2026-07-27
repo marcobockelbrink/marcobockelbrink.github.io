@@ -190,7 +190,7 @@ try { var _t = new URLSearchParams(location.search).get("theme")
   <span style="color:var(--muted);font-size:12px;margin-left:8px">Stand: <span id="stand">__DATE__</span></span>
 </div>
 <div id="infoCalc" style="display:none">Quelle: VMware Aria Operations · CPU-Überprovisionierung: Faktor __FACTOR__ (physische Cores) · RAM 1:1 · alle VMs inkl. powered-off · „frei" berücksichtigt genehmigte Reservierungen__FAILNOTE__</div>
-<div id="infoHelp" style="display:none">Klick auf den Clusternamen zeigt Details und Reservierungen. __RESNOTE__<div style="margin-top:12px">📖 <a href="reviewer-handbuch" target="_blank" rel="noopener">Reviewer-Handbuch öffnen</a></div></div>
+<div id="infoHelp" style="display:none">Klick auf den Clusternamen zeigt Details und Reservierungen. __RESNOTE__<div style="margin-top:12px">📖 <a href="benutzerhandbuch" target="_blank" rel="noopener">Benutzerhandbuch öffnen</a> · <a href="reviewer-handbuch" target="_blank" rel="noopener">Reviewer-Handbuch öffnen</a></div></div>
 <div class="modal-bg" id="infoBg" onclick="if(event.target===this)closeInfo()">
   <div class="modal">
     <h2 id="infoTitle"></h2>
@@ -911,7 +911,7 @@ try { var _t = new URLSearchParams(location.search).get("theme")
 <div class="pgbar" id="pager_ltable"></div>
 </div>
 <div class="hovercard" id="hovercard"></div>
-<div class="foot">VMware Kapazitätsplanung · Version __VERSION____CONTACT_FOOT__</div>
+<div class="foot">VMware Kapazitätsplanung · Version __VERSION__ · <a href="benutzerhandbuch" target="_blank" rel="noopener" style="color:inherit">📖 Benutzerhandbuch</a>__CONTACT_FOOT__</div>
 <script>
 let CLUSTERS = __DATA__;
 const FACTOR = __FACTOR__;
@@ -3771,6 +3771,8 @@ const I18N = {
   "Reviewer-Handbuch": "Reviewer handbook",
   "– wie Prüfen & Freigeben funktioniert": "– how reviewing & approving works",
   "Reviewer-Handbuch öffnen": "Open reviewer handbook",
+  "Benutzerhandbuch öffnen": "Open user guide",
+  "📖 Benutzerhandbuch": "📖 User guide",
   "Storage-Anfrage löschen": "Delete storage request",
   "Storage-Erweiterung gelöscht": "Storage expansion deleted",
   "Diese Storage-Anfrage wirklich löschen? Das lässt sich nicht rückgängig machen.":

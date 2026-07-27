@@ -460,6 +460,175 @@ def reviewer_doc_html(lang="de", version="", role_label="Reviewer"):
        title, sub, body, foot))
 
 
+def user_doc_html(lang="de", version="", rolenames=None):
+    """Selbst-enthaltenes, offline lauffähiges Benutzerhandbuch (kein CDN),
+    zweisprachig, theme-treu — Schwester-Seite des Reviewer-Handbuchs.
+    Zielgruppe: alle Rollen, Schwerpunkt Anforderer (Antrag stellen)."""
+    de = lang != "en"
+    def L(d, e):
+        return d if de else e
+    rn = rolenames or DEFAULT_ROLE_NAMES
+    anf = _html_escape(rn.get("anforderer") or "Anforderer")
+    rev = _html_escape(rn.get("reviewer") or "Reviewer")
+    aud = _html_escape(rn.get("auditor") or "Auditor")
+    adm = _html_escape(rn.get("admin") or "Administrator")
+    title = L("Benutzerhandbuch", "User guide")
+    sections = [
+        (L("Anmeldung & Oberfläche", "Sign-in & interface"),
+         L("Du meldest dich mit deinem <b>Windows-Konto</b> an (Active Directory); "
+           "deine Rolle ist hinterlegt und bestimmt, was du siehst. Die Sprache "
+           "folgt dem Browser (Deutsch/Englisch), <b>☀️/🌙</b> oben rechts schaltet "
+           "zwischen Hell und Dunkel. In jeder großen Tabelle kannst du "
+           "<b>suchen</b>, per Klick auf die Spaltenköpfe <b>sortieren</b>, über "
+           "<b>„⚙ Spalten“</b> Spalten ein-/ausblenden und unten seitenweise "
+           "<b>blättern</b> (100/200/300 je Seite).",
+           "You sign in with your <b>Windows account</b> (Active Directory); your "
+           "role is stored and controls what you see. The language follows the "
+           "browser (German/English), <b>☀️/🌙</b> in the top right toggles light "
+           "and dark mode. In every large table you can <b>search</b>, <b>sort</b> "
+           "by clicking the column headers, show/hide columns via "
+           "<b>“⚙ Columns”</b> and <b>page</b> through at the bottom "
+           "(100/200/300 per page).")),
+        (L("Die Kapazitäts-Übersicht verstehen", "Understanding the capacity view"),
+         L("Die Startseite zeigt je Cluster die <b>freie Kapazität</b> für vCPU, "
+           "RAM und Storage — mit Balken für die Auslastung. „Frei“ heißt: "
+           "Kapazität minus Belegung minus <b>bereits genehmigter</b> Anfragen "
+           "(inkl. Ausfallreserve). Ein Klick auf einen Cluster öffnet die "
+           "<b>Detailkarte</b> mit Netzwerk (VLANs), Storage (LUNs), Tags und — "
+           "je nach Rolle — Hosts und VMs. Oben filterst du nach Quelle oder "
+           "über den <b>Cluster-Selektor</b>.",
+           "The start page shows the <b>free capacity</b> per cluster for vCPU, "
+           "RAM and storage — with utilization bars. “Free” means capacity minus "
+           "usage minus <b>already approved</b> requests (incl. failover "
+           "reserve). Clicking a cluster opens the <b>detail card</b> with "
+           "network (VLANs), storage (LUNs), tags and — depending on your role — "
+           "hosts and VMs. At the top you can filter by source or via the "
+           "<b>cluster selector</b>.")),
+        (L("Kapazität anfragen (Rolle „{a}“)", "Requesting capacity (role “{a}”)")
+         .replace("{a}", anf),
+         L("Im Tab <b>„Reservierungen“</b> stellst du mit <b>„+ Neue Anfrage“</b> "
+           "einen Antrag: sprechender <b>Name</b> (z. B. Projekt), Ziel-"
+           "<b>Cluster</b>, benötigte <b>vCPU / RAM (GB) / Storage (GB)</b> und "
+           "optional ein <b>Change-/Jira-Ticket</b>. Die Übersicht zeigt dir "
+           "vorab, ob der Cluster genug frei hat — bei Engpässen warnt das "
+           "Formular. Nach dem Absenden bekommt der Antrag eine <b>Kapa-Nummer</b>, "
+           "über die alle Beteiligten ihn wiederfinden.",
+           "In the <b>“Reservations”</b> tab, <b>“+ New request”</b> creates a "
+           "request: a descriptive <b>name</b> (e.g. the project), the target "
+           "<b>cluster</b>, the required <b>vCPU / RAM (GB) / storage (GB)</b> "
+           "and optionally a <b>change/Jira ticket</b>. The overview shows "
+           "upfront whether the cluster has enough free capacity — the form "
+           "warns about shortages. After submitting, the request receives a "
+           "<b>capa number</b> that everyone can use to find it.")),
+        (L("Was nach dem Absenden passiert", "What happens after submitting"),
+         L("Dein Antrag durchläuft die konfigurierten <b>Teams nacheinander</b> "
+           "(Status: <i>beantragt</i> → <i>in Prüfung</i> → <i>genehmigt</i> oder "
+           "<i>abgelehnt</i>); je nach Konfiguration übernimmt eine "
+           "<b>Auto-Freigabe</b> einzelne Stufen automatisch. Über Freigaben und "
+           "Ablehnungen wirst du <b>per Mail</b> informiert. Erst ein "
+           "<b>genehmigter</b> Antrag zählt gegen die freie Kapazität; er gilt "
+           "eine begrenzte Zeit und läuft danach automatisch ab.",
+           "Your request passes through the configured <b>teams one after "
+           "another</b> (status: <i>requested</i> → <i>in review</i> → "
+           "<i>approved</i> or <i>rejected</i>); depending on configuration an "
+           "<b>auto-approval</b> handles some stages automatically. You are "
+           "notified <b>by email</b> about approvals and rejections. Only an "
+           "<b>approved</b> request counts against free capacity; it is valid "
+           "for a limited time and then expires automatically.")),
+        (L("Stornieren & Archiv", "Cancelling & archive"),
+         L("Wird eine Anfrage nicht mehr gebraucht, <b>storniere</b> sie in der "
+           "Reservierungs-Liste — das dürfen du selbst, dein Team oder die "
+           "Administration. Storniertes und Abgelehntes verschwindet nicht, "
+           "sondern wandert ins <b>Archiv</b> (eigener Menüpunkt) und bleibt "
+           "dort nachvollziehbar.",
+           "If a request is no longer needed, <b>cancel</b> it in the "
+           "reservations list — you, your team or the administration may do so. "
+           "Cancelled and rejected requests do not disappear; they move to the "
+           "<b>archive</b> (its own menu item) and remain traceable there.")),
+        (L("Storage, VLAN-Suche & Statistik", "Storage, VLAN search & statistics"),
+         L("Die <b>Storage-Übersicht</b> zeigt Erweiterungs-Anfragen ans "
+           "Storage-Team (anfragen dürfen {r} und {ad}). Die <b>VLAN-Suche</b> "
+           "findet per IP, Subnetz oder Name, welcher Cluster ein Netz trägt. "
+           "Unter <b>„Statistik“</b> siehst du Trends: VM-Größen, RAM-/Storage-"
+           "Auslastung über die Zeit — als Diagramme und CSV-Export.",
+           "The <b>storage overview</b> shows expansion requests to the storage "
+           "team ({r} and {ad} may request). The <b>VLAN search</b> finds by IP, "
+           "subnet or name which cluster carries a network. Under "
+           "<b>“Statistics”</b> you see trends: VM sizes, RAM/storage "
+           "utilization over time — as charts and CSV export.")
+         .replace("{r}", rev).replace("{ad}", adm)),
+        (L("Die Rollen im Überblick", "The roles at a glance"),
+         L("<b>{a}</b> stellt Anfragen und storniert eigene. <b>{r}</b> prüft "
+           "und entscheidet, wenn sein Team an der Reihe ist — Details im "
+           "<a href='reviewer-handbuch'>Reviewer-Handbuch</a>. <b>{au}</b> sieht "
+           "alles lesend inklusive Log. <b>{ad}</b> verwaltet Rollen, Teams und "
+           "Einstellungen. Was einzelne Rollen sehen, steuert die Administration "
+           "über die Sichtbarkeits-Matrix.",
+           "<b>{a}</b> creates requests and cancels their own. <b>{r}</b> "
+           "reviews and decides when their team is up — details in the "
+           "<a href='reviewer-handbuch'>reviewer handbook</a>. <b>{au}</b> sees "
+           "everything read-only including the log. <b>{ad}</b> manages roles, "
+           "teams and settings. What each role sees is controlled by the "
+           "administration via the visibility matrix.")
+         .replace("{a}", anf).replace("{r}", rev)
+         .replace("{au}", aud).replace("{ad}", adm)),
+    ]
+    body = "\n".join(
+        f'<div class="sec"><h2>{h}</h2><p>{c}</p></div>' for h, c in sections)
+    sub = L("Schritt für Schritt durch das Dashboard · v%s" % _html_escape(version),
+            "Step by step through the dashboard · v%s" % _html_escape(version))
+    foot = L("Diese Seite lässt sich erweitern – Rückfragen und Wünsche gern an "
+             "die Administration. Self-contained, offline nutzbar.",
+             "This page can be extended – questions and suggestions welcome to "
+             "the administration. Self-contained, usable offline.")
+    lang_attr = "de" if de else "en"
+    return ("""<!DOCTYPE html>
+<html lang="%s">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script>try { var _t = new URLSearchParams(location.search).get("theme")
+  || localStorage.getItem("kapa_theme");
+  if (!_t && window.matchMedia && matchMedia("(prefers-color-scheme: light)").matches) _t = "light";
+  if (_t === "light") document.documentElement.setAttribute("data-theme", "light");
+} catch (e) {}</script>
+<title>%s</title>
+<style>
+  :root { --bg:#0f172a; --card:#1e293b; --line:#334155; --text:#e2e8f0;
+          --muted:#94a3b8; --accent:#38bdf8; }
+  html[data-theme="light"] { --bg:#eef2f7; --card:#ffffff; --line:#d4dbe5;
+          --text:#1e293b; --muted:#5b6b7f; --accent:#0369a1; }
+  * { box-sizing:border-box; }
+  body { background:var(--bg); color:var(--text);
+         font:15px/1.6 "Segoe UI",system-ui,sans-serif; margin:0; padding:28px; }
+  .wrap { max-width:820px; margin:0 auto; }
+  h1 { font-size:22px; margin:0 0 2px; }
+  .sub { color:var(--muted); margin-bottom:22px; }
+  a { color:var(--accent); }
+  .sec { background:var(--card); border:1px solid var(--line); border-radius:12px;
+         padding:14px 18px; margin-bottom:14px; }
+  .sec h2 { font-size:16px; margin:0 0 6px; }
+  .sec p { margin:0; color:var(--text); }
+  .sec b { color:var(--text); }
+  .foot { color:var(--muted); font-size:13px; margin-top:20px; }
+  .back { display:inline-block; margin-bottom:18px; font-size:13px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a class="back" href="./">%s</a>
+  <h1>%s</h1>
+  <div class="sub">%s</div>
+  %s
+  <div class="foot">%s</div>
+</div>
+</body>
+</html>
+""" % (lang_attr, title,
+       L("← Zurück zum Dashboard", "← Back to the dashboard"),
+       title, sub, body, foot))
+
+
 HTML_TEMPLATE = _fe("index.html")
 
 
