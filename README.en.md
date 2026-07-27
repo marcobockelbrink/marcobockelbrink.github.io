@@ -47,7 +47,7 @@ standard actions**, though (entered names, clusters and comments stay as typed).
 - **Light/dark mode**: ☀️/🌙 button in the header, stored per user; otherwise
   follows the system setting (`prefers-color-scheme`); `?theme=light|dark`
   overrides once (e.g. kiosk displays)
-- **Auto-refresh** with estimated progress; export as **CSV/JSON**
+- **Auto-refresh** with estimated progress; **import & export** bundled in their own tab (capacity CSV, reservations as CSV/JSON, JSON restore for admins, API pointer)
 
 **Network & VLAN**
 - **Network tab** per cluster: port groups with VLAN numbers, searchable in place

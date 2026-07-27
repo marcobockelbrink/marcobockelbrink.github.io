@@ -26,7 +26,7 @@ spec:
         fsGroup: 0        # Datenverzeichnis gehört Gruppe 0 (g=u, OpenShift-kompatibel)
       containers:
         - name: kapa
-          image: ghcr.io/marcobockelbrink/kapa-dashboard:3.4.2
+          image: ghcr.io/marcobockelbrink/kapa-dashboard:3.5.0
           imagePullPolicy: IfNotPresent
           # Härtung (empfohlen, von Trivy geprüft): non-root, kein Privileg-
           # Aufstieg, read-only Root-FS (Schreibpfade sind /opt/kapa/data und

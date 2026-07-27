@@ -919,6 +919,12 @@ try:
     check("Benutzerhandbuch: englischer Zwilling via Accept-Language",
           se == 200 and b"User guide" in be and b"New request" in be)
 
+    print("== v3.5: Import & Export als eigener Reiter ==")
+    si, bi, _ = req("GET", "/", raw=True)
+    check("Reiter Import & Export vorhanden, Toolbar-Knöpfe umgezogen",
+          si == 200 and b'id="tabIo"' in bi and b'id="ioView"' in bi
+          and b'id="csvBtn"' not in bi and b'id="importBtn"' not in bi)
+
     print("== v3.4: Quellen-Label im Selektor ==")
     sq, bq, _ = req("PUT", "/api/v1/selector",
                     {"selector": [], "source_label": "RZ-Standort"})

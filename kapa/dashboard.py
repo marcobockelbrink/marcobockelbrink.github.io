@@ -550,12 +550,18 @@ def user_doc_html(lang="de", version="", rolenames=None):
            "Storage-Team (anfragen dürfen {r} und {ad}). Die <b>VLAN-Suche</b> "
            "findet per IP, Subnetz oder Name, welcher Cluster ein Netz trägt. "
            "Unter <b>„Statistik“</b> siehst du Trends: VM-Größen, RAM-/Storage-"
-           "Auslastung über die Zeit — als Diagramme und CSV-Export.",
+           "Auslastung über die Zeit — als Diagramme und CSV-Export. Der Reiter "
+           "<b>„Import &amp; Export“</b> bündelt die Daten-Downloads: Kapazität "
+           "als CSV, Reservierungen als CSV oder JSON (JSON-Import nur für die "
+           "Administration).",
            "The <b>storage overview</b> shows expansion requests to the storage "
            "team ({r} and {ad} may request). The <b>VLAN search</b> finds by IP, "
            "subnet or name which cluster carries a network. Under "
            "<b>“Statistics”</b> you see trends: VM sizes, RAM/storage "
-           "utilization over time — as charts and CSV export.")
+           "utilization over time — as charts and CSV export. The "
+           "<b>“Import &amp; export”</b> tab bundles the data downloads: "
+           "capacity as CSV, reservations as CSV or JSON (JSON import is "
+           "admin-only).")
          .replace("{r}", rev).replace("{ad}", adm)),
         (L("Die Rollen im Überblick", "The roles at a glance"),
          L("<b>{a}</b> stellt Anfragen und storniert eigene. <b>{r}</b> prüft "

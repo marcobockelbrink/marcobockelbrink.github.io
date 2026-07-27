@@ -48,7 +48,7 @@ Cluster und Kommentare bleiben wie erfasst).
 - **Hell/Dunkel-Modus**: ☀️/🌙-Knopf in der Kopfleiste, je Benutzer gespeichert;
   folgt sonst der Systemeinstellung (`prefers-color-scheme`); `?theme=light|dark`
   überstimmt einmalig (z. B. Kiosk-Anzeigen)
-- **Auto-Aktualisierung** mit geschätztem Prozent-Fortschritt; Export als **CSV/JSON**
+- **Auto-Aktualisierung** mit geschätztem Prozent-Fortschritt; **Import & Export** gebündelt im eigenen Reiter (Kapazitäts-CSV, Reservierungen als CSV/JSON, JSON-Restore für Admins, API-Verweis)
 
 **Netzwerk & VLAN**
 - **Netzwerk-Reiter** je Cluster: Portgruppen mit VLAN-Nummern, direkt durchsuchbar

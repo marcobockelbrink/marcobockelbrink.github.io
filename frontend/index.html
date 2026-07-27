@@ -218,10 +218,6 @@ try { var _t = new URLSearchParams(location.search).get("theme")
     </div></details>
   <span id="refreshStatus" style="font-size:12px;color:var(--muted)"></span>
   <span id="timer" style="font-size:12px;color:var(--muted);margin-left:auto"></span>
-  <a class="btn" id="csvBtn" href="api/v1/reservations?format=csv"
-     download="reservierungen.csv" title="Reservierungen als CSV (Semikolon, für Excel)">CSV exportieren</a>
-  <button class="btn" onclick="exportRes()">Reservierungen exportieren (JSON)</button>
-  <label class="btn" id="importBtn">Reservierungen importieren (JSON)<input type="file" accept=".json" hidden onchange="importRes(event)"></label>
 </div>
 <div class="modal-bg" id="modalBg" onclick="if(event.target===this)closeModal()">
   <div class="modal">
@@ -282,6 +278,7 @@ try { var _t = new URLSearchParams(location.search).get("theme")
   <span class="tab" id="tabApp" onclick="setView('app')">Genehmigungen</span>
   <span class="tab" id="tabArch" onclick="setView('arch')">Archiv</span>
   <span class="tab" id="tabStat" onclick="setView('stat')">Statistik</span>
+  <span class="tab" id="tabIo" onclick="setView('io')">Import &amp; Export</span>
   <span class="tab" id="tabAdm" onclick="setView('adm')">Verwaltung</span>
   <span class="tab" id="tabLog" onclick="setView('log')">Log</span>
 </div>
@@ -422,6 +419,35 @@ try { var _t = new URLSearchParams(location.search).get("theme")
 </div>
 <div class="pgbar" id="pager_stortable"></div>
 </div>
+
+<div id="ioView" style="display:none">
+<div class="sechead">Kapazität</div>
+<div class="hint" style="color:var(--muted);margin-bottom:8px">
+  Die aktuelle Cluster-Übersicht als CSV (Semikolon, für Excel) – mit den
+  effektiv freien Werten nach Reservierungen und Tanzu-Namespaces.
+  Rolle und Quellen-Filter werden serverseitig berücksichtigt.</div>
+<a class="btn" href="api/v1/data?format=csv" download="kapazitaet.csv">⬇ Kapazität als CSV</a>
+
+<div class="sechead" style="margin-top:22px">Reservierungen</div>
+<div class="hint" style="color:var(--muted);margin-bottom:8px">
+  CSV für Excel und Reports; JSON eignet sich als Sicherung oder zum
+  Übertragen auf eine andere Installation.</div>
+<a class="btn" href="api/v1/reservations?format=csv" download="reservierungen.csv">⬇ Reservierungen als CSV</a>
+<button class="btn" onclick="exportRes()">⬇ Reservierungen als JSON</button>
+<div id="ioImport" style="margin-top:14px">
+  <div class="hint" style="color:var(--muted);margin-bottom:6px"><b>
+    ⚠ Achtung: Der JSON-Import ersetzt den kompletten Reservierungs-Bestand
+    durch den Inhalt der Datei – gedacht für Wiederherstellung oder Umzug.
+    Vorher exportieren!</b></div>
+  <label class="btn">⬆ Reservierungen importieren (JSON)<input type="file" accept=".json" hidden onchange="importRes(event)"></label>
+</div>
+
+<div class="sechead" style="margin-top:22px">Automatisierung</div>
+<div class="hint" style="color:var(--muted);margin-bottom:8px">
+  Alle Exporte gibt es auch skriptbar über die REST-API (Bearer-Token,
+  Verwaltung → API) – z. B. für Grafana, CMDB oder das Storage-Team.</div>
+<a class="btn" href="api/v1/docs" target="_blank" rel="noopener">📘 API-Dokumentation öffnen</a>
+</div><!-- ioView -->
 
 <div id="admView" style="display:none">
 <div class="tabs subtabs">
@@ -1785,22 +1811,24 @@ let VIEW = (location.pathname.endsWith("/storage") || location.hash === "#storag
          : (location.pathname.endsWith("/genehmigungen") || location.hash === "#genehmigungen") ? "app"
          : (location.pathname.endsWith("/archiv") || location.hash === "#archiv") ? "arch"
          : (location.pathname.endsWith("/statistik") || location.hash === "#statistik") ? "stat"
+         : location.hash === "#import-export" ? "io"
          : (location.pathname.endsWith("/verwaltung") || location.hash === "#verwaltung") ? "adm"
          : (location.pathname.endsWith("/log") || location.hash === "#log") ? "log"
          : "kapa";
 if ((VIEW === "adm" || VIEW === "log") && !IS_ADMIN) VIEW = "kapa";
 if (VIEW === "stat" && (VIS.statistik === false || !SERVE)) VIEW = "kapa";
+if (VIEW === "io" && !SERVE) VIEW = "kapa";
 
 function setView(v) {
   VIEW = v;
-  const tabs = { kapa: "tabKapa", vlan: "tabVlan", stor: "tabStor", res: "tabRes", app: "tabApp", arch: "tabArch", stat: "tabStat", adm: "tabAdm", log: "tabLog" };
-  const views = { kapa: "kapaView", vlan: "vlanView", stor: "storView", res: "resView", app: "appView", arch: "archView", stat: "statView", adm: "admView", log: "logView" };
+  const tabs = { kapa: "tabKapa", vlan: "tabVlan", stor: "tabStor", res: "tabRes", app: "tabApp", arch: "tabArch", stat: "tabStat", io: "tabIo", adm: "tabAdm", log: "tabLog" };
+  const views = { kapa: "kapaView", vlan: "vlanView", stor: "storView", res: "resView", app: "appView", arch: "archView", stat: "statView", io: "ioView", adm: "admView", log: "logView" };
   for (const k in tabs) {
     document.getElementById(tabs[k]).classList.toggle("active", v === k);
     document.getElementById(views[k]).style.display = v === k ? "" : "none";
   }
   // Verwaltung hat eine eigene Filterbox im Tab „Benutzer und Rollen"
-  document.getElementById("filter").style.display = (v === "vlan" || v === "stor" || v === "res" || v === "arch" || v === "stat" || v === "adm") ? "none" : "";
+  document.getElementById("filter").style.display = (v === "vlan" || v === "stor" || v === "res" || v === "arch" || v === "stat" || v === "io" || v === "adm") ? "none" : "";
   document.getElementById("filter").placeholder =
     v === "kapa" ? "Cluster filtern …"
     : v === "log" ? "Log filtern …" : "Reservierungen filtern …";
@@ -1812,7 +1840,7 @@ function setView(v) {
     history.replaceState(null, "",
       keep ? location.pathname + keep
       : v === "res" ? "#reservierungen" : v === "app" ? "#genehmigungen"
-      : v === "arch" ? "#archiv" : v === "stat" ? "#statistik" : v === "adm" ? "#verwaltung" : v === "log" ? "#log"
+      : v === "arch" ? "#archiv" : v === "stat" ? "#statistik" : v === "io" ? "#import-export" : v === "adm" ? "#verwaltung" : v === "log" ? "#log"
       : v === "vlan" ? "#vlan-suche" : v === "stor" ? "#storage" : location.pathname);
   } catch (e) {}
   if (v === "stor") loadStorage();
@@ -3456,7 +3484,7 @@ if (ME) {
   document.getElementById("logoutBtn").style.display = "";
 }
 if (!CAN_REQUEST) document.getElementById("newReqBtn").style.display = "none";
-if (!IS_ADMIN) document.getElementById("importBtn").style.display = "none";
+if (!IS_ADMIN) document.getElementById("ioImport").style.display = "none";
 if (!IS_ADMIN) document.getElementById("refreshBtn").style.display = "none";
 if (IS_ADMIN && SERVE) document.getElementById("refreshMenu").style.display = "";
 if (!IS_ADMIN || !SERVE) document.getElementById("tabAdm").style.display = "none";
@@ -3540,7 +3568,7 @@ initSortable();
 
 setView(VIEW);
 if (!SERVE) document.getElementById("refreshBtn").style.display = "none";
-if (!SERVE) document.getElementById("csvBtn").style.display = "none";  // API nur im Serve-Modus
+if (!SERVE) document.getElementById("tabIo").style.display = "none";  // API nur im Serve-Modus
 
 // ---- Live-Abruf & Auto-Update (nur im Serve-Modus) ----
 let nextRefresh = null;   // Zeitpunkt (ms) der nächsten automatischen Aktualisierung
@@ -4082,6 +4110,22 @@ const I18N = {
 "Datei konnte nicht gelesen werden.": "File could not be read.",
 "Ungültige Datei.": "Invalid file.",
 "Ungültige Datei (kein JSON).": "Invalid file (not JSON).",
+"Import & Export": "Import & export",
+"Kapazität": "Capacity",
+"Die aktuelle Cluster-Übersicht als CSV (Semikolon, für Excel) – mit den effektiv freien Werten nach Reservierungen und Tanzu-Namespaces. Rolle und Quellen-Filter werden serverseitig berücksichtigt.":
+  "The current cluster overview as CSV (semicolons, for Excel) – with the effective free values after reservations and Tanzu namespaces. Role and source filters are applied server-side.",
+"⬇ Kapazität als CSV": "⬇ Capacity as CSV",
+"CSV für Excel und Reports; JSON eignet sich als Sicherung oder zum Übertragen auf eine andere Installation.":
+  "CSV for Excel and reports; JSON is suited as a backup or for moving to another installation.",
+"⬇ Reservierungen als CSV": "⬇ Reservations as CSV",
+"⬇ Reservierungen als JSON": "⬇ Reservations as JSON",
+"⬆ Reservierungen importieren (JSON)": "⬆ Import reservations (JSON)",
+"Automatisierung": "Automation",
+"Alle Exporte gibt es auch skriptbar über die REST-API (Bearer-Token, Verwaltung → API) – z. B. für Grafana, CMDB oder das Storage-Team.":
+  "All exports are also scriptable via the REST API (bearer token, Administration → API) – e.g. for Grafana, CMDB or the storage team.",
+"📘 API-Dokumentation öffnen": "📘 Open API documentation",
+"⚠ Achtung: Der JSON-Import ersetzt den kompletten Reservierungs-Bestand durch den Inhalt der Datei – gedacht für Wiederherstellung oder Umzug. Vorher exportieren!":
+  "⚠ Caution: the JSON import replaces the entire reservation inventory with the file contents – meant for restore or migration. Export first!",
 "Alte Reservierungen übernehmen?": "Adopt old reservations?",
 "Benutzername oder Passwort falsch.": "Wrong username or password.",
 "Zu viele Fehlversuche – bitte einige Minuten warten und erneut versuchen.": "Too many failed attempts – please wait a few minutes and try again.",
