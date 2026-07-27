@@ -296,6 +296,15 @@ def make_handler(app):
             self._json({"error": "Bearer-Token mit Schreibrecht erforderlich"}, 401)
             return None
 
+        @staticmethod
+        def _v1_alt(path):
+            """v3: EIN Pfadraum. Unbekannte /api/v1/X-Pfade werden auf die
+            Session-API /api/X abgebildet — identische Handler, identische
+            Rollen-/Team-Prüfungen (Session-only; Token greifen hier nicht)."""
+            if path.startswith("/api/v1/"):
+                return "/api/" + path[len("/api/v1/"):]
+            return None
+
         def do_GET(self):
             parsed = urllib.parse.urlsplit(self.path)
             self._route = parsed.path
@@ -303,6 +312,10 @@ def make_handler(app):
             fn = self._GET_ROUTES.get(self._route)
             if fn:
                 return fn(self)
+            alt = self._v1_alt(self._route)
+            if alt and alt in self._GET_ROUTES:
+                self._route = alt
+                return self._GET_ROUTES[alt](self)
             self.send_error(404)
 
         def _get_page(self):
@@ -432,11 +445,17 @@ def make_handler(app):
                     self._json({"requests": rows})
                 return
             if route == "/api/v1/status":
+                # v3: Felder additiv erweitert (progress/error/tiers, next
+                # tier-genau) — die UI liest den Status jetzt auch hier.
                 nxt = None
-                if interval > 0 and state["last"]:
-                    nxt = max(0, int(state["last"] + interval - time.time()))
+                if interval > 0 and any(tier_last.values()):
+                    nxt = max(0, int(min(tier_last[t] + tier_interval(t)
+                                         for t in TIERS) - time.time()))
                 self._json({"version": VERSION, "updated": state["updated"],
-                            "refreshing": state["refreshing"], "next": nxt})
+                            "refreshing": state["refreshing"], "next": nxt,
+                            "progress": state["progress"],
+                            "error": state["error"],
+                            "tiers": state.get("tiers") or {}})
             elif route == "/api/v1/data":
                 # Token = externe Anwendung (Workload ok); Session eines
                 # Anforderers bekommt den Workload wie im UI nicht.
@@ -720,6 +739,16 @@ def make_handler(app):
             for pred, pfn in self._POST_PATTERNS:
                 if pred(self.path):
                     return pfn(self)
+            alt = self._v1_alt(self.path)
+            if alt:
+                fn = self._POST_ROUTES.get(alt)
+                if fn:
+                    self.path = alt        # ID-Parser arbeiten auf self.path
+                    return fn(self)
+                for pred, pfn in self._POST_PATTERNS:
+                    if pred(alt):
+                        self.path = alt
+                        return pfn(self)
             self.send_error(404)
 
         def _post_storage_request(self):
@@ -935,6 +964,11 @@ def make_handler(app):
         # Bewusst kompakte Spiegelungen der Session-Handler mit
         # Admin-Semantik (keine Team-Beschränkung); Actor = "api:<Tokenname>".
         def _post_v1_reservations(self):
+            # v3, EIN Pfadraum: ohne Bearer-Header übernimmt der Session-
+            # Handler — identische Rollen-Prüfung und Antwort wie im UI.
+            if not (self.headers.get("Authorization") or "").startswith("Bearer "):
+                self.path = "/api/reservations"
+                return self._post_reservations()
             actor = self._bearer_scope("write_res", "Reservierungen")
             if not actor:
                 return
@@ -979,6 +1013,14 @@ def make_handler(app):
 
         def _post_v1_res_decision(self):
             op = self.path.rsplit("/", 1)[1]
+            # v3, EIN Pfadraum: ohne Bearer-Header übernehmen die Session-
+            # Handler — inkl. Rollen- UND Team-an-der-Reihe-Prüfung (die
+            # Token-Semantik ohne Team-Bindung gilt nur für echte Token).
+            if not (self.headers.get("Authorization") or "").startswith("Bearer "):
+                self.path = "/api/" + self.path[len("/api/v1/"):]
+                if op == "cancel":
+                    return self._post_res_cancel()
+                return self._post_res_decision()
             flag, label = (("write_approve", "Genehmigungen")
                            if op in ("approve", "reject")
                            else ("write_res", "Reservierungen"))
@@ -1533,6 +1575,16 @@ def make_handler(app):
             for prefix, pfn in self._PUT_PREFIXES:
                 if self.path.startswith(prefix):
                     return pfn(self)
+            alt = self._v1_alt(self.path)
+            if alt:
+                fn = self._PUT_ROUTES.get(alt)
+                if fn:
+                    self.path = alt
+                    return fn(self)
+                for prefix, pfn in self._PUT_PREFIXES:
+                    if alt.startswith(prefix):
+                        self.path = alt
+                        return pfn(self)
             self.send_error(404)
 
         def _put_reservations(self):
@@ -1957,6 +2009,12 @@ def make_handler(app):
             for prefix, fn in self._DELETE_PREFIXES:
                 if self.path.startswith(prefix):
                     return fn(self)
+            alt = self._v1_alt(self.path)
+            if alt:
+                for prefix, fn in self._DELETE_PREFIXES:
+                    if alt.startswith(prefix):
+                        self.path = alt
+                        return fn(self)
             self.send_error(404)
 
         def _del_reservation(self):

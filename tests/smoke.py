@@ -811,6 +811,27 @@ try:
             proc2.kill()
         shutil.rmtree(DATA2, ignore_errors=True)
 
+    print("== v3: EIN Pfadraum /api/v1/* ==")
+    # v1/status trägt jetzt zusätzlich die UI-Felder (additiv erweitert).
+    st1, b1, _ = req("GET", "/api/v1/status")
+    check("v1/status additiv erweitert (progress/error/tiers)",
+          st1 == 200 and all(k in b1 for k in
+                             ("version", "updated", "refreshing", "next",
+                              "progress", "error", "tiers")))
+    # Session-Endpunkte sind unter /api/v1/... erreichbar (Alias, identische
+    # Handler) — Antwort deckungsgleich mit dem alten Pfad.
+    sa, ba, _ = req("GET", "/api/v1/teams")
+    sb, bb, _ = req("GET", "/api/teams")
+    check("v1-Alias: /api/v1/teams == /api/teams", sa == sb == 200 and ba == bb)
+    # POST ohne Bearer-Header nimmt den Session-Pfad: Antwort ist die
+    # UI-Liste (visible_res), nicht das Token-Objekt {"reservation": ...}.
+    sc, bc, _ = req("POST", "/api/v1/reservations",
+                    {"name": "v3-Vertrag", "cluster": "Cluster-01",
+                     "vcpu": 1, "ram_gb": 4, "storage_gb": 10})
+    check("v1-POST ohne Bearer -> Session-Handler (Listen-Antwort)",
+          sc == 200 and isinstance(bc, list)
+          and any(r.get("name") == "v3-Vertrag" for r in bc))
+
     print("== INI-Wächter ==")
     bad = os.path.join(DATA, "bad.ini")
     with open(bad, "w") as f:
