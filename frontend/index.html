@@ -809,21 +809,26 @@ try { var _t = new URLSearchParams(location.search).get("theme")
 <div class="hint" style="color:var(--muted);margin-bottom:8px">
   Betreff und HTML-Text der Reservierungs-Mails. Verfügbare Variablen unten
   einfach anklicken, um sie an der Cursor-Position einzufügen. Leer lassen =
-  eingebaute Standardvorlage. „Vorschau" rendert die Vorlage mit Beispieldaten.</div>
+  eingebaute Standardvorlage. Die Vorschau rechts rendert beim Tippen live
+  mit Beispieldaten.</div>
 <div id="mailVars" style="margin-bottom:10px"></div>
-<label style="font-size:12px;color:var(--muted)">Betreff</label>
-<input id="tplSubject" class="filterbox" style="width:100%;margin-bottom:10px" placeholder="Standardbetreff" onfocus="MAIL_TPL_FOCUS='tplSubject'">
-<label style="font-size:12px;color:var(--muted)">HTML-Text</label>
-<textarea id="tplHtml" style="width:100%;min-height:220px;background:var(--field);border:1px solid var(--line);color:var(--text);border-radius:8px;padding:10px;font-family:monospace;font-size:12px;line-height:1.5" placeholder="Standardvorlage (leer lassen)" onfocus="MAIL_TPL_FOCUS='tplHtml'"></textarea>
-<div style="margin-top:8px">
-  <button class="btn approve" onclick="saveMailTemplate()">✓ Vorlage speichern</button>
-  <button class="btn" onclick="previewMail()">Vorschau</button>
-  <button class="btn" onclick="resetMailTemplate()">Standard einsetzen</button>
-  <span id="tplSaved" style="color:var(--ok);font-size:12px;margin-left:8px"></span>
-</div>
-<div id="mailPreview" style="display:none;margin-top:12px">
-  <div class="hint" style="color:var(--muted);margin-bottom:4px">Vorschau (Beispieldaten) · Betreff: <b id="previewSubject"></b></div>
-  <iframe id="previewFrame" sandbox="" style="width:100%;height:360px;border:1px solid var(--line);border-radius:8px;background:#fff"></iframe>
+<div style="display:flex;gap:14px;flex-wrap:wrap;align-items:stretch">
+  <div style="flex:1 1 460px;min-width:360px">
+    <label style="font-size:12px;color:var(--muted)">Betreff</label>
+    <input id="tplSubject" class="filterbox" style="width:100%;margin-bottom:10px" placeholder="Standardbetreff" onfocus="MAIL_TPL_FOCUS='tplSubject'" oninput="schedulePreviewMail()">
+    <label style="font-size:12px;color:var(--muted)">HTML-Text</label>
+    <textarea id="tplHtml" style="width:100%;min-height:400px;background:var(--field);border:1px solid var(--line);color:var(--text);border-radius:8px;padding:10px;font-family:monospace;font-size:12px;line-height:1.5" placeholder="Standardvorlage (leer lassen)" onfocus="MAIL_TPL_FOCUS='tplHtml'" oninput="schedulePreviewMail()"></textarea>
+    <div style="margin-top:8px">
+      <button class="btn approve" onclick="saveMailTemplate()">✓ Vorlage speichern</button>
+      <button class="btn" onclick="resetMailTemplate()">Standard einsetzen</button>
+      <span id="tplSaved" style="color:var(--ok);font-size:12px;margin-left:8px"></span>
+    </div>
+  </div>
+  <div id="mailPreview" style="flex:1 1 460px;min-width:360px">
+    <div class="hint" style="color:var(--muted);margin-bottom:4px">Vorschau (Beispieldaten) · Betreff: <b id="previewSubject"></b>
+      <span id="previewState" style="float:right;font-size:11px"></span></div>
+    <iframe id="previewFrame" sandbox="" style="width:100%;height:462px;border:1px solid var(--line);border-radius:8px;background:#fff"></iframe>
+  </div>
 </div>
 
 <div class="sechead" style="margin-top:20px">SMTP / Versand (aus der Konfiguration)</div>
@@ -2230,6 +2235,7 @@ function resetMailTemplate() {
   const h = document.getElementById("tplHtml"), s = document.getElementById("tplSubject");
   if (h) h.value = MAIL_DEF_TPL || "";
   if (s) s.value = MAIL_DEF_SUBJ || "";
+  schedulePreviewMail();
 }
 // ---- Ankündigung pflegen (Verwaltung -> Ankündigung) ----
 let ANN_CFG = null;
@@ -2778,21 +2784,31 @@ function previewAnnounce() {
   document.getElementById("annBg").classList.add("open");
 }
 
+// Live-Vorschau: rendert beim Tippen (entprellt) serverseitig mit
+// Beispieldaten — man sieht sofort, wie die Mail im Client aussieht.
+let PREVIEW_TIMER = null;
+function schedulePreviewMail() {
+  clearTimeout(PREVIEW_TIMER);
+  PREVIEW_TIMER = setTimeout(previewMail, 500);
+}
 function previewMail() {
   const th = (document.getElementById("tplHtml") || {}).value || "";
   const ts = (document.getElementById("tplSubject") || {}).value || "";
+  const st = document.getElementById("previewState");
   fetch("api/v1/mail-preview", { method: "PUT",
       headers: {"Content-Type": "application/json"},
       body: JSON.stringify({ template_html: th, template_subject: ts }) })
     .then(r => r.ok ? r.json() : Promise.reject())
     .then(d => {
-      const box = document.getElementById("mailPreview");
       const sub = document.getElementById("previewSubject");
       const fr = document.getElementById("previewFrame");
       if (sub) sub.textContent = d.subject || "";
       if (fr) fr.srcdoc = d.html || "";
-      if (box) box.style.display = "";
-    }).catch(() => notify("Vorschau fehlgeschlagen."));
+      if (st) { st.textContent = "aktuell"; st.style.color = "var(--ok)"; }
+    }).catch(() => {
+      if (st) { st.textContent = "Vorschau nicht erreichbar";
+                st.style.color = "var(--muted)"; }
+    });
 }
 
 // ---- Unter-Reiter der Verwaltung + read-only Konfiguration ----
@@ -2809,6 +2825,7 @@ function setAdmTab(t) {
     const tb = document.getElementById(tabs[k]); if (tb) tb.classList.toggle("active", k === t);
     const gr = document.getElementById(grps[k]); if (gr) gr.style.display = k === t ? "" : "none";
   }
+  if (t === "mail") previewMail();   // Live-Vorschau beim Öffnen füllen
 }
 let CONFIG = null;
 function loadConfig() {
@@ -3935,12 +3952,14 @@ const I18N = {
   "days of waiting – then again every that many days until decided.",
 "✓ Mail-Regeln speichern": "✓ Save mail rules",
 "Mail-Vorlage (HTML)": "Mail template (HTML)",
-"Betreff und HTML-Text der Reservierungs-Mails. Verfügbare Variablen unten einfach anklicken, um sie an der Cursor-Position einzufügen. Leer lassen = eingebaute Standardvorlage. „Vorschau\" rendert die Vorlage mit Beispieldaten.":
-  "Subject and HTML body of the reservation emails. Click a variable below to insert it at the cursor position. Leave empty = built-in default template. \"Preview\" renders the template with sample data.",
+"Betreff und HTML-Text der Reservierungs-Mails. Verfügbare Variablen unten einfach anklicken, um sie an der Cursor-Position einzufügen. Leer lassen = eingebaute Standardvorlage. Die Vorschau rechts rendert beim Tippen live mit Beispieldaten.":
+  "Subject and HTML body of the reservation emails. Click a variable below to insert it at the cursor position. Leave empty = built-in default template. The preview on the right renders live with sample data as you type.",
 "Betreff": "Subject", "HTML-Text": "HTML body",
 "Standardbetreff": "Default subject", "Standardvorlage (leer lassen)": "Default template (leave empty)",
 "✓ Vorlage speichern": "✓ Save template", "Vorschau": "Preview", "Standard einsetzen": "Insert default",
 "Vorschau (Beispieldaten) · Betreff:": "Preview (sample data) · subject:",
+"aktuell": "up to date",
+"Vorschau nicht erreichbar": "preview unavailable",
 "Vorschau fehlgeschlagen.": "Preview failed.",
 "Speichern der Mail-Vorlage fehlgeschlagen.": "Saving the mail template failed.",
 "Ereignis (beantragt / genehmigt / abgelehnt / wartet auf Freigabe …)": "Event (requested / approved / rejected / awaiting approval …)",
