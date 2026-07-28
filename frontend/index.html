@@ -273,9 +273,10 @@ try { var _t = new URLSearchParams(location.search).get("theme")
   <div class="modal">
     <h2 id="askTitle"></h2>
     <div class="hint" id="askMsg" style="color:var(--muted);margin-bottom:16px;white-space:pre-line"></div>
+    <div id="askErr" style="display:none;color:var(--crit);font-size:13px;margin:-8px 0 12px"></div>
     <div class="actions">
       <button class="btn" id="askCancel" onclick="askClose(false)">Abbrechen</button>
-      <button class="btn primary" id="askOk" onclick="askClose(true)">OK</button>
+      <button class="btn primary" id="askOk" onclick="askConfirmOk()">OK</button>
     </div>
   </div>
 </div>
@@ -1411,9 +1412,13 @@ function cmtCancel() { cmtClose(null); }
 
 // ---- Schicke Bestätigung / Hinweis (ersetzt native confirm()/alert()) ----
 let _askResolve = null;
+let _askValidate = null;   // optionale Prüfung beim OK-Klick (siehe askConfirmOk)
 function askConfirm(opts) {
   return new Promise(resolve => {
     _askResolve = resolve;
+    _askValidate = opts.validate || null;
+    const ae = document.getElementById("askErr");
+    if (ae) { ae.style.display = "none"; ae.textContent = ""; }
     document.getElementById("askTitle").textContent = opts.title || "Bestätigen";
     // opts.html = eigenes Formular (nur aus vertrauenswürdigem App-Code, nie
     // aus Fremddaten befüllen); sonst reiner Text.
@@ -1442,8 +1447,23 @@ function askConfirm(opts) {
 function notify(message, title) {
   return askConfirm({ title: title || "Hinweis", message: message, okLabel: "OK", hideCancel: true });
 }
+// OK-Klick: erst die optionale validate()-Prüfung. Gibt sie einen String
+// zurück, bleibt der Dialog OFFEN und zeigt ihn inline (Eingabe direkt
+// korrigierbar) – geschlossen wird nur bei bestandener Prüfung.
+function askConfirmOk() {
+  if (_askValidate) {
+    const err = _askValidate();
+    if (err) {
+      const ae = document.getElementById("askErr");
+      if (ae) { ae.textContent = err; ae.style.display = ""; }
+      return;
+    }
+  }
+  askClose(true);
+}
 function askClose(val) {
   document.getElementById("askBg").classList.remove("open");
+  _askValidate = null;
   const r = _askResolve; _askResolve = null;
   if (r) r(!!val);
 }
@@ -3358,29 +3378,41 @@ function openStorReq(cluster, lun, naa, curGb, resId, resName) {
         Neue LUN, Größe (TB): <input id="storTB" type="number" min="0.1" step="0.1" class="filterbox" style="width:120px" placeholder="z. B. 2">
       </div>
       <div style="margin-top:8px">Kommentar: <input id="storComment" class="filterbox" style="width:100%" placeholder="optional, z. B. Change/Grund"></div>
-    </div>` })
+    </div>`,
+    // Eingaben prüfen, BEVOR der Dialog schließt – bei Fehler bleibt er offen
+    // und die Meldung erscheint inline, sodass man direkt korrigieren kann.
+    validate: () => {
+      const kind = document.querySelector('input[name="storKind"]:checked').value;
+      if (kind === "expand") {
+        const sel = document.getElementById("storLun");
+        const cur = parseInt(sel.options[sel.selectedIndex].getAttribute("data-cap")) || 0;
+        const tgt = parseInt(document.getElementById("storTarget").value) || 0;
+        if (tgt <= cur) return "Wunschgröße muss größer als die aktuelle Größe sein (" + fmt(cur) + " GB).";
+        if (STOR.max_lun_gb && tgt > STOR.max_lun_gb)
+          return "Die Größe überschreitet das Maximum von " + fmt(Math.round(STOR.max_lun_gb / 1024 * 10) / 10) + " TB.";
+      } else {
+        const gb = Math.round((parseFloat(document.getElementById("storTB").value) || 0) * 1024);
+        if (gb <= 0) return "Bitte eine Größe in TB angeben.";
+        if (STOR.max_lun_gb && gb > STOR.max_lun_gb)
+          return "Die Größe überschreitet das Maximum von " + fmt(Math.round(STOR.max_lun_gb / 1024 * 10) / 10) + " TB.";
+      }
+      return "";
+    } })
     .then(ok => {
       if (!ok) return;
       const kind = document.querySelector('input[name="storKind"]:checked').value;
       const body = { cluster: cluster, kind: kind,
         comment: (document.getElementById("storComment")||{}).value || "",
         res_id: resId || "", res_name: resName || "" };
-      let want = 0;
       if (kind === "expand") {
         const sel = document.getElementById("storLun");
         const o = sel.options[sel.selectedIndex];
         body.lun_name = sel.value; body.naa = o.getAttribute("data-naa") || "";
         body.current_gb = parseInt(o.getAttribute("data-cap")) || 0;
         body.target_gb = parseInt(document.getElementById("storTarget").value) || 0;
-        want = body.target_gb;
-        if (body.target_gb <= body.current_gb) return notify("Wunschgröße muss größer als die aktuelle Größe sein.");
       } else {
         body.size_gb = Math.round((parseFloat(document.getElementById("storTB").value) || 0) * 1024);
-        want = body.size_gb;
-        if (body.size_gb <= 0) return notify("Bitte eine Größe in TB angeben.");
       }
-      if (STOR.max_lun_gb && want > STOR.max_lun_gb)
-        return notify("Die Größe überschreitet das Maximum von " + fmt(Math.round(STOR.max_lun_gb / 1024 * 10) / 10) + " TB.");
       fetch("api/v1/storage-request", { method: "POST", headers: {"Content-Type":"application/json"}, body: JSON.stringify(body) })
         .then(r => r.ok ? r.json() : r.json().then(e => Promise.reject(e)))
         .then(d => { loadStorage(); notify("Storage-Erweiterung angefragt."); })
