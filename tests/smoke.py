@@ -285,9 +285,12 @@ try:
     check("API-erledigt mit Storage-Recht",
           st == 200 and dr["request"]["status"] == "erledigt"
           and dr["request"]["done_by"] == "api:Smoke-Writer")
-    st, openl, _ = req("GET", "/api/v1/storage-requests")
-    st2, alll, _ = req("GET", "/api/v1/storage-requests?status=alle")
-    check("Filter offen/alle",
+    # Token-Vertrag: Default "offen"; Session-Default "alle" prüft der
+    # v3.5.2-Block weiter unten (Storage-Seite des UIs).
+    st, openl, _ = req("GET", "/api/v1/storage-requests", headers=auth)
+    st2, alll, _ = req("GET", "/api/v1/storage-requests?status=alle",
+                       headers=auth)
+    check("Filter offen/alle (Token-Default: offen)",
           len(openl["requests"]) == 0 and len(alll["requests"]) == 1)
     # Löschen einer versehentlich angelegten Anfrage (Admin) – netto ±0
     st, mk, _ = req("POST", "/api/storage-request",
@@ -894,6 +897,29 @@ try:
         put_vis({})
         check("Matrix: Statistik für Reviewer abschaltbar (200 -> 403)",
               ok_default == 200 and blocked == 403)
+        # v3.5.2-Regression: die Storage-Seite nutzt seit v3 den v1-Pfad —
+        # der muss für Sessions enabled/max_lun_gb liefern (Erweitern-Knopf!),
+        # standardmäßig ALLE Stati zeigen und den Quellen-Filter anwenden.
+        def _b2(method, path, tok, body=None):
+            data = json.dumps(body).encode() if body is not None else None
+            r = urllib.request.Request(B2 + path, data=data, method=method,
+                headers={"Content-Type": "application/json",
+                         "Cookie": "kapa_session=" + tok})
+            with urllib.request.urlopen(r, timeout=10) as resp:
+                return json.loads(resp.read().decode())
+        _b2("PUT", "/api/v1/storagecfg", SESS_TOK,
+            {"enabled": True, "min_lun_gb": 0})
+        _b2("POST", "/api/v1/storage-request", SESS_TOK,
+            {"cluster": "Cluster-03", "kind": "new", "size_gb": 500})
+        sr_adm = _b2("GET", "/api/v1/storage-requests", SESS_TOK)
+        check("Storage-Seite (v1+Session): enabled/max_lun_gb dabei, Anfrage sichtbar",
+              sr_adm.get("enabled") is True and "max_lun_gb" in sr_adm
+              and any(x.get("cluster") == "Cluster-03"
+                      for x in sr_adm.get("requests") or []))
+        sr_nord = _b2("GET", "/api/v1/storage-requests", NORD_TOK)
+        check("Storage-Seite: Quellen-Filter greift (RZ-Nord sieht RZ-Sued-Anfrage nicht)",
+              not any(x.get("cluster") == "Cluster-03"
+                      for x in sr_nord.get("requests") or []))
         # vROps-Quellen-Filter: Admin sieht alle, RZ-Nord-Konto nur RZ-Nord.
         adm_src = {c.get("source") for c in data_for(SESS_TOK)}
         nord = data_for(NORD_TOK)

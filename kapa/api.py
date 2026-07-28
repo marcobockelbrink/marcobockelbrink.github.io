@@ -456,12 +456,24 @@ def make_handler(app):
                                          "erforderlich"}, 401)
                     return
             if route == "/api/v1/storage-requests":
-                # Für das Storage-Team: offene (Standard) oder alle Anfragen,
-                # inkl. NAA — als JSON oder CSV für die Automatisierung.
-                only = (query.get("status", ["offen"])[0] or "offen").lower()
+                # Für das Storage-Team: offene (Standard bei Token) oder alle
+                # Anfragen, inkl. NAA — als JSON oder CSV. Seit v3 nutzt auch
+                # die Storage-Seite des UIs diesen Pfad (Session): sie bekommt
+                # ohne status-Parameter ALLE Anfragen (wie früher), nur die
+                # Cluster ihrer erlaubten Quellen, plus enabled/max_lun_gb —
+                # daran hängen die Erweiterungs-Knöpfe.
+                only = (query.get("status",
+                                  ["offen" if tok else "alle"])[0]
+                        or "offen").lower()
+                cmap = {c.get("name"): c.get("source")
+                        for c in state["clusters"]}
                 with storage_lock:
                     rows = [dict(x) for x in storage_reqs
-                            if only == "alle" or x.get("status") == only]
+                            if (only == "alle" or x.get("status") == only)
+                            and (bool(tok)
+                                 or _src_ok(s, x.get("cluster"), cmap))]
+                    st_enabled = storage_cfg["enabled"]
+                    st_max = storage_cfg.get("max_lun_gb", 0)
                 # ESXi-Hosts des jeweiligen Clusters mitgeben — das Storage-
                 # Team braucht sie fürs Zoning/LUN-Mapping. Token (externe
                 # App) bekommt sie immer; eine Session nur, wenn die Rolle
@@ -479,7 +491,8 @@ def make_handler(app):
                     self._send(storagereq_csv(rows, self._lang()),
                                "text/csv; charset=utf-8")
                 else:
-                    self._json({"requests": rows})
+                    self._json({"requests": rows, "enabled": st_enabled,
+                                "max_lun_gb": st_max})
                 return
             if route == "/api/v1/status":
                 # v3: Felder additiv erweitert (progress/error/tiers, next
