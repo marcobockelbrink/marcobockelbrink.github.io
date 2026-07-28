@@ -7,7 +7,9 @@
 #
 #   docker compose up -d          (erster Start provisioniert ~1 Minute)
 #   python3 tests/ldap_live.py    (echter LDAPS-Test gegen den Container)
-FROM debian:12-slim
+# Digest-gepinnt (Scorecard/Reproduzierbarkeit); Container läuft bewusst
+# als root — ein Samba-AD-DC braucht das (NT-ACLs, Ports, winbind).
+FROM debian:12-slim@sha256:7b140f374b289a7c2befc338f42ebe6441b7ea838a042bbd5acbfca6ec875818
 
 ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && apt-get install -y --no-install-recommends \

@@ -15,15 +15,19 @@ on:
         required: false
         default: ""
 
+# Standard: nur lesen — die Schreibrechte bekommt gezielt der Build-Job
+# (Scorecard-Best-Practice: Write-Permissions auf Job-, nicht Workflow-Ebene).
 permissions:
   contents: read
-  packages: write
-  id-token: write        # für die Provenance-Signatur (Sigstore, keyless)
-  attestations: write    # Attestation im Repo hinterlegen
 
 jobs:
   build-push:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      id-token: write        # für die Provenance-Signatur (Sigstore, keyless)
+      attestations: write    # Attestation im Repo hinterlegen
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 

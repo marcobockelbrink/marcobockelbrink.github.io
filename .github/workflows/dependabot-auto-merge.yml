@@ -7,13 +7,16 @@ name: Dependabot Auto-Merge
 
 on: pull_request
 
-permissions:
-  contents: write        # zum Mergen
-  pull-requests: write   # zum Aktivieren von Auto-Merge
+# Standard: keine Rechte — der Job holt sich gezielt seine Schreibrechte
+# (Scorecard-Best-Practice: Write-Permissions auf Job-, nicht Workflow-Ebene).
+permissions: {}
 
 jobs:
   auto-merge:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write        # zum Mergen
+      pull-requests: write   # zum Aktivieren von Auto-Merge
     # Nur für von Dependabot erstellte PRs.
     if: ${{ github.actor == 'dependabot[bot]' }}
     steps:
