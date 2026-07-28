@@ -1752,7 +1752,13 @@ function rerenderCard() {
 let TOTAL = null;
 
 function srcBadge(src) {
-  return src ? ` <span class="srcbadge" title="Datenquelle (vROps)">${esc(src)}</span>` : "";
+  if (!src) return "";
+  // Offline-Quellen: Import-Datum als Mouseover (wie im Quellen-Selektor) —
+  // statt des generischen vROps-Hinweises, der dort nicht stimmt.
+  const imp = (CLUSTERS || []).find(c => c.source === src && c.imported);
+  const tip = imp ? "Offline-Import: " + (imp.imported_on || "Datum unbekannt")
+                  : "Datenquelle (vROps)";
+  return ` <span class="srcbadge" title="${esc(tip)}">${esc(src)}${imp ? " ⏱" : ""}</span>`;
 }
 function clusterSource(name) {
   const c = CLUSTERS.find(x => x.name === name);
