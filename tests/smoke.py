@@ -136,6 +136,7 @@ def _undefined_globals(path):
 _miss = {p: _undefined_globals(p)
          for p in sorted(_glob.glob(os.path.join(ROOT, "kapa", "*.py")))
          + sorted(_glob.glob(os.path.join(ROOT, "tests", "*.py")))
+         + sorted(_glob.glob(os.path.join(ROOT, "tests", "fuzz", "*.py")))
          + [APP]}
 _bad = {os.path.basename(p): m for p, m in _miss.items() if m}
 check("Keine undefinierten Modul-Globals (Import beim Auslagern vergessen)",
@@ -149,6 +150,18 @@ _ut = subprocess.run([sys.executable,
 check("Unit-Tests Rechenkern (tests/unit.py)", _ut.returncode == 0,
       (_ut.stderr or _ut.stdout).strip().splitlines()[-1]
       if (_ut.stderr or _ut.stdout) else "")
+
+# Fuzz-Ziele kurz im Standardbibliothek-Modus laufen lassen — hält sie
+# lauffähig (Import/Signatur) und prüft die Parser für ungetrusteten Input
+# (LDAP-BER-Decoder!) bei jedem Testlauf gegen zufällige Bytes.
+_fz = subprocess.run(
+    [sys.executable, os.path.join(ROOT, "tests", "fuzz", "fuzz_parsers.py"),
+     "--stdlib"],
+    capture_output=True, text=True, timeout=60,
+    env={**os.environ, "KAPA_FUZZ_ITER": "2000"})
+check("Fuzz-Ziele (Parser, stdlib-Modus)", _fz.returncode == 0,
+      (_fz.stderr or _fz.stdout).strip().splitlines()[-1]
+      if (_fz.stderr or _fz.stdout) else "")
 
 # Regressionstest für den v3.2-Login-Bug: ldap_bind gegen einen LOKALEN
 # Lauscher (Verbindung kommt zustande, TLS-Handshake läuft ins Leere) —
