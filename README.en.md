@@ -9,6 +9,7 @@
 [![Docker-Image (GHCR)](https://github.com/marcobockelbrink/vmware/actions/workflows/docker.yml/badge.svg)](https://github.com/marcobockelbrink/vmware/actions/workflows/docker.yml)
 [![Dependency-Review](https://github.com/marcobockelbrink/vmware/actions/workflows/dependency-review.yml/badge.svg)](https://github.com/marcobockelbrink/vmware/actions/workflows/dependency-review.yml)
 ![standard library only](https://img.shields.io/badge/dependencies-0%20(stdlib%20only)-success)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 
 **▶ [View the live demo](https://marcobockelbrink.github.io/vmware/)** — static snapshot with sample data, no sign-in.
 
