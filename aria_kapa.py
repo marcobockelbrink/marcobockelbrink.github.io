@@ -415,6 +415,7 @@ def serve(args, password):
         last = ""
         for attempt in (1, 2):
             try:
+                # nosemgrep: python.lang.security.audit.dynamic-urllib-use-detected.dynamic-urllib-use-detected
                 req = urllib.request.Request(ep["url"], data=body,
                                              method="POST", headers=headers)
                 # nosec B310: Schema in _clean_webhooks auf http/https begrenzt

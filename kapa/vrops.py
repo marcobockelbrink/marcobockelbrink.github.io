@@ -39,10 +39,11 @@ class AriaOps:
         return urllib.request.urlopen(req, context=self.ctx, timeout=timeout)  # nosec B310 – URL stammt aus der Admin-Konfiguration (vROps, https), nicht aus Nutzereingaben
 
     def _request(self, method, path, body=None, params=None):
-        url = self.base + path
+        url = self.base + path  # nosemgrep: python.lang.security.audit.dynamic-urllib-use-detected.dynamic-urllib-use-detected
         if params:
             url += "?" + urllib.parse.urlencode(params, doseq=True)
         data = json.dumps(body).encode() if body is not None else None
+        # nosemgrep: python.lang.security.audit.dynamic-urllib-use-detected.dynamic-urllib-use-detected
         req = urllib.request.Request(url, data=data, method=method)
         req.add_header("Accept", "application/json")
         req.add_header("Content-Type", "application/json")
@@ -109,6 +110,7 @@ class AriaOps:
             params = [("resourceId", rid) for rid in ids[i:i + chunk]] + \
                      [("statKey", k) for k in stat_keys]
             url = self.base + "/resources/stats/latest?" + urllib.parse.urlencode(params)
+            # nosemgrep: python.lang.security.audit.dynamic-urllib-use-detected.dynamic-urllib-use-detected
             req = urllib.request.Request(url)
             req.add_header("Accept", "application/json")
             req.add_header("Authorization", "OpsToken " + self.token)
