@@ -69,6 +69,6 @@ LOGOS = {
    '<div class="tag" style="color:#FF7A7A;font-size:18px">a.k.a. Ballooning</div>'),
 }
 for key, (st, inner) in LOGOS.items():
-    open(os.path.join(HTML, key + ".html"), "w", encoding="utf-8").write(
-        SHELL.format(st=st, inner=inner))
+    with open(os.path.join(HTML, key + ".html"), "w", encoding="utf-8") as f:
+        f.write(SHELL.format(st=st, inner=inner))
 print("HTML-Logos:", len(LOGOS))

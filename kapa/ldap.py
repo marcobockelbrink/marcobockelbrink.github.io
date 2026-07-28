@@ -3,6 +3,7 @@
 Gruppen-Mitglieder-Abfrage, nur mit der Standardbibliothek (eigener
 minimaler BER/DER-Kodierer). Aus aria_kapa.py ausgelagert (v3.0)."""
 
+from contextlib import suppress
 import ssl
 import urllib.parse
 
@@ -433,7 +434,5 @@ def ldap_group_members(url, bind_dn, bind_pw, base_dn, group_cn,
         res["error"] = f"AD-Fehler: {e}"
         return res
     finally:
-        try:
+        with suppress(OSError):
             sock.close()
-        except OSError:
-            pass

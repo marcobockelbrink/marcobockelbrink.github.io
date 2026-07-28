@@ -103,7 +103,8 @@ def main():
     proc = subprocess.Popen(
         [sys.executable, APP, "--serve", "--sample", "--bind", "127.0.0.1",
          "--port", str(port), "--data-dir", data],
-        stdout=open(os.path.join(data, "app.log"), "w"), stderr=subprocess.STDOUT)
+        stdout=(logf := open(os.path.join(data, "app.log"), "w")),
+        stderr=subprocess.STDOUT)
     html_path = os.path.join(data, "page.html")
     try:
         base = f"http://127.0.0.1:{port}"
@@ -162,6 +163,7 @@ def main():
         except subprocess.TimeoutExpired:
             proc.kill()
         import shutil
+        logf.close()
         shutil.rmtree(data, ignore_errors=True)
 
 

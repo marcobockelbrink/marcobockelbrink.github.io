@@ -2,6 +2,7 @@
 """Datenablage: atomare Datei-Writes, JsonStore (eine JSON-Datei je
 Sammlung) und SqliteStore (eine DB-Datei), plus data_path/-Migration.
 Aus aria_kapa.py ausgelagert (v3.0)."""
+from contextlib import suppress
 import json
 import threading
 import os
@@ -31,10 +32,8 @@ def atomic_write(path, text):
             os.fsync(f.fileno())
         os.replace(tmp, path)
     except BaseException:
-        try:
+        with suppress(OSError):
             os.remove(tmp)
-        except OSError:
-            pass
         raise
 
 
@@ -108,10 +107,8 @@ class SqliteStore:
             row = self.db.execute("SELECT data FROM kv WHERE name=?",
                                   (name,)).fetchone()
         if row:
-            try:
+            with suppress(ValueError):
                 return json.loads(row[0])
-            except ValueError:
-                pass
         return default
 
     def save(self, name, obj):

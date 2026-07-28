@@ -34,6 +34,8 @@ class AriaOps:
     def _open(self, req, timeout=120):
         if self.opener is not None:
             return self.opener.open(req, timeout=timeout)
+        # URL stammt aus der Admin-Konfiguration (vROps, https)
+        # nosemgrep: python.lang.security.audit.dynamic-urllib-use-detected.dynamic-urllib-use-detected
         return urllib.request.urlopen(req, context=self.ctx, timeout=timeout)  # nosec B310 – URL stammt aus der Admin-Konfiguration (vROps, https), nicht aus Nutzereingaben
 
     def _request(self, method, path, body=None, params=None):

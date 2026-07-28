@@ -18,60 +18,41 @@ Aufruf:
 Benötigt nur die Python-Standardbibliothek (Python 3.8+).
 """
 
+from contextlib import suppress
 from kapa.constants import (VERSION, ROLE_KEYS, DEFAULT_ROLE_NAMES,
-                            NOTIFY_EVENTS, NOTIFY_ROLE_EVENTS,
-                            WEBHOOK_EVENTS, VIS_FEATURES,
+                            NOTIFY_ROLE_EVENTS, WEBHOOK_EVENTS, VIS_FEATURES,
                             DEFAULT_VISIBILITY, DEFAULT_NOTIFY)
 
 import argparse
 import getpass
-import gzip
 import hashlib
 import hmac
 import json
 import os
 import re
-import ssl
 import sys
-import tempfile
 import threading
 import urllib.request
 import urllib.parse
 from datetime import datetime, timedelta
-
-from kapa.util import _fe, _FRONTEND_DIR  # noqa: F401 (Re-Export)
-from kapa.api import make_handler
 from types import SimpleNamespace
-# ------------------------- vROps Suite-API: kapa/vrops.py --
+
+# kapa/-Module: HTTP-Handler, vROps-Client, AD, Datenablage, Backup/Mail,
+# Datensammlung und Auslieferung. Hier stehen NUR die Namen, die dieses
+# Skript (serve-Setup, Threads, Fachlogik, main) selbst benutzt — alles
+# Weitere importiert kapa/api.py direkt aus den Modulen.
+from kapa.api import make_handler
 from kapa.vrops import AriaOps
-
-# -------------------------------------------------- Active Directory (LDAP) --
-
-from kapa.ldap import (ldap_bind, ldap_member_of, ldap_user_attr,
-                       ldap_group_members)
-
-# ------------------------------- Datenablage: kapa/store.py --
-from kapa.store import (ensure_dir, atomic_write, JsonStore, SqliteStore,
+from kapa.ldap import ldap_user_attr
+from kapa.store import (ensure_dir, JsonStore, SqliteStore,
                         data_path, migrate_data_files)
-
-# ------------------------------- Backup/Mail: kapa/-Module --
-from kapa.util import _html_escape
 from kapa.backup import sftp_backup, backup_rotate
 from kapa.mail import (send_mail, reservation_mail_body,
                        reservation_mail_html, render_template,
-                       _mail_values, MAIL_VARS,
-                       DEFAULT_MAIL_SUBJECT, DEFAULT_MAIL_TEMPLATE)
-
-# ------------------------------------------------------------- Datenabfrage --
-
+                       _mail_values, DEFAULT_MAIL_SUBJECT)
 from kapa.collect import (strip_uplinks, collect, build_summary,
                           sample_data)
-
-
-# --------------------- Auslieferung/Doku: kapa/dashboard.py --
-from kapa.dashboard import (POWERCLI_PS1, openapi_spec, API_DOCS_HTML,
-                            LOGIN_TEMPLATE, reviewer_doc_html, HTML_TEMPLATE,
-                            json_for_html, render_html, render_dashboard)
+from kapa.dashboard import render_dashboard
 
 
 
@@ -115,11 +96,9 @@ def _drop_empty_long_opts(argv):
 # ------------------------------------------------------------- Serve-Modus ---
 
 def serve(args, password):
-    import secrets
-    import threading
     import time
     import uuid
-    from http.server import ThreadingHTTPServer, BaseHTTPRequestHandler
+    from http.server import ThreadingHTTPServer
 
     def new_res_id():
         """Kapa-ID: konfigurierbares Präfix + Zufallsteil (Hex) in konfigurierter
@@ -439,6 +418,8 @@ def serve(args, password):
                 req = urllib.request.Request(ep["url"], data=body,
                                              method="POST", headers=headers)
                 # nosec B310: Schema in _clean_webhooks auf http/https begrenzt
+                # Ziel-URL ist admin-konfiguriert und auf http(s) geprüft
+                # nosemgrep: python.lang.security.audit.dynamic-urllib-use-detected.dynamic-urllib-use-detected
                 with urllib.request.urlopen(req, timeout=8) as resp:  # nosec B310
                     code = resp.status
                 audit(None, "Webhook gesendet",
@@ -1132,10 +1113,8 @@ def serve(args, password):
                 lines = _tail_lines(f"{args.log_file}.1", limit - len(lines)) + lines
         out = []
         for ln in lines[-limit:]:
-            try:
+            with suppress(ValueError):     # halbe Zeile beim Rotieren o. Ä.
                 out.append(json.loads(ln))
-            except ValueError:
-                pass
         return list(reversed(out))   # neueste zuerst
 
     def res_detail(r):
@@ -2066,11 +2045,9 @@ def serve(args, password):
                     continue
                 stage = len(appr)
                 last = None
-                try:
+                with suppress(ValueError):
                     last = datetime.strptime(
                         str(r.get("reminded_on") or "")[:10], "%Y-%m-%d").date()
-                except ValueError:
-                    pass
                 if (r.get("reminded_stage") == stage and last
                         and (today - last).days < days_cfg):
                     continue          # für diese Stufe erst kürzlich erinnert

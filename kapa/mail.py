@@ -2,7 +2,7 @@
 """Mail-Versand (SMTP) und Reservierungs-Mails: Text/HTML-Rendering,
 editierbare Vorlage ({{platzhalter}}), Standard-Vorlage und -Betreff.
 Aus aria_kapa.py ausgelagert (v3.0)."""
-import sys
+from contextlib import suppress
 from datetime import datetime, timedelta
 
 from kapa.util import _html_escape
@@ -48,12 +48,10 @@ def send_mail(args, subject, body, extra_to=(), to_override=None, html=None):
 
 def _res_valid_date(r, res_ttl):
     if r.get("created"):
-        try:
+        with suppress(ValueError):
             d = datetime.fromisoformat(r["created"]) + \
                 timedelta(days=(res_ttl - 1 if res_ttl > 0 else 30))
             return d.strftime("%d.%m.%Y")
-        except ValueError:
-            pass
     return ""
 
 

@@ -22,3 +22,7 @@ RUN chmod +x /entrypoint.sh
 
 EXPOSE 636
 ENTRYPOINT ["/entrypoint.sh"]
+
+# Provision beim Erststart dauert ~1 Minute — großzügige Startphase.
+HEALTHCHECK --start-period=180s --interval=15s --timeout=10s --retries=4 \
+    CMD samba-tool user list >/dev/null 2>&1 || exit 1

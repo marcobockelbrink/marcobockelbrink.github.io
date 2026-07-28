@@ -2,6 +2,7 @@
 """Datenabfrage aus vROps (collect), Zusammenfassung je Cluster
 (build_summary), Uplink-/Namensfilter und die Demo-Daten
 (sample_data). Aus aria_kapa.py ausgelagert (v3.0)."""
+from contextlib import suppress
 import json
 import re
 import sys
@@ -117,10 +118,8 @@ def collect(api, cpu_factor, progress=None, failover_hosts=1, exclude_tag="",
 
     def report(pct):
         if progress:
-            try:
+            with suppress(Exception):   # UI-Callback darf den Abruf nie stoppen
                 progress(str(int(pct)) + " %")
-            except Exception:
-                pass
 
     report(3)
     log("Lese Cluster ...")
@@ -704,14 +703,12 @@ def collect(api, cpu_factor, progress=None, failover_hosts=1, exclude_tag="",
                 # Cluster über die Beziehungen finden (Namespace -> Supervisor
                 # = ClusterComputeResource; notfalls über einen Host)
                 cl_name = ""
-                try:
+                with suppress(Exception):   # best effort: ohne Zuordnung weiter
                     rel = api.related(nid, kinds={"ClusterComputeResource"})
                     if rel:
                         rid = rel[0]
                         cl_name = next((name_of(c) for c in clusters
                                         if c["identifier"] == rid), "")
-                except Exception:
-                    pass
                 if cl_name and cl_name in data:
                     data[cl_name].setdefault("namespaces", []).append(
                         {"name": nname, "cpu_mhz": round(cpu_mhz),

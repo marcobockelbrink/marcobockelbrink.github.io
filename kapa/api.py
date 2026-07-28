@@ -213,13 +213,14 @@ def make_handler(app):
                     self.send_header("Cache-Control", "no-cache")
                     self.send_header("Vary", "Accept-Encoding")
                     self.end_headers()
-                    return
+                    return None
                 h = dict(headers or {})
                 h["ETag"] = tag
                 h.setdefault("Cache-Control", "no-cache")
                 return self._send(body, "application/json; charset=utf-8",
                                   code, h)
-            self._send(body, "application/json; charset=utf-8", code, headers)
+            return self._send(body, "application/json; charset=utf-8",
+                              code, headers)
 
         MAX_BODY = 2 * 1024 * 1024   # 2 MiB – reicht für große Reservierungs-Importe
 
@@ -338,6 +339,7 @@ def make_handler(app):
                 self._route = alt
                 return self._GET_ROUTES[alt](self)
             self.send_error(404)
+            return None
 
         def _get_page(self):
             s = self._session()
@@ -790,6 +792,7 @@ def make_handler(app):
                         self.path = alt
                         return pfn(self)
             self.send_error(404)
+            return None
 
         def _post_storage_request(self):
             # Storage-Erweiterung anlegen — aus dem Freigabe-Dialog (mit
@@ -869,6 +872,8 @@ def make_handler(app):
             try:
                 req = urllib.request.Request(url, data=bodyb, method="POST",
                                              headers=headers)
+                # Test-Ziel ist admin-eingegeben und auf http(s) geprüft
+                # nosemgrep: python.lang.security.audit.dynamic-urllib-use-detected.dynamic-urllib-use-detected
                 with urllib.request.urlopen(req, timeout=8) as resp:  # nosec B310
                     code = resp.status
                 audit(s["user"], "Webhook-Test gesendet", f"{url} (HTTP {code})")
@@ -1011,11 +1016,11 @@ def make_handler(app):
                 return self._post_reservations()
             actor = self._bearer_scope("write_res", "Reservierungen")
             if not actor:
-                return
+                return None
             item = self._body()
             if not isinstance(item, dict) or not str(item.get("name") or "").strip():
                 self._json({"error": "Ungültige Reservierung (name erforderlich)"}, 400)
-                return
+                return None
             oneline = lambda v, n: " ".join(str(v or "").split())[:n]
             von = oneline(item.get("von"), 120) or actor
             try:
@@ -1034,7 +1039,7 @@ def make_handler(app):
                          "approved": False}
             except (TypeError, ValueError):
                 self._json({"error": "Ungültige Zahlenwerte"}, 400)
-                return
+                return None
             with res_lock:
                 prune_reservations()
                 reservations.append(entry)
@@ -1050,6 +1055,7 @@ def make_handler(app):
             elif approval_teams:
                 mail_event("team_turn", snap, team=current_team(snap),
                            actor=actor)
+            return None
 
         def _post_v1_res_decision(self):
             op = self.path.rsplit("/", 1)[1]
@@ -1066,7 +1072,7 @@ def make_handler(app):
                            else ("write_res", "Reservierungen"))
             actor = self._bearer_scope(flag, label)
             if not actor:
-                return
+                return None
             rid = urllib.parse.unquote(
                 self.path[len("/api/v1/reservations/"):-(len(op) + 1)])
             comment = str((self._body() or {}).get("comment") or "").strip()[:64]
@@ -1090,11 +1096,12 @@ def make_handler(app):
             if notify is None:
                 self._json({"error": "Antrag nicht gefunden oder bereits "
                                      "entschieden."}, 404)
-                return
+                return None
             self._json({"reservation": public_res(notify)})
             res_decision_notify(op, notify, actor, comment,
                                 action=action, api=True)
             emit_auto_events(notify, auto_events)
+            return None
 
         def _post_v1_storage_done(self):
             # Storage-Team meldet Umsetzung: Schreibrecht „Storage"
@@ -1626,6 +1633,7 @@ def make_handler(app):
                         self.path = alt
                         return pfn(self)
             self.send_error(404)
+            return None
 
         def _put_reservations(self):
             if not self._require("admin"):
@@ -2071,6 +2079,7 @@ def make_handler(app):
                         self.path = alt
                         return fn(self)
             self.send_error(404)
+            return None
 
         def _del_reservation(self):
             # Löschen von Reservierungsanfragen ist deaktiviert – Anträge

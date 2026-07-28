@@ -8,6 +8,7 @@ wichtigsten Abläufe Ende-zu-Ende (HTTP-Ebene, wie ein echter Client):
 
 Exit-Code 0 = alles grün. Gedacht als Sicherheitsnetz vor jedem Release.
 """
+from contextlib import suppress
 import gzip
 import json
 import os
@@ -52,10 +53,8 @@ def req(method, path, body=None, headers=None, raw=False):
             return resp.status, payload, dict(resp.headers)
     except urllib.error.HTTPError as e:
         payload = e.read()
-        try:
+        with suppress(Exception):
             payload = json.loads(payload.decode())
-        except Exception:
-            pass
         return e.code, payload, dict(e.headers)
 
 
@@ -71,13 +70,11 @@ def wait_up(timeout=30):
     """Warten, bis der Server läuft UND der erste Demo-Abruf durch ist."""
     t0 = time.time()
     while time.time() - t0 < timeout:
-        try:
+        with suppress(Exception):   # Server startet noch
             st, body, _ = req("GET", "/healthz")
             if st == 200 and body.get("clusters", 0) > 0 \
                     and not body.get("refreshing"):
                 return body
-        except Exception:
-            pass
         time.sleep(0.5)
     raise RuntimeError("Server kam nicht hoch — siehe " + LOG)
 
@@ -93,7 +90,8 @@ import glob as _glob
 
 
 def _undefined_globals(path):
-    tree = _ast.parse(open(path, encoding="utf-8").read())
+    with open(path, encoding="utf-8") as _f:
+        tree = _ast.parse(_f.read())
     defined = set(dir(_bi)) | {"__file__", "__name__", "__doc__"}
     for nd in _ast.walk(tree):
         if isinstance(nd, _ast.Import):
@@ -117,6 +115,9 @@ def _undefined_globals(path):
                     defined.add(n.id)
         elif isinstance(nd, _ast.ExceptHandler) and nd.name:
             defined.add(nd.name)
+        elif isinstance(nd, _ast.NamedExpr):
+            if isinstance(nd.target, _ast.Name):
+                defined.add(nd.target.id)
         elif isinstance(nd, _ast.With):
             for it in nd.items:
                 if it.optional_vars:
@@ -183,7 +184,7 @@ proc = subprocess.Popen(
     [sys.executable, APP, "--serve", "--sample", "--bind", "127.0.0.1",
      "--port", str(PORT), "--data-dir", DATA,
      "--id-prefix", "KAPA-", "--id-length", "6"],
-    stdout=open(LOG, "w"), stderr=subprocess.STDOUT)
+    stdout=(LOGF := open(LOG, "w")), stderr=subprocess.STDOUT)
 
 try:
     print(f"Server: {BASE}  (Daten: {DATA})")
@@ -788,7 +789,8 @@ try:
         [sys.executable, APP, "--serve", "--sample", "--bind", "127.0.0.1",
          "--port", str(P2), "--data-dir", DATA2,
          "--ad-url", "ldaps://smoke.invalid"],
-        stdout=open(os.path.join(DATA2, "s.log"), "w"), stderr=subprocess.STDOUT)
+        stdout=(LOGF2 := open(os.path.join(DATA2, "s.log"), "w")),
+        stderr=subprocess.STDOUT)
     try:
         B2 = f"http://127.0.0.1:{P2}"
         t0 = time.time()
@@ -809,7 +811,8 @@ try:
             st2, msg = e.code, json.loads(e.read().decode())
         check("Passwort im Benutzerfeld -> 401 + Hinweis, kein AD-Kontakt",
               st2 == 401 and "sieht wie ein Passwort aus" in msg.get("error", ""))
-        logtxt = open(os.path.join(DATA2, "kapa_log.jsonl")).read()
+        with open(os.path.join(DATA2, "kapa_log.jsonl")) as _lf:
+            logtxt = _lf.read()
         check("Passwort NICHT im Audit-Log",
               SECRET not in logtxt and "nicht protokolliert" in logtxt)
         # Session aus der Datei überlebt den "Neustart" (frischer Prozess)
@@ -865,9 +868,9 @@ try:
                          "Cookie": "kapa_session=" + SESS_TOK})
             with urllib.request.urlopen(r, timeout=10) as resp:
                 return json.loads(resp.read().decode())
-        v = put_vis({"reviewer": {"workload": True, "hosts": True, "vms": False,
-                                  "network": False, "storage": True,
-                                  "tags": True, "decided_by": True}})
+        put_vis({"reviewer": {"workload": True, "hosts": True, "vms": False,
+                              "network": False, "storage": True,
+                              "tags": True, "decided_by": True}})
         rev2 = data_for(REV_TOK)
         check("Matrix: Reviewer ohne Netzwerk, mit Hosts",
               "portgroups" not in rev2[0] and "hosts" in rev2[0]
@@ -907,6 +910,7 @@ try:
             proc2.wait(timeout=5)
         except subprocess.TimeoutExpired:
             proc2.kill()
+        LOGF2.close()
         shutil.rmtree(DATA2, ignore_errors=True)
 
     print("== Benutzerhandbuch ==")
@@ -992,6 +996,7 @@ finally:
         proc.wait(timeout=5)
     except subprocess.TimeoutExpired:
         proc.kill()
+    LOGF.close()
     shutil.rmtree(DATA, ignore_errors=True)
 
 print(f"\n{PASS} ok, {len(FAIL)} fehlgeschlagen"

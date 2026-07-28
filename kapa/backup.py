@@ -2,9 +2,9 @@
 """SFTP-Backup (tar.gz via ssh/sftp-Batch) und Rotation.
 Aus aria_kapa.py ausgelagert (v3.0); nimmt args als Parameter,
 kein App-Zustand."""
+from contextlib import suppress
 import os
 import re
-import sys
 from datetime import datetime, timedelta
 
 
@@ -92,10 +92,8 @@ def sftp_backup(args):
     try:
         _ssh_run(cmd + [tmp, args.backup_target.rstrip("/") + "/" + name], env)
     finally:
-        try:
+        with suppress(OSError):
             os.remove(tmp)
-        except OSError:
-            pass
     return name
 
 
@@ -118,10 +116,8 @@ def backup_rotate(args):
         try:
             return _ssh_run(cmd + ["-b", batch, host], env)
         finally:
-            try:
+            with suppress(OSError):
                 os.remove(batch)
-            except OSError:
-                pass
 
     listing = sftp_batch([f"ls -1 {rdir}"])
     cutoff = ((datetime.now() - timedelta(days=args.backup_keep_days))

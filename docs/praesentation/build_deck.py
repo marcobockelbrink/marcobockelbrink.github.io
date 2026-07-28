@@ -7,7 +7,6 @@ from pptx.util import Inches, Pt, Emu
 from pptx.dml.color import RGBColor
 from pptx.enum.text import PP_ALIGN, MSO_ANCHOR
 from pptx.enum.shapes import MSO_SHAPE
-from pptx.oxml.ns import qn
 from PIL import Image
 import sys, os
 
@@ -29,7 +28,6 @@ TOTAL = 10           # Gesamtzahl der Folien (für die Fußzeile)
 prs = Presentation()
 prs.slide_width  = Inches(13.333)
 prs.slide_height = Inches(7.5)
-SW, SH = prs.slide_width, prs.slide_height
 BLANK = prs.slide_layouts[6]
 
 

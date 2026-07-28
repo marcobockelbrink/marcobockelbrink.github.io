@@ -229,7 +229,8 @@ class TestStore(unittest.TestCase):
             p = os.path.join(d, "f.txt")
             atomic_write(p, "eins")
             atomic_write(p, "zwei")
-            self.assertEqual(open(p, encoding="utf-8").read(), "zwei")
+            with open(p, encoding="utf-8") as f:
+                self.assertEqual(f.read(), "zwei")
         finally:
             import shutil
             shutil.rmtree(d, ignore_errors=True)

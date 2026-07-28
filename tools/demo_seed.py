@@ -23,6 +23,7 @@ def call(method, path, body=None):
     data = json.dumps(body).encode() if body is not None else None
     req = urllib.request.Request(BASE + path, data=data, method=method,
                                  headers={"Content-Type": "application/json"})
+    # nosemgrep: python.lang.security.audit.dynamic-urllib-use-detected.dynamic-urllib-use-detected  # Dev-Werkzeug: Ziel ist der lokale Testserver
     with urllib.request.urlopen(req, timeout=30) as r:
         raw = r.read().decode()
     return json.loads(raw) if raw.strip() else None

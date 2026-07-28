@@ -23,17 +23,20 @@ spec:
         app: kapa-dashboard
     spec:
       securityContext:
-        fsGroup: 0        # Datenverzeichnis gehört Gruppe 0 (g=u, OpenShift-kompatibel)
+        # UID/GID > 10000 (Trivy KSV020/021/116); die Volumes gehören per
+        # fsGroup dieser gemeinsamen Gruppe, das Image bleibt g=u-lesbar.
+        fsGroup: 10001
       containers:
         - name: kapa
-          image: ghcr.io/marcobockelbrink/kapa-dashboard:3.5.0
+          image: ghcr.io/marcobockelbrink/kapa-dashboard:3.5.1
           imagePullPolicy: IfNotPresent
           # Härtung (empfohlen, von Trivy geprüft): non-root, kein Privileg-
           # Aufstieg, read-only Root-FS (Schreibpfade sind /opt/kapa/data und
           # /tmp – beide als Volume gemountet), alle Capabilities entfernt.
           securityContext:
             runAsNonRoot: true
-            runAsUser: 1001
+            runAsUser: 10001
+            runAsGroup: 10001
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: true
             capabilities:
@@ -86,6 +89,7 @@ spec:
               cpu: 100m
               memory: 128Mi
             limits:
+              cpu: 500m
               memory: 512Mi
       volumes:
         - name: data

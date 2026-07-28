@@ -5,6 +5,7 @@ liefert der GITHUB_TOKEN die Rechte. Ohne Fremd-Bibliotheken (nur Stdlib).
 
     python3 security_report.py <owner/repo> <out-basis-ohne-endung>
 Benötigt die Umgebungsvariable GH_TOKEN (oder GITHUB_TOKEN)."""
+from contextlib import suppress
 import html
 import json
 import os
@@ -29,10 +30,8 @@ def gh_api(path):
     for chunk in txt.replace("][", "]\n[").splitlines():
         chunk = chunk.strip()
         if chunk:
-            try:
+            with suppress(json.JSONDecodeError):
                 items.extend(json.loads(chunk))
-            except json.JSONDecodeError:
-                pass
     return items
 
 
@@ -91,7 +90,8 @@ def main():
                       f"{html.unescape(rule.get('description') or rule.get('name') or rule.get('id',''))} "
                       f"· `{where}` · [Alert #{a.get('number')}]({a.get('html_url','')})")
     md_txt = "\n".join(md) + "\n"
-    open(OUT + ".md", "w", encoding="utf-8").write(md_txt)
+    with open(OUT + ".md", "w", encoding="utf-8") as f:
+        f.write(md_txt)
 
     # ---- HTML (druckbar -> PDF) ----
     def esc(x):
@@ -131,7 +131,8 @@ def main():
 {('<h2>Details</h2><table><tr><th>Schweregrad</th><th>Scanner</th><th>Regel</th><th>Ort</th><th>Alert</th></tr>' + rows + '</table>') if alerts else ''}
 <p style="color:#94a3b8;font-size:12px">Erzeugt automatisch aus dem GitHub-Security-Tab · CodeQL, Bandit, Semgrep, Trivy, Scorecard.</p>
 </body></html>"""
-    open(OUT + ".html", "w", encoding="utf-8").write(doc)
+    with open(OUT + ".html", "w", encoding="utf-8") as f:
+        f.write(doc)
 
     # Kurzfassung für die GitHub-Job-Zusammenfassung
     print(f"OFFENE_FUNDE={len(alerts)}")
