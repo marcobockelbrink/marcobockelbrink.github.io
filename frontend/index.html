@@ -16,12 +16,14 @@ try { var _t = new URLSearchParams(location.search).get("theme")
   /* color-scheme koppelt native Controls (Datums-Picker, Kalender-Icon,
      Scrollbars) ans Theme – sonst ist z. B. das Kalender-Icon im Dunkeln
      unsichtbar. */
-  :root { color-scheme: dark;
+  :root {
+  color-scheme: dark;  /* native Controls (Kalender-Icon) folgen dem Theme */ color-scheme: dark;
           --bg:#0f172a; --card:#1e293b; --line:#334155; --text:#e2e8f0;
           --muted:#94a3b8; --ok:#22c55e; --warn:#f59e0b; --crit:#ef4444;
           --accent:#38bdf8; --res:#818cf8; --field:#0b1220; --accent-text:#08131f; }
   /* Helles Theme: per Knopf in der Kopfleiste, gespeichert je Benutzer */
   html[data-theme="light"] {
+  color-scheme: light;
     color-scheme: light;
     --bg:#eef2f7; --card:#ffffff; --line:#d4dbe5; --text:#1e293b;
     --muted:#5b6b7f; --ok:#15803d; --warn:#b45309; --crit:#dc2626;
@@ -174,6 +176,8 @@ try { var _t = new URLSearchParams(location.search).get("theme")
   .modal input:focus, .modal select:focus, .modal textarea:focus { outline:none; border-color:var(--res); }
   .modal .hint { font-size:12px; color:var(--accent); margin-top:10px; }
   .modal .actions { display:flex; justify-content:flex-end; gap:8px; margin-top:16px; }
+  .icn { display:inline-block; width:1em; height:1em;
+         vertical-align:-0.125em; }
 </style>
 </head>
 <body>
@@ -181,7 +185,7 @@ try { var _t = new URLSearchParams(location.search).get("theme")
 <!-- Benutzer / Theme / Abmelden: fest oben rechts, gegenüber von Info & Hilfe -->
 <div id="userarea" style="position:absolute;top:22px;right:24px;display:flex;gap:8px;align-items:center">
   <span id="userbox" style="font-size:12px;color:var(--muted)"></span>
-  <button class="btn" id="themeBtn" onclick="toggleTheme()" title="Hell/Dunkel umschalten">☀️</button>
+  <button class="btn" id="themeBtn" onclick="toggleTheme()" title="Hell/Dunkel umschalten"></button>
   <button class="btn" id="logoutBtn" style="display:none" onclick="logout()">Abmelden</button>
 </div>
 <div class="sub">
@@ -190,7 +194,7 @@ try { var _t = new URLSearchParams(location.search).get("theme")
   <span style="color:var(--muted);font-size:12px;margin-left:8px">Stand: <span id="stand">__DATE__</span></span>
 </div>
 <div id="infoCalc" style="display:none">Quelle: VMware Aria Operations · CPU-Überprovisionierung: Faktor __FACTOR__ (physische Cores) · RAM 1:1 · alle VMs inkl. powered-off · „frei" berücksichtigt genehmigte Reservierungen__FAILNOTE__</div>
-<div id="infoHelp" style="display:none">Klick auf den Clusternamen zeigt Details und Reservierungen. __RESNOTE__<div style="margin-top:12px">📖 <a href="benutzerhandbuch" target="_blank" rel="noopener">Benutzerhandbuch öffnen</a> · <a href="reviewer-handbuch" target="_blank" rel="noopener">Reviewer-Handbuch öffnen</a></div></div>
+<div id="infoHelp" style="display:none">Klick auf den Clusternamen zeigt Details und Reservierungen. __RESNOTE__<div style="margin-top:12px"><span data-icon="book"></span> <a href="benutzerhandbuch" target="_blank" rel="noopener">Benutzerhandbuch öffnen</a> · <a href="reviewer-handbuch" target="_blank" rel="noopener">Reviewer-Handbuch öffnen</a></div></div>
 <div class="modal-bg" id="infoBg" onclick="if(event.target===this)closeInfo()">
   <div class="modal">
     <h2 id="infoTitle"></h2>
@@ -200,7 +204,7 @@ try { var _t = new URLSearchParams(location.search).get("theme")
 </div>
 <div class="modal-bg" id="annBg">
   <div class="modal" style="max-width:520px">
-    <h2 id="annTitle" style="display:flex;align-items:center;gap:8px">📣 <span></span></h2>
+    <h2 id="annTitle" style="display:flex;align-items:center;gap:8px"><span data-icon="megaphone"></span> <span></span></h2>
     <div id="annBody" style="font-size:13px;line-height:1.6;color:var(--text);white-space:pre-wrap"></div>
     <div class="actions"><button class="btn primary" onclick="closeAnnounce()">Verstanden</button></div>
   </div>
@@ -339,7 +343,7 @@ try { var _t = new URLSearchParams(location.search).get("theme")
 </div>
 <div id="appView" style="display:none">
 <div style="display:flex;align-items:center;margin-bottom:8px;font-size:13px">
-  <span>📖 <a href="reviewer-handbuch" target="_blank" rel="noopener">Reviewer-Handbuch</a>
+  <span><span data-icon="book"></span> <a href="reviewer-handbuch" target="_blank" rel="noopener">Reviewer-Handbuch</a>
     <span style="color:var(--muted)">– wie Prüfen &amp; Freigeben funktioniert</span></span>
   <span id="colctl_atable" style="margin-left:auto"></span>
 </div>
@@ -426,27 +430,27 @@ try { var _t = new URLSearchParams(location.search).get("theme")
   Die aktuelle Cluster-Übersicht als CSV (Semikolon, für Excel) – mit den
   effektiv freien Werten nach Reservierungen und Tanzu-Namespaces.
   Rolle und Quellen-Filter werden serverseitig berücksichtigt.</div>
-<a class="btn" href="api/v1/data?format=csv" download="kapazitaet.csv">⬇ Kapazität als CSV</a>
+<a class="btn" href="api/v1/data?format=csv" download="kapazitaet.csv"><span data-icon="download"></span> Kapazität als CSV</a>
 
 <div class="sechead" style="margin-top:22px">Reservierungen</div>
 <div class="hint" style="color:var(--muted);margin-bottom:8px">
   CSV für Excel und Reports; JSON eignet sich als Sicherung oder zum
   Übertragen auf eine andere Installation.</div>
-<a class="btn" href="api/v1/reservations?format=csv" download="reservierungen.csv">⬇ Reservierungen als CSV</a>
-<button class="btn" onclick="exportRes()">⬇ Reservierungen als JSON</button>
+<a class="btn" href="api/v1/reservations?format=csv" download="reservierungen.csv"><span data-icon="download"></span> Reservierungen als CSV</a>
+<button class="btn" onclick="exportRes()"><span data-icon="download"></span> Reservierungen als JSON</button>
 <div id="ioImport" style="margin-top:14px">
   <div class="hint" style="color:var(--muted);margin-bottom:6px"><b>
-    ⚠ Achtung: Der JSON-Import ersetzt den kompletten Reservierungs-Bestand
+    <span data-icon="warning"></span> Achtung: Der JSON-Import ersetzt den kompletten Reservierungs-Bestand
     durch den Inhalt der Datei – gedacht für Wiederherstellung oder Umzug.
     Vorher exportieren!</b></div>
-  <label class="btn">⬆ Reservierungen importieren (JSON)<input type="file" accept=".json" hidden onchange="importRes(event)"></label>
+  <label class="btn"><span data-icon="upload"></span> Reservierungen importieren (JSON)<input type="file" accept=".json" hidden onchange="importRes(event)"></label>
 </div>
 
 <div class="sechead" style="margin-top:22px">Automatisierung</div>
 <div class="hint" style="color:var(--muted);margin-bottom:8px">
   Alle Exporte gibt es auch skriptbar über die REST-API (Bearer-Token,
   Verwaltung → API) – z. B. für Grafana, CMDB oder das Storage-Team.</div>
-<a class="btn" href="api/v1/docs" target="_blank" rel="noopener">📘 API-Dokumentation öffnen</a>
+<a class="btn" href="api/v1/docs" target="_blank" rel="noopener"><span data-icon="book"></span> API-Dokumentation öffnen</a>
 </div><!-- ioView -->
 
 <div id="admView" style="display:none">
@@ -480,7 +484,7 @@ try { var _t = new URLSearchParams(location.search).get("theme")
   <tbody id="whbody"></tbody>
 </table>
 <button class="btn" onclick="addWebhook()">+ Webhook hinzufügen</button>
-<button class="btn approve" onclick="saveWebhooks()">✓ Webhooks speichern</button>
+<button class="btn approve" onclick="saveWebhooks()"><span data-icon="check"></span> Webhooks speichern</button>
 <span id="whSaved" style="color:var(--ok);font-size:12px;margin-left:8px"></span>
 </div>
 
@@ -501,7 +505,7 @@ try { var _t = new URLSearchParams(location.search).get("theme")
   <label style="font-size:13px"><input type="checkbox" id="annCfgActive"> aktiv – Popup wird angezeigt</label>
 </div>
 <div style="margin-top:10px">
-  <button class="btn approve" onclick="saveAnnounce()">✓ Ankündigung speichern</button>
+  <button class="btn approve" onclick="saveAnnounce()"><span data-icon="check"></span> Ankündigung speichern</button>
   <button class="btn" onclick="previewAnnounce()">Vorschau</button>
   <span id="annSaved" style="color:var(--ok);font-size:12px;margin-left:8px"></span>
 </div>
@@ -537,7 +541,7 @@ try { var _t = new URLSearchParams(location.search).get("theme")
   freigegeben haben, ist ein Antrag genehmigt. Ohne Teams gilt einstufig
   (Admin genehmigt direkt). Reviewer werden oben ihrem Team zugewiesen.
   Die <b>E-Mail/Verteiler</b> je Team wird angeschrieben, sobald das Team im
-  Workflow an der Reihe ist (siehe „Mail-Benachrichtigungen"); mit „✓ Team-Adressen
+  Workflow an der Reihe ist (siehe „Mail-Benachrichtigungen"); mit „Team-Adressen
   speichern" sichern.</div>
 <div class="tablewrap">
 <table class="kt" id="tmtable">
@@ -545,7 +549,7 @@ try { var _t = new URLSearchParams(location.search).get("theme")
   <tbody id="tmbody"></tbody>
 </table>
 </div>
-<button class="btn approve" style="margin-top:8px" onclick="saveNotify()">✓ Team-Adressen speichern</button>
+<button class="btn approve" style="margin-top:8px" onclick="saveNotify()"><span data-icon="check"></span> Team-Adressen speichern</button>
 </div><!-- admGrpUsers -->
 
 <div id="admGrpSel" style="display:none">
@@ -598,7 +602,7 @@ try { var _t = new URLSearchParams(location.search).get("theme")
   manuell, die weiteren Stufen laufen automatisch durch. Ohne Teams gilt der
   Haken sinngemäß für die einstufige Freigabe.</div>
 <div id="aaTeams" style="margin-bottom:12px"></div>
-<button class="btn approve" onclick="saveAutoApprove()">✓ Auto-Freigabe speichern</button>
+<button class="btn approve" onclick="saveAutoApprove()"><span data-icon="check"></span> Auto-Freigabe speichern</button>
 <span id="aaSaved" style="color:var(--ok);font-size:12px;margin-left:8px"></span>
 </div><!-- admGrpAuto -->
 
@@ -615,7 +619,7 @@ try { var _t = new URLSearchParams(location.search).get("theme")
   <tbody id="visbody"></tbody>
 </table>
 </div>
-<button class="btn approve" style="margin-top:10px" onclick="saveVisibility()">✓ Sichtbarkeit speichern</button>
+<button class="btn approve" style="margin-top:10px" onclick="saveVisibility()"><span data-icon="check"></span> Sichtbarkeit speichern</button>
 <span id="visSaved" style="color:var(--ok);font-size:12px;margin-left:8px"></span>
 </div><!-- admGrpVis -->
 
@@ -686,7 +690,7 @@ try { var _t = new URLSearchParams(location.search).get("theme")
 <datalist id="vsanClusterList"></datalist>
 <button class="btn" onclick="addVsanOverride()">+ Cluster-Override</button>
 <div style="margin-top:14px"></div>
-<button class="btn approve" onclick="saveStorageCfg()">✓ Speichern &amp; anwenden</button>
+<button class="btn approve" onclick="saveStorageCfg()"><span data-icon="check"></span> Speichern &amp; anwenden</button>
 <span id="storMinSaved" style="color:var(--ok);font-size:12px;margin-left:8px"></span>
 </div><!-- admGrpStorCfg -->
 
@@ -716,7 +720,7 @@ try { var _t = new URLSearchParams(location.search).get("theme")
   <input id="netExclVlans" class="filterbox" style="width:100%;max-width:520px"
     placeholder="z. B. 99, 205, 3900-3999">
 </div>
-<button class="btn approve" onclick="saveNetCfg()">✓ Speichern &amp; anwenden</button>
+<button class="btn approve" onclick="saveNetCfg()"><span data-icon="check"></span> Speichern &amp; anwenden</button>
 <span id="netCfgSaved" style="color:var(--ok);font-size:12px;margin-left:8px"></span>
 </div><!-- admGrpNet -->
 
@@ -733,7 +737,7 @@ try { var _t = new URLSearchParams(location.search).get("theme")
   Quelle.</div>
 <div style="margin-bottom:14px">
   <a class="btn" href="api/v1/import/powercli" download="kapa_export.ps1"
-     title="PowerCLI-Skript, das das Import-JSON erzeugt">⬇ PowerCLI-Skript (kapa_export.ps1)</a>
+     title="PowerCLI-Skript, das das Import-JSON erzeugt"><span data-icon="download"></span> PowerCLI-Skript (kapa_export.ps1)</a>
   <span style="color:var(--muted);font-size:12px;margin-left:8px">
     Aufruf: <code>.\kapa_export.ps1 -Server vcenter.insel.local</code></span>
 </div>
@@ -781,7 +785,7 @@ try { var _t = new URLSearchParams(location.search).get("theme")
 </div>
 <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:8px">
   <a class="btn" href="api/v1/import/reservations/beispiel" download="kapa-import-beispiel.csv"
-     title="Vorlage mit Kopfzeile und zwei Beispielzeilen – in Excel öffnen und befüllen">⬇ Beispiel-CSV (Vorlage)</a>
+     title="Vorlage mit Kopfzeile und zwei Beispielzeilen – in Excel öffnen und befüllen"><span data-icon="download"></span> Beispiel-CSV (Vorlage)</a>
   <label class="btn">CSV-Datei wählen &amp; importieren<input
     type="file" accept=".csv,text/csv" hidden onchange="importKapaCsv(event)"></label>
   <span id="kapaCsvStatus" style="font-size:12px;color:var(--muted)"></span>
@@ -791,7 +795,7 @@ try { var _t = new URLSearchParams(location.search).get("theme")
 <div id="admGrpTok" style="display:none">
 <div class="sechead">API-Tokens für externe Anwendungen (Endpunkte unter /api/v1/; Schreibrechte je Token per Klick)</div>
 <div class="hint" style="color:var(--muted);margin-bottom:8px">
-  📖 <a href="api/v1/docs" target="_blank" rel="noopener">API-Dokumentation öffnen</a>
+  <span data-icon="book"></span> <a href="api/v1/docs" target="_blank" rel="noopener">API-Dokumentation öffnen</a>
   (interaktiv, mit „Ausführen") · <a href="api/v1/openapi.json" target="_blank" rel="noopener">OpenAPI-Spec</a>
   zum Import in Swagger/Postman.</div>
 <div style="text-align:right;margin-bottom:6px"><span id="colctl_ttable"></span></div>
@@ -836,7 +840,7 @@ try { var _t = new URLSearchParams(location.search).get("theme")
          style="width:60px;background:var(--field);border:1px solid var(--line);color:var(--text);border-radius:6px;padding:4px 6px;text-align:center">
   Tagen Wartezeit – danach alle so viele Tage erneut, bis entschieden ist.
 </div>
-<button class="btn approve" style="margin-top:8px" onclick="saveNotify()">✓ Mail-Regeln speichern</button>
+<button class="btn approve" style="margin-top:8px" onclick="saveNotify()"><span data-icon="check"></span> Mail-Regeln speichern</button>
 <span id="notifySaved" style="color:var(--ok);font-size:12px;margin-left:8px"></span>
 
 <div class="sechead" style="margin-top:22px">Mail-Vorlage (HTML)</div>
@@ -853,7 +857,7 @@ try { var _t = new URLSearchParams(location.search).get("theme")
     <label style="font-size:12px;color:var(--muted)">HTML-Text</label>
     <textarea id="tplHtml" style="width:100%;min-height:400px;background:var(--field);border:1px solid var(--line);color:var(--text);border-radius:8px;padding:10px;font-family:monospace;font-size:12px;line-height:1.5" placeholder="Standardvorlage (leer lassen)" onfocus="MAIL_TPL_FOCUS='tplHtml'" oninput="schedulePreviewMail()"></textarea>
     <div style="margin-top:8px">
-      <button class="btn approve" onclick="saveMailTemplate()">✓ Vorlage speichern</button>
+      <button class="btn approve" onclick="saveMailTemplate()"><span data-icon="check"></span> Vorlage speichern</button>
       <button class="btn" onclick="resetMailTemplate()">Standard einsetzen</button>
       <span id="tplSaved" style="color:var(--ok);font-size:12px;margin-left:8px"></span>
     </div>
@@ -901,7 +905,7 @@ try { var _t = new URLSearchParams(location.search).get("theme")
 </datalist>
 <span id="rcNow" style="color:var(--muted);font-size:12px;margin-left:8px"></span>
 <div style="margin-top:12px">
-<button class="btn approve" onclick="saveRefreshCfg()">✓ Intervalle &amp; Zeitzone speichern</button>
+<button class="btn approve" onclick="saveRefreshCfg()"><span data-icon="check"></span> Intervalle &amp; Zeitzone speichern</button>
 <span id="rcSaved" style="color:var(--ok);font-size:12px;margin-left:8px"></span>
 <span id="rcDefault" style="color:var(--muted);font-size:12px;margin-left:8px"></span>
 </div>
@@ -912,7 +916,7 @@ try { var _t = new URLSearchParams(location.search).get("theme")
     Sichert alle Laufzeitdaten (Reservierungen, Rollen, Teams, Selektor, Log,
     Tokens) als tar.gz auf das konfigurierte SFTP-Ziel. Läuft automatisch nach
     dem konfigurierten Intervall – hier lässt sich ein Backup sofort auslösen.</div>
-  <button class="btn primary" id="backupBtn" onclick="runBackup()">💾 Backup jetzt erstellen</button>
+  <button class="btn primary" id="backupBtn" onclick="runBackup()"><span data-icon="save"></span> Backup jetzt erstellen</button>
   <span id="backupStatus" style="font-size:12px;margin-left:10px"></span>
 </div>
 <div class="sechead" style="margin-top:20px">Konfiguration (schreibgeschützt)</div>
@@ -944,8 +948,44 @@ try { var _t = new URLSearchParams(location.search).get("theme")
 <div class="pgbar" id="pager_ltable"></div>
 </div>
 <div class="hovercard" id="hovercard"></div>
-<div class="foot">VMware Kapazitätsplanung · Version __VERSION__ · <a href="benutzerhandbuch" target="_blank" rel="noopener" style="color:inherit">📖 Benutzerhandbuch</a>__CONTACT_FOOT__</div>
+<div class="foot">VMware Kapazitätsplanung · Version __VERSION__ · <a href="benutzerhandbuch" target="_blank" rel="noopener" style="color:inherit"><span data-icon="book"></span> Benutzerhandbuch</a>__CONTACT_FOOT__</div>
 <script>
+// Selbst gehostete Icons (Phosphor Icons, MIT-Lizenz, "regular"-Gewicht,
+// https://github.com/phosphor-icons/core) -- einmalig vendored, kein CDN,
+// kein Icon-Font. fill="currentColor" laesst sie die Textfarbe der
+// umgebenden Klasse (z. B. text-ok/text-crit) uebernehmen; Groesse ueber
+// Tailwinds w-*/h-* am jeweiligen <svg>. Ersetzt die bisherigen Emoji-Icons.
+const ICONS = {
+  check: '<svg viewBox="0 0 256 256" fill="currentColor"><path d="M229.66,77.66l-128,128a8,8,0,0,1-11.32,0l-56-56a8,8,0,0,1,11.32-11.32L96,188.69,218.34,66.34a8,8,0,0,1,11.32,11.32Z"/></svg>',
+  close: '<svg viewBox="0 0 256 256" fill="currentColor"><path d="M205.66,194.34a8,8,0,0,1-11.32,11.32L128,139.31,61.66,205.66a8,8,0,0,1-11.32-11.32L116.69,128,50.34,61.66A8,8,0,0,1,61.66,50.34L128,116.69l66.34-66.35a8,8,0,0,1,11.32,11.32L139.31,128Z"/></svg>',
+  warning: '<svg viewBox="0 0 256 256" fill="currentColor"><path d="M236.8,188.09,149.35,36.22h0a24.76,24.76,0,0,0-42.7,0L19.2,188.09a23.51,23.51,0,0,0,0,23.72A24.35,24.35,0,0,0,40.55,224h174.9a24.35,24.35,0,0,0,21.33-12.19A23.51,23.51,0,0,0,236.8,188.09ZM222.93,203.8a8.5,8.5,0,0,1-7.48,4.2H40.55a8.5,8.5,0,0,1-7.48-4.2,7.59,7.59,0,0,1,0-7.72L120.52,44.21a8.75,8.75,0,0,1,15,0l87.45,151.87A7.59,7.59,0,0,1,222.93,203.8ZM120,144V104a8,8,0,0,1,16,0v40a8,8,0,0,1-16,0Zm20,36a12,12,0,1,1-12-12A12,12,0,0,1,140,180Z"/></svg>',
+  gear: '<svg viewBox="0 0 256 256" fill="currentColor"><path d="M128,80a48,48,0,1,0,48,48A48.05,48.05,0,0,0,128,80Zm0,80a32,32,0,1,1,32-32A32,32,0,0,1,128,160Zm88-29.84q.06-2.16,0-4.32l14.92-18.64a8,8,0,0,0,1.48-7.06,107.21,107.21,0,0,0-10.88-26.25,8,8,0,0,0-6-3.93l-23.72-2.64q-1.48-1.56-3-3L186,40.54a8,8,0,0,0-3.94-6,107.71,107.71,0,0,0-26.25-10.87,8,8,0,0,0-7.06,1.49L130.16,40Q128,40,125.84,40L107.2,25.11a8,8,0,0,0-7.06-1.48A107.6,107.6,0,0,0,73.89,34.51a8,8,0,0,0-3.93,6L67.32,64.27q-1.56,1.49-3,3L40.54,70a8,8,0,0,0-6,3.94,107.71,107.71,0,0,0-10.87,26.25,8,8,0,0,0,1.49,7.06L40,125.84Q40,128,40,130.16L25.11,148.8a8,8,0,0,0-1.48,7.06,107.21,107.21,0,0,0,10.88,26.25,8,8,0,0,0,6,3.93l23.72,2.64q1.49,1.56,3,3L70,215.46a8,8,0,0,0,3.94,6,107.71,107.71,0,0,0,26.25,10.87,8,8,0,0,0,7.06-1.49L125.84,216q2.16.06,4.32,0l18.64,14.92a8,8,0,0,0,7.06,1.48,107.21,107.21,0,0,0,26.25-10.88,8,8,0,0,0,3.93-6l2.64-23.72q1.56-1.48,3-3L215.46,186a8,8,0,0,0,6-3.94,107.71,107.71,0,0,0,10.87-26.25,8,8,0,0,0-1.49-7.06Zm-16.1-6.5a73.93,73.93,0,0,1,0,8.68,8,8,0,0,0,1.74,5.48l14.19,17.73a91.57,91.57,0,0,1-6.23,15L187,173.11a8,8,0,0,0-5.1,2.64,74.11,74.11,0,0,1-6.14,6.14,8,8,0,0,0-2.64,5.1l-2.51,22.58a91.32,91.32,0,0,1-15,6.23l-17.74-14.19a8,8,0,0,0-5-1.75h-.48a73.93,73.93,0,0,1-8.68,0,8,8,0,0,0-5.48,1.74L100.45,215.8a91.57,91.57,0,0,1-15-6.23L82.89,187a8,8,0,0,0-2.64-5.1,74.11,74.11,0,0,1-6.14-6.14,8,8,0,0,0-5.1-2.64L46.43,170.6a91.32,91.32,0,0,1-6.23-15l14.19-17.74a8,8,0,0,0,1.74-5.48,73.93,73.93,0,0,1,0-8.68,8,8,0,0,0-1.74-5.48L40.2,100.45a91.57,91.57,0,0,1,6.23-15L69,82.89a8,8,0,0,0,5.1-2.64,74.11,74.11,0,0,1,6.14-6.14A8,8,0,0,0,82.89,69L85.4,46.43a91.32,91.32,0,0,1,15-6.23l17.74,14.19a8,8,0,0,0,5.48,1.74,73.93,73.93,0,0,1,8.68,0,8,8,0,0,0,5.48-1.74L155.55,40.2a91.57,91.57,0,0,1,15,6.23L173.11,69a8,8,0,0,0,2.64,5.1,74.11,74.11,0,0,1,6.14,6.14,8,8,0,0,0,5.1,2.64l22.58,2.51a91.32,91.32,0,0,1,6.23,15l-14.19,17.74A8,8,0,0,0,199.87,123.66Z"/></svg>',
+  users: '<svg viewBox="0 0 256 256" fill="currentColor"><path d="M117.25,157.92a60,60,0,1,0-66.5,0A95.83,95.83,0,0,0,3.53,195.63a8,8,0,1,0,13.4,8.74,80,80,0,0,1,134.14,0,8,8,0,0,0,13.4-8.74A95.83,95.83,0,0,0,117.25,157.92ZM40,108a44,44,0,1,1,44,44A44.05,44.05,0,0,1,40,108Zm210.14,98.7a8,8,0,0,1-11.07-2.33A79.83,79.83,0,0,0,172,168a8,8,0,0,1,0-16,44,44,0,1,0-16.34-84.87,8,8,0,1,1-5.94-14.85,60,60,0,0,1,55.53,105.64,95.83,95.83,0,0,1,47.22,37.71A8,8,0,0,1,250.14,206.7Z"/></svg>',
+  download: '<svg viewBox="0 0 256 256" fill="currentColor"><path d="M224,144v64a8,8,0,0,1-8,8H40a8,8,0,0,1-8-8V144a8,8,0,0,1,16,0v56H208V144a8,8,0,0,1,16,0Zm-101.66,5.66a8,8,0,0,0,11.32,0l40-40a8,8,0,0,0-11.32-11.32L136,124.69V32a8,8,0,0,0-16,0v92.69L93.66,98.34a8,8,0,0,0-11.32,11.32Z"/></svg>',
+  upload: '<svg viewBox="0 0 256 256" fill="currentColor"><path d="M224,144v64a8,8,0,0,1-8,8H40a8,8,0,0,1-8-8V144a8,8,0,0,1,16,0v56H208V144a8,8,0,0,1,16,0ZM93.66,77.66,120,51.31V144a8,8,0,0,0,16,0V51.31l26.34,26.35a8,8,0,0,0,11.32-11.32l-40-40a8,8,0,0,0-11.32,0l-40,40A8,8,0,0,0,93.66,77.66Z"/></svg>',
+  edit: '<svg viewBox="0 0 256 256" fill="currentColor"><path d="M227.31,73.37,182.63,28.68a16,16,0,0,0-22.63,0L36.69,152A15.86,15.86,0,0,0,32,163.31V208a16,16,0,0,0,16,16H92.69A15.86,15.86,0,0,0,104,219.31L227.31,96a16,16,0,0,0,0-22.63ZM92.69,208H48V163.31l88-88L180.69,120ZM192,108.68,147.31,64l24-24L216,84.68Z"/></svg>',
+  save: '<svg viewBox="0 0 256 256" fill="currentColor"><path d="M219.31,72,184,36.69A15.86,15.86,0,0,0,172.69,32H48A16,16,0,0,0,32,48V208a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V83.31A15.86,15.86,0,0,0,219.31,72ZM168,208H88V152h80Zm40,0H184V152a16,16,0,0,0-16-16H88a16,16,0,0,0-16,16v56H48V48H172.69L208,83.31ZM160,72a8,8,0,0,1-8,8H96a8,8,0,0,1,0-16h56A8,8,0,0,1,160,72Z"/></svg>',
+  book: '<svg viewBox="0 0 256 256" fill="currentColor"><path d="M232,48H160a40,40,0,0,0-32,16A40,40,0,0,0,96,48H24a8,8,0,0,0-8,8V200a8,8,0,0,0,8,8H96a24,24,0,0,1,24,24,8,8,0,0,0,16,0,24,24,0,0,1,24-24h72a8,8,0,0,0,8-8V56A8,8,0,0,0,232,48ZM96,192H32V64H96a24,24,0,0,1,24,24V200A39.81,39.81,0,0,0,96,192Zm128,0H160a39.81,39.81,0,0,0-24,8V88a24,24,0,0,1,24-24h64Z"/></svg>',
+  bell: '<svg viewBox="0 0 256 256" fill="currentColor"><path d="M221.8,175.94C216.25,166.38,208,139.33,208,104a80,80,0,1,0-160,0c0,35.34-8.26,62.38-13.81,71.94A16,16,0,0,0,48,200H88.81a40,40,0,0,0,78.38,0H208a16,16,0,0,0,13.8-24.06ZM128,216a24,24,0,0,1-22.62-16h45.24A24,24,0,0,1,128,216ZM48,184c7.7-13.24,16-43.92,16-80a64,64,0,1,1,128,0c0,36.05,8.28,66.73,16,80Z"/></svg>',
+  mail: '<svg viewBox="0 0 256 256" fill="currentColor"><path d="M224,48H32a8,8,0,0,0-8,8V192a16,16,0,0,0,16,16H216a16,16,0,0,0,16-16V56A8,8,0,0,0,224,48Zm-96,85.15L52.57,64H203.43ZM98.71,128,40,181.81V74.19Zm11.84,10.85,12,11.05a8,8,0,0,0,10.82,0l12-11.05,58,53.15H52.57ZM157.29,128,216,74.18V181.82Z"/></svg>',
+  arrowLeft: '<svg viewBox="0 0 256 256" fill="currentColor"><path d="M224,128a8,8,0,0,1-8,8H59.31l58.35,58.34a8,8,0,0,1-11.32,11.32l-72-72a8,8,0,0,1,0-11.32l72-72a8,8,0,0,1,11.32,11.32L59.31,120H216A8,8,0,0,1,224,128Z"/></svg>',
+  arrowRight: '<svg viewBox="0 0 256 256" fill="currentColor"><path d="M221.66,133.66l-72,72a8,8,0,0,1-11.32-11.32L196.69,136H40a8,8,0,0,1,0-16H196.69L138.34,61.66a8,8,0,0,1,11.32-11.32l72,72A8,8,0,0,1,221.66,133.66Z"/></svg>',
+  drag: '<svg viewBox="0 0 256 256" fill="currentColor"><path d="M104,60A12,12,0,1,1,92,48,12,12,0,0,1,104,60Zm60,12a12,12,0,1,0-12-12A12,12,0,0,0,164,72ZM92,116a12,12,0,1,0,12,12A12,12,0,0,0,92,116Zm72,0a12,12,0,1,0,12,12A12,12,0,0,0,164,116ZM92,184a12,12,0,1,0,12,12A12,12,0,0,0,92,184Zm72,0a12,12,0,1,0,12,12A12,12,0,0,0,164,184Z"/></svg>',
+  sun: '<svg viewBox="0 0 256 256" fill="currentColor"><path d="M120,40V16a8,8,0,0,1,16,0V40a8,8,0,0,1-16,0Zm72,88a64,64,0,1,1-64-64A64.07,64.07,0,0,1,192,128Zm-16,0a48,48,0,1,0-48,48A48.05,48.05,0,0,0,176,128ZM58.34,69.66A8,8,0,0,0,69.66,58.34l-16-16A8,8,0,0,0,42.34,53.66Zm0,116.68-16,16a8,8,0,0,0,11.32,11.32l16-16a8,8,0,0,0-11.32-11.32ZM192,72a8,8,0,0,0,5.66-2.34l16-16a8,8,0,0,0-11.32-11.32l-16,16A8,8,0,0,0,192,72Zm5.66,114.34a8,8,0,0,0-11.32,11.32l16,16a8,8,0,0,0,11.32-11.32ZM48,128a8,8,0,0,0-8-8H16a8,8,0,0,0,0,16H40A8,8,0,0,0,48,128Zm80,80a8,8,0,0,0-8,8v24a8,8,0,0,0,16,0V216A8,8,0,0,0,128,208Zm112-88H216a8,8,0,0,0,0,16h24a8,8,0,0,0,0-16Z"/></svg>',
+  moon: '<svg viewBox="0 0 256 256" fill="currentColor"><path d="M233.54,142.23a8,8,0,0,0-8-2,88.08,88.08,0,0,1-109.8-109.8,8,8,0,0,0-10-10,104.84,104.84,0,0,0-52.91,37A104,104,0,0,0,136,224a103.09,103.09,0,0,0,62.52-20.88,104.84,104.84,0,0,0,37-52.91A8,8,0,0,0,233.54,142.23ZM188.9,190.34A88,88,0,0,1,65.66,67.11a89,89,0,0,1,31.4-26A106,106,0,0,0,96,56,104.11,104.11,0,0,0,200,160a106,106,0,0,0,14.92-1.06A89,89,0,0,1,188.9,190.34Z"/></svg>',
+  megaphone: '<svg viewBox="0 0 256 256" fill="currentColor"><path d="M228.54,86.66l-176.06-54A16,16,0,0,0,32,48V192a16,16,0,0,0,16,16,16,16,0,0,0,4.52-.65L136,181.73V192a16,16,0,0,0,16,16h32a16,16,0,0,0,16-16v-29.9l28.54-8.75A16.09,16.09,0,0,0,240,138V102A16.09,16.09,0,0,0,228.54,86.66ZM136,165,48,192V48l88,27Zm48,27H152V176.82L184,167Zm40-54-.11,0L152,160.08V79.92l71.89,22,.11,0v36Z"/></svg>',
+};
+// Icon als <svg>-String mit Groessen-/Zusatzklassen (Default 16x16, inline).
+function icon(name, cls) {
+  const svg = ICONS[name] || "";
+  return svg.replace("<svg ", `<svg class="icn ${cls || ""}" `);
+}
+// Statisches Markup (vor diesem <script>-Tag) traegt nur Marker-Spans
+// (data-icon="name"); da das Script am Ende von <body> steht, ist das
+// gesamte statische DOM zu diesem Zeitpunkt bereits geparst -- kein
+// DOMContentLoaded-Listener noetig.
+document.querySelectorAll("[data-icon]").forEach(el => { el.innerHTML = icon(el.dataset.icon); });
+
 let CLUSTERS = __DATA__;
 const FACTOR = __FACTOR__;
 const TANZU_MHZ = __TANZU_MHZ__;   // MHz je vCPU-Äquivalent (Tanzu-Namespaces)
@@ -1108,7 +1148,7 @@ function applyTheme(t) {
   if (t === "light") document.documentElement.setAttribute("data-theme", "light");
   else document.documentElement.removeAttribute("data-theme");
   const b = document.getElementById("themeBtn");
-  if (b) { b.textContent = t === "light" ? "🌙" : "☀️";
+  if (b) { b.innerHTML = t === "light" ? icon("moon") : icon("sun");
            b.title = t === "light" ? "Dunkles Design" : "Helles Design"; }
   try { localStorage.setItem("kapa_theme", t); } catch (e) {}
 }
@@ -1179,7 +1219,7 @@ function colMenuHtml(tableId) {
     return `<label><input type="checkbox" ${hid[i] ? "" : "checked"} onchange="toggleCol('${tableId}',${i})"> ${esc(label)}</label>`;
   }).join("");
   const anyHidden = Object.keys(hid).length;
-  return `<details class="colmenu"><summary>⚙ Spalten${anyHidden ? " (" + anyHidden + " aus)" : ""}</summary>
+  return `<details class="colmenu"><summary>${icon("gear")} Spalten${anyHidden ? " (" + anyHidden + " aus)" : ""}</summary>
     <div>${items}<label style="border-top:1px solid var(--line);margin-top:4px;padding-top:4px">
       <a href="#" onclick="resetCols('${tableId}');return false" style="color:var(--accent)">alle einblenden</a></label></div></details>`;
 }
@@ -1413,7 +1453,7 @@ function closeInfo() { document.getElementById("infoBg").classList.remove("open"
 
 function rejectRes(id) {
   const r = RES.find(x => x.id === id);
-  askComment({ title: "Antrag ablehnen", okLabel: "✕ Ablehnen", okClass: "danger",
+  askComment({ title: "Antrag ablehnen", okLabel: "Ablehnen", okClass: "danger",
     message: "„" + ((r && r.name) || "?") + "“ – die Ablehnung bleibt " +
              (TTL > 0 ? TTL : 31) + " Tage in der Historie sichtbar." }).then(c => {
     if (c === null) return;
@@ -1432,7 +1472,7 @@ function approveRes(id) {
   const r = RES.find(x => x.id === id);
   const team = r ? currentTeam(r) : null;
   askComment({ title: team ? "Freigeben (" + team + ")" : "Antrag genehmigen",
-    okLabel: "✓ Bestätigen", message: "„" + ((r && r.name) || "?") + "“",
+    okLabel: "Bestätigen", message: "„" + ((r && r.name) || "?") + "“",
     // Bei aktiver Storage-Erweiterung ein Zusatz-Button im Kommentar-Dialog:
     extraLabel: (STOR.enabled && CAN_STORAGE && r) ? "+ Storage-Erweiterung" : "",
     onExtra: () => { closeComment(); openStorReq(r.cluster, "", "", 0, r.id, r.name); }
@@ -1460,7 +1500,7 @@ function delRes(id) {
 }
 function cancelRes(id) {
   const r = RES.find(x => x.id === id);
-  askComment({ title: "Anfrage stornieren", okLabel: "⦸ Stornieren", okClass: "danger",
+  askComment({ title: "Anfrage stornieren", okLabel: "Stornieren", okClass: "danger",
     message: "„" + ((r && r.name) || "?") + "“ bleibt als „storniert“ in der " +
              "Historie und zählt nicht mehr gegen die Kapazität." }).then(c => {
     if (c === null) return;
@@ -1549,7 +1589,12 @@ function importRes(ev) {
 
 // ---- Darstellung ----
 function pct(v, cap) { return cap > 0 ? Math.min(100, v / cap * 100) : 0; }
-function color(p) { return p < 70 ? "var(--ok)" : p < 90 ? "var(--warn)" : "var(--crit)"; }
+// Statusfarbe ist ein geschlossenes 3er-Set (ok/warn/crit) -- daher als
+// Tailwind-Klasse statt als berechneter Inline-Style-String (bleibt so
+// automatisch theme-reaktiv, siehe tailwind.config.js Farbmapping).
+function statusTone(p) { return p < 70 ? "ok" : p < 90 ? "warn" : "crit"; }
+function colorText(p) { return "text-" + statusTone(p); }
+function colorBg(p) { return "bg-" + statusTone(p); }
 function fmt(n) { return n.toLocaleString("de-DE"); }
 function esc(s) { return String(s).replace(/[&<>"']/g, c =>
   ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
@@ -1558,12 +1603,12 @@ function metric(label, used, resv, cap, unit) {
   const pu = pct(used, cap);
   const pr = pct(used + resv, cap) - pu;
   const free = Math.round((cap - used - resv) * 10) / 10;
-  const c = color(pu + pr);
+  const c = colorText(pu + pr);
   return `<div class="metric">
     <div class="row"><span>${label}</span>
       <span>${fmt(used)} belegt${resv ? " + " + fmt(resv) + " reserviert" : ""} / ${fmt(cap)} ${unit} ·
-      <span class="free" style="color:${c}">${fmt(free)} ${unit} frei</span></span></div>
-    <div class="bar"><i style="width:${pu}%;background:${color(pu)}"></i><i class="r" style="width:${pr}%"></i></div>
+      <span class="free ${c}">${fmt(free)} ${unit} frei</span></span></div>
+    <div class="bar"><i class="bar-fill ${colorBg(pu)}" style="--w:${pu}%"></i><i class="r bar-fill" style="--w:${pr}%"></i></div>
   </div>`;
 }
 
@@ -1596,7 +1641,7 @@ function card(c, idx, isTotal) {
     return `<tr${net}><td>${esc(d.name)}</td><td>${typ}</td>
       <td class="num">${fmt(Math.round(d.cap_gb))}</td>
       <td class="num">${fmt(Math.round(d.used_gb))}</td>
-      <td class="num" style="color:${color(p)}">${p}%</td>
+      <td class="num ${colorText(p)}">${p}%</td>
       <td class="num">${fmt(Math.round((d.cap_gb - d.used_gb) * 10) / 10)}</td></tr>`;
   }).join("");
   const dsLink = m => `<a href="#" onclick="setDsSort('${m}');return false"${DS_SORT === m ? ' style="font-weight:600;color:var(--text)"' : ""}>${m === "size" ? "Größe" : "Belegung"}</a>`;
@@ -1618,7 +1663,7 @@ function card(c, idx, isTotal) {
     `<tr><td>${esc(r.name)}${r.change ? ' <span style="color:var(--muted)">' + esc(r.change) + '</span>' : ''}${isTotal ? ' <span style="color:var(--muted)">(' + esc(r.cluster) + ')</span>' : ''}</td>
      <td class="num">${r.vcpu}</td><td class="num">${fmt(r.ram_gb)}</td><td class="num">${fmt(r.storage_gb || 0)}</td>
      <td>${fmtDate(validUntil(r))}</td><td>${stBadge(r)}</td>
-     <td>${canCancel(r) ? `<button class="del" title="Anfrage stornieren" onclick="cancelRes('${esc(r.id)}')">⦸ Storno</button>` : ""}</td></tr>`).join("");
+     <td>${canCancel(r) ? `<button class="del" title="Anfrage stornieren" onclick="cancelRes('${esc(r.id)}')">${icon("close")} Storno</button>` : ""}</td></tr>`).join("");
   const foreignNote = foreignN ? `<div style="color:var(--muted);font-size:12px;margin-top:6px">+ ${foreignN} genehmigte Reservierung(en) anderer Teams – in „reserviert“ berücksichtigt.</div>` : "";
   const resTable = (shownRes.length ?
     `<table><tr><th>Anfrage</th><th class="num">vCPU</th><th class="num">RAM (GB)</th><th class="num">Storage (GB)</th><th>gültig bis</th><th>Status</th><th></th></tr>${resRows}</table>`
@@ -1634,7 +1679,7 @@ function card(c, idx, isTotal) {
       <div class="kpi">reserviert<b>${fmt(rvCpu)} vCPU / ${fmt(rvRam)} GB</b></div>
       ${(tz.cpu || tz.ram) ? `<div class="kpi">davon Tanzu-Namespaces<b>${fmt(tz.cpu)} vCPU / ${fmt(tz.ram)} GB</b></div>` : ""}
       <div class="kpi">Ø VM<b>${c.vmCount?Math.round(c.vcpuUsed/c.vmCount*10)/10:0} vCPU / ${c.vmCount?Math.round(c.ramUsed/c.vmCount):0} GB</b></div>
-      ${(c.workload != null && VIS.workload) ? `<div class="kpi">Workload (vROps)<b style="color:${color(c.workload)}">${c.workload} %</b></div>` : ""}
+      ${(c.workload != null && VIS.workload) ? `<div class="kpi">Workload (vROps)<b class="${colorText(c.workload)}">${c.workload} %</b></div>` : ""}
     </div>
     ${(c.namespaces || []).length ? `
     <div class="resbox">
@@ -1744,7 +1789,7 @@ let DS_SORT = "size";
 function setDsSort(m) { DS_SORT = m; rerenderCard(); }
 function rerenderCard() {
   if (hoverIdx !== null && hc.style.display === "block")
-    hc.innerHTML = '<button class="hc-close" title="Schließen" onclick="hideCard()">✕</button>' +
+    hc.innerHTML = '<button class="hc-close" title="Schließen" onclick="hideCard()">' + icon("close") + '</button>' +
                    card(hoverIdx === -1 ? TOTAL : CLUSTERS[hoverIdx], hoverIdx, hoverIdx === -1);
 }
 
@@ -1777,7 +1822,7 @@ function miniBar(used, resv, cap) {
   // Prozentwert als Tooltip: die Auslastung ist damit nicht nur über die Farbe
   // erkennbar (Farbsehschwäche).
   const tip = Math.round(pu + pr) + "% belegt" + (resv ? " (inkl. Reservierungen)" : "");
-  return `<div class="bar mini" title="${tip}"><i style="width:${pu}%;background:${color(pu + pr)}"></i><i class="r" style="width:${pr}%"></i></div>`;
+  return `<div class="bar mini" title="${tip}"><i class="bar-fill ${colorBg(pu + pr)}" style="--w:${pu}%"></i><i class="r bar-fill" style="--w:${pr}%"></i></div>`;
 }
 
 function row(c, idx, isTotal) {
@@ -1790,20 +1835,20 @@ function row(c, idx, isTotal) {
         rvStor = sumStorage(rv);
   const fCpu = c.vcpuFree - rvCpu;
   const fRam = Math.round((c.ramFree - rvRam) * 10) / 10;
-  const cCpu = color(pct(c.vcpuUsed + rvCpu, c.vcpuCap));
-  const cRam = color(pct(c.ramUsed + rvRam, c.ramCap));
+  const cCpu = colorText(pct(c.vcpuUsed + rvCpu, c.vcpuCap));
+  const cRam = colorText(pct(c.ramUsed + rvRam, c.ramCap));
   const hasStor = (c.storageCap || 0) > 0;
   const fStor = Math.round(((c.storageFree || 0) - rvStor) * 10) / 10;
-  const cStor = color(pct((c.storageUsed || 0) + rvStor, c.storageCap || 0));
+  const cStor = colorText(pct((c.storageUsed || 0) + rvStor, c.storageCap || 0));
   return `<tr class="${isTotal ? 'trtotal' : ''}">
     <td class="cl" title="Details anzeigen" onclick="toggleCard(${idx},this)">${esc(c.name)}${srcBadge(c.source)}</td>
     <td class="num">${fmt(c.hostCount)}</td>
     <td class="num">${fmt(c.vmCount)}</td>
-    <td class="num free" style="color:${cCpu}">${fmt(fCpu)}</td>
+    <td class="num free ${cCpu}">${fmt(fCpu)}</td>
     <td class="barcol">${miniBar(c.vcpuUsed, rvCpu, c.vcpuCap)}</td>
-    <td class="num free" style="color:${cRam}">${fmt(fRam)}</td>
+    <td class="num free ${cRam}">${fmt(fRam)}</td>
     <td class="barcol">${miniBar(c.ramUsed, rvRam, c.ramCap)}</td>
-    <td class="num free ${hasStor ? 'cl' : ''}" style="color:${hasStor ? cStor : 'var(--muted)'}" title="${hasStor ? 'Datastores/LUNs anzeigen' : 'keine Storage-Daten aus Aria'}" ${hasStor ? `onclick="openStorage(${idx},this)"` : ''}>${hasStor ? fmt(fStor) : '–'}</td>
+    <td class="num free ${hasStor ? 'cl ' + cStor : 'text-muted'}" title="${hasStor ? 'Datastores/LUNs anzeigen' : 'keine Storage-Daten aus Aria'}" ${hasStor ? `onclick="openStorage(${idx},this)"` : ''}>${hasStor ? fmt(fStor) : '–'}</td>
     <td class="barcol">${hasStor ? miniBar(c.storageUsed || 0, rvStor, c.storageCap) : ''}</td>
     <td class="num">${rv.length || "–"}${pend ? ` <span class="st pend">+${pend}</span>` : ""}</td></tr>`;
 }
@@ -1882,7 +1927,7 @@ function runBackup() {
       if (d.error) { st.style.color = "var(--crit)"; st.textContent = "Fehlgeschlagen: " + d.error; }
       else {
         st.style.color = "var(--ok)";
-        st.textContent = "✓ Backup erstellt: " + d.backup
+        st.innerHTML = icon("check") + " Backup erstellt: " + esc(d.backup)
           + (d.rotated ? " · " + d.rotated + " alte(s) Archiv(e) gelöscht" : "");
       }
     })
@@ -1926,7 +1971,7 @@ function renderTokenTable() {
          <label title="POST /api/v1/storage-requests/{id}/done"><input type="checkbox"
            ${t.write_storage ? "checked" : ""} onchange="setTokenScope('${esc(id)}')"
            data-scope="storage" data-tid="${esc(id)}"> Storage</label></td>
-       <td><button class="del" onclick="delToken('${esc(id)}')">✕ Widerrufen</button></td></tr>`; })
+       <td><button class="del" onclick="delToken('${esc(id)}')">${icon("close")} Widerrufen</button></td></tr>`; })
     .join("");
   document.getElementById("ttbody").innerHTML =
     `<tr><td colspan="6"><input class="filterbox" style="width:100%" id="tknName"
@@ -1993,10 +2038,10 @@ function renderPager(id, total, start, shown, pages, st) {
   bar.style.display = "flex";
   const opts = PAGE_SIZES.map(n => `<option value="${n}"${n===st.size?" selected":""}>${n}</option>`).join("");
   bar.innerHTML =
-    `<button class="btn" ${st.page<=0?"disabled":""} onclick="pageGo('${id}',-1)">← Zurück</button>
-     <span style="color:var(--muted)">Einträge ${start+1}–${start+shown} · Seite ${st.page+1} von ${pages}</span>
-     <button class="btn" ${st.page>=pages-1?"disabled":""} onclick="pageGo('${id}',1)">Weiter →</button>
-     <label style="color:var(--muted);margin-left:auto">Pro Seite <select class="filterbox" onchange="pageSize('${id}',this.value)">${opts}</select></label>`;
+    `<button class="btn" ${st.page<=0?"disabled":""} onclick="pageGo('${id}',-1)">${icon("arrowLeft")} Zurück</button>
+     <span class="text-muted">Einträge ${start+1}–${start+shown} · Seite ${st.page+1} von ${pages}</span>
+     <button class="btn" ${st.page>=pages-1?"disabled":""} onclick="pageGo('${id}',1)">Weiter ${icon("arrowRight")}</button>
+     <label class="text-muted" style="margin-left:auto">Pro Seite <select class="filterbox" onchange="pageSize('${id}',this.value)">${opts}</select></label>`;
 }
 // Zuordnung Tabelle -> Render-Funktion (Funktionsdeklarationen sind gehoistet).
 const PAGE_RENDER = {
@@ -2170,15 +2215,15 @@ function renderTeams() {
         <td><input class="filterbox" style="width:100%" id="teamEdit" value="${esc(t)}"
              onkeydown="if(event.key==='Enter')saveTeamRename(${i});if(event.key==='Escape')cancelEditTeam()"></td>
         ${mailCell}
-        <td><button class="btn approve" onclick="saveTeamRename(${i})">✓ Speichern</button>
+        <td><button class="btn approve" onclick="saveTeamRename(${i})">${icon("check")} Speichern</button>
             <button class="btn" onclick="cancelEditTeam()">Abbrechen</button></td></tr>`;
     }
     return `<tr><td class="num">${i + 1}</td><td>${esc(t)}</td>
      ${mailCell}
      <td><button class="edit" title="nach oben" ${i === 0 ? "disabled" : ""} onclick="moveTeam(${i},-1)">↑</button>
          <button class="edit" title="nach unten" ${i === TEAMS.length - 1 ? "disabled" : ""} onclick="moveTeam(${i},1)">↓</button>
-         <button class="edit" title="Team umbenennen" onclick="editTeam(${i})">✎ Umbenennen</button>
-         <button class="del" title="Team entfernen" onclick="delTeam(${i})">✕ Entfernen</button></td></tr>`;
+         <button class="edit" title="Team umbenennen" onclick="editTeam(${i})">${icon("edit")} Umbenennen</button>
+         <button class="del" title="Team entfernen" onclick="delTeam(${i})">${icon("close")} Entfernen</button></td></tr>`;
   }).join("");
   document.getElementById("tmbody").innerHTML =
     `<tr><td></td><td><input class="filterbox" style="width:100%" id="newTeam"
@@ -2251,7 +2296,7 @@ function saveNotify() {
   apiNotify("PUT", body).then(d => {
     if (d && d.notify) NOTIFY = d.notify;
     const st = document.getElementById("notifySaved");
-    if (st) { st.textContent = "✓ gespeichert"; setTimeout(() => { if (st) st.textContent = ""; }, 2500); }
+    if (st) { st.innerHTML = icon("check") + " gespeichert"; setTimeout(() => { if (st) st.textContent = ""; }, 2500); }
     render();
   }).catch(() => notify("Speichern der Mail-Regeln fehlgeschlagen."));
 }
@@ -2281,7 +2326,7 @@ function saveMailTemplate() {
   apiNotify("PUT", body).then(d => {
     if (d && d.notify) NOTIFY = d.notify;
     const st = document.getElementById("tplSaved");
-    if (st) { st.textContent = "✓ gespeichert"; setTimeout(() => { if (st) st.textContent = ""; }, 2500); }
+    if (st) { st.innerHTML = icon("check") + " gespeichert"; setTimeout(() => { if (st) st.textContent = ""; }, 2500); }
   }).catch(() => notify("Speichern der Mail-Vorlage fehlgeschlagen."));
 }
 function resetMailTemplate() {
@@ -2322,7 +2367,7 @@ function saveAnnounce() {
     .then(d => {
       if (d && d.announce) { ANN_CFG = d.announce; renderAnnounce(); }
       const st = document.getElementById("annSaved");
-      if (st) { st.textContent = "✓ gespeichert"; setTimeout(() => { if (st) st.textContent = ""; }, 2500); }
+      if (st) { st.innerHTML = icon("check") + " gespeichert"; setTimeout(() => { if (st) st.textContent = ""; }, 2500); }
     }).catch(() => notify("Speichern der Ankündigung fehlgeschlagen."));
 }
 // ---- Sichtbarkeits-Matrix pflegen (Verwaltung -> Sichtbarkeit) ----
@@ -2361,7 +2406,7 @@ function saveVisibility() {
     .then(d => {
       if (d && d.visibility) { VIS_CFG.visibility = d.visibility; renderVisibility(); }
       const st = document.getElementById("visSaved");
-      if (st) { st.textContent = "✓ gespeichert – gilt beim nächsten Laden der Seite"; setTimeout(() => { if (st) st.textContent = ""; }, 4000); }
+      if (st) { st.innerHTML = icon("check") + " gespeichert – gilt beim nächsten Laden der Seite"; setTimeout(() => { if (st) st.textContent = ""; }, 4000); }
     }).catch(() => notify("Speichern der Sichtbarkeit fehlgeschlagen."));
 }
 
@@ -2404,7 +2449,7 @@ function vsanOvrRow(cl, f) {
     <td><input class="filterbox vovrCl" list="vsanClusterList" style="width:180px" value="${esc(cl)}" placeholder="Cluster suchen …"></td>
     <td><select class="filterbox vovrPol" style="width:auto" onchange="const t=this.closest('tr').querySelector('.vovrFac'); if(this.value) t.value=this.value">${vsanOptions(f)}</select></td>
     <td class="num"><input class="filterbox vovrFac" type="number" min="0.05" max="1" step="0.01" style="width:80px" value="${f}"></td>
-    <td><button class="del" title="Override entfernen" onclick="this.closest('tr').remove()">✕</button></td>
+    <td><button class="del" title="Override entfernen" onclick="this.closest('tr').remove()">${icon("close")}</button></td>
   </tr>`;
 }
 function renderVsanOverrides(ovr) {
@@ -2444,7 +2489,7 @@ function saveStorageCfg() {
       if (d.vsan_factor != null) { if (vf) vf.value = d.vsan_factor; if (vp) vp.innerHTML = vsanOptions(d.vsan_factor); }
       renderVsanOverrides(d.vsan_overrides || {});
       ["storCfgSaved","storMinSaved"].forEach(id => { const st = document.getElementById(id);
-        if (st) { st.textContent = "✓ gespeichert"; setTimeout(() => { if (st) st.textContent = ""; }, 2500); } }); })
+        if (st) { st.innerHTML = icon("check") + " gespeichert"; setTimeout(() => { if (st) st.textContent = ""; }, 2500); } }); })
     .catch(() => notify("Speichern fehlgeschlagen."));
 }
 function loadStorageCfg() {
@@ -2488,7 +2533,7 @@ function saveNetCfg() {
       const vx2 = document.getElementById("netExclVlans");
       if (vx2) vx2.value = d.exclude_vlans || "";
       const ok = document.getElementById("netCfgSaved");
-      if (ok) { ok.textContent = "✓ gespeichert";
+      if (ok) { ok.innerHTML = icon("check") + " gespeichert";
                 setTimeout(() => { ok.textContent = ""; }, 2500); }
       pollStatus();
     })
@@ -2524,7 +2569,7 @@ function saveRefreshCfg() {
                              storage: val("rcStorage"), tz: tz }) })
     .then(r => r.ok ? r.json() : r.json().then(e => Promise.reject(e)))
     .then(d => { const ok = document.getElementById("rcSaved");
-      if (ok) { ok.textContent = "✓ gespeichert";
+      if (ok) { ok.innerHTML = icon("check") + " gespeichert";
                 setTimeout(() => { ok.textContent = ""; }, 2500); }
       showServerNow(d.now, d.tz); })
     .catch(e => notify((e && e.error) ? e.error : "Speichern fehlgeschlagen."));
@@ -2669,7 +2714,7 @@ function renderWebhooks() {
     <td>${whEventsCell(w.events)}</td>
     <td><input class="filterbox whSecret" type="password" autocomplete="new-password" style="width:150px" placeholder="${w.has_secret?"•••• (gesetzt)":"optional"}"></td>
     <td><input class="filterbox whDesc" style="width:130px" value="${esc(w.desc||"")}" placeholder="z. B. AWX"></td>
-    <td style="white-space:nowrap"><button class="btn" onclick="testWebhook(this)">Test</button> <button class="del" title="Entfernen" onclick="this.closest('tr').remove()">✕</button></td>
+    <td style="white-space:nowrap"><button class="btn" onclick="testWebhook(this)">Test</button> <button class="del" title="Entfernen" onclick="this.closest('tr').remove()">${icon("close")}</button></td>
   </tr>`).join("") || `<tr><td colspan="6" style="color:var(--muted)">Noch kein Webhook konfiguriert.</td></tr>`;
 }
 function addWebhook() {
@@ -2695,7 +2740,7 @@ function saveWebhooks() {
     .then(r => r.ok ? r.json() : Promise.reject())
     .then(d => { if (d.endpoints) { WEBHOOKS = d.endpoints; renderWebhooks(); }
       const ok = document.getElementById("whSaved");
-      if (ok) { ok.textContent = "✓ gespeichert"; setTimeout(()=>{ok.textContent="";},2500); } })
+      if (ok) { ok.innerHTML = icon("check") + " gespeichert"; setTimeout(()=>{ok.textContent="";},2500); } })
     .catch(() => notify("Speichern fehlgeschlagen."));
 }
 function testWebhook(btn) {
@@ -2707,7 +2752,7 @@ function testWebhook(btn) {
   fetch("api/v1/webhooks/test", { method:"POST", headers:{"Content-Type":"application/json"},
       body: JSON.stringify({ url: url, secret: secret }) })
     .then(r => r.json())
-    .then(d => notify(d.ok ? ("✓ Test gesendet – Empfänger antwortete mit HTTP " + d.status)
+    .then(d => notify(d.ok ? ("Test gesendet – Empfänger antwortete mit HTTP " + d.status)
                             : ("Test fehlgeschlagen: " + (d.error || "unbekannt"))))
     .catch(() => notify("Test fehlgeschlagen (Netzwerk/Server)."))
     .then(() => { btn.disabled = false; btn.textContent = old; });
@@ -2726,7 +2771,7 @@ function renderImports() {
     <td>${esc(s.name)}</td><td class="num">${s.clusters}</td>
     <td class="num">${s.hosts}</td><td class="num">${fmt(s.vms)}</td>
     <td>${esc(fmtDate(s.imported_on))}</td><td>${esc(s.imported_by || "–")}</td>
-    <td><button class="del" title="Offline-Quelle entfernen" onclick="delImport('${esc(s.name)}')">✕ Löschen</button></td>
+    <td><button class="del" title="Offline-Quelle entfernen" onclick="delImport('${esc(s.name)}')">${icon("close")} Löschen</button></td>
   </tr>`).join("") ||
     `<tr><td colspan="7" style="color:var(--muted)">Noch keine Offline-Quelle importiert.</td></tr>`;
 }
@@ -2749,7 +2794,7 @@ function importOffline(ev) {
       .then(x => {
         if (!x.ok) { if (st) st.textContent = ""; return notify(x.j.error || "Import fehlgeschlagen."); }
         const skip = (x.j.skipped || []);
-        if (st) { st.textContent = "✓ importiert (" + x.j.clusters + " Cluster) – Daten werden neu berechnet";
+        if (st) { st.innerHTML = icon("check") + " importiert (" + x.j.clusters + " Cluster) – Daten werden neu berechnet";
                   setTimeout(() => { st.textContent = ""; }, 5000); }
         if (skip.length) notify("Hinweis: " + skip.length + " Cluster ohne Hosts wurden übersprungen: "
                                 + skip.join(", ") + ".\n(Ein Cluster ohne ESXi-Hosts hat keine planbare Kapazität.)");
@@ -2785,7 +2830,7 @@ function importKapaCsv(ev) {
       notify("Datei konnte nicht gelesen werden."); });
 }
 function delImport(name) {
-  askConfirm({ title: "Offline-Quelle entfernen", okLabel: "✕ Löschen", okClass: "danger",
+  askConfirm({ title: "Offline-Quelle entfernen", okLabel: "Löschen", okClass: "danger",
     message: "Quelle „" + name + "“ samt ihrer Cluster aus der Übersicht entfernen?\n" +
              "Bestehende Kapazitätsanfragen auf diese Cluster bleiben erhalten." })
     .then(ok => { if (!ok) return;
@@ -2834,7 +2879,7 @@ function saveAutoApprove() {
     .then(d => {
       if (d && d.autoapprove) { AA_CFG = d.autoapprove; renderAutoApprove(); }
       const st = document.getElementById("aaSaved");
-      if (st) { st.textContent = "✓ gespeichert"; setTimeout(() => { if (st) st.textContent = ""; }, 2500); }
+      if (st) { st.innerHTML = icon("check") + " gespeichert"; setTimeout(() => { if (st) st.textContent = ""; }, 2500); }
     }).catch(() => notify("Speichern der Auto-Freigabe fehlgeschlagen."));
 }
 
@@ -2934,7 +2979,7 @@ function saveSelector() {
     const cats = SELECTOR.map(s => s.category);
     Object.keys(SEL_VALUES).forEach(k => { if (!cats.includes(k)) delete SEL_VALUES[k]; });
     const st = document.getElementById("selSaved");
-    if (st) { st.textContent = "✓ gespeichert"; setTimeout(() => { if (st) st.textContent = ""; }, 2500); }
+    if (st) { st.innerHTML = icon("check") + " gespeichert"; setTimeout(() => { if (st) st.textContent = ""; }, 2500); }
     render();
   }).catch(() => notify("Speichern des Selektors fehlgeschlagen."));
 }
@@ -2945,7 +2990,7 @@ function renderSelector() {
   const rows = [0, 1, 2].map(i => {
     const cur = SELECTOR[i] || {category: "", label: ""};
     const warn = cur.category && !tagCategories().includes(cur.category)
-      ? ' <span class="st pend" title="Kategorie derzeit in keinem Cluster-Tag">⚠ derzeit ohne Werte</span>' : "";
+      ? ' <span class="st pend" title="Kategorie derzeit in keinem Cluster-Tag">${icon("warning")} derzeit ohne Werte</span>' : "";
     return `<tr><td class="num">${i + 1}</td>
       <td><select id="sel${i}" class="filterbox" style="max-width:280px">
         <option value="">– keine –</option>
@@ -2957,7 +3002,7 @@ function renderSelector() {
   }).join("");
   document.getElementById("selbody").innerHTML = rows +
     `<tr><td></td><td colspan="2">
-       <button class="btn approve" onclick="saveSelector()">✓ Selektor speichern</button>
+       <button class="btn approve" onclick="saveSelector()">${icon("check")} Selektor speichern</button>
        <span id="selSaved" style="color:var(--ok);font-size:12px;margin-left:8px"></span>
        ${all.length ? "" : '<span style="color:var(--muted);font-size:12px;margin-left:8px">Noch keine Tag-Kategorien – erst nach dem ersten Aria-Abruf verfügbar.</span>'}
      </td></tr>`;
@@ -2987,7 +3032,7 @@ function renderRoleNames() {
      <td><input class="filterbox" style="width:100%" id="rn_${k}" value="${esc(ROLE_NAMES[k] || k)}"
           onkeydown="if(event.key==='Enter')saveRoleNames()"></td></tr>`).join("");
   document.getElementById("rnbody").innerHTML = rows +
-    `<tr><td></td><td><button class="btn approve" onclick="saveRoleNames()">✓ Bezeichnungen speichern</button></td></tr>`;
+    `<tr><td></td><td><button class="btn approve" onclick="saveRoleNames()">${icon("check")} Bezeichnungen speichern</button></td></tr>`;
 }
 
 // Rollen-Auswahl (Dropdown) und das rollenabhängige Feld (Team/Abteilung)
@@ -3044,7 +3089,7 @@ function renderAdmTable() {
         <td>${roleSelect("editRole", cur.role, "syncRoleField('edit','" + esc(u) + "')")}</td>
         <td id="editFieldCell">${roleField("editDept", cur.role, cur.abteilung || "", u)}</td>
         <td class="srcCol">${srcCheckboxes("editSrc", cur.sources || [])}</td>
-        <td><button class="btn approve" onclick="saveEditRole('${esc(u)}')">✓ Speichern</button>
+        <td><button class="btn approve" onclick="saveEditRole('${esc(u)}')">${icon("check")} Speichern</button>
             <button class="btn" onclick="cancelEditRole()">Abbrechen</button></td></tr>`;
     }
     // Team-Zuweisung prüfen: nach Umbenennen/Löschen eines Teams (oder aus der
@@ -3052,15 +3097,15 @@ function renderAdmTable() {
     const needsTeam = r.role === "anforderer" || r.role === "reviewer";
     const orphan = needsTeam && r.abteilung && TEAMS.length && !TEAMS.includes(r.abteilung);
     const warn = orphan
-      ? ' <span class="st rej" title="Dieses Team gibt es nicht (mehr) – bitte neu zuweisen">⚠ unbekannt</span>'
-      : (needsTeam && !r.abteilung ? ' <span class="st pend" title="Ohne Team: sieht nur eigene Anfragen bzw. kann nichts freigeben">⚠ kein Team</span>' : "");
+      ? ' <span class="st rej" title="Dieses Team gibt es nicht (mehr) – bitte neu zuweisen">${icon("warning")} unbekannt</span>'
+      : (needsTeam && !r.abteilung ? ' <span class="st pend" title="Ohne Team: sieht nur eigene Anfragen bzw. kann nichts freigeben">${icon("warning")} kein Team</span>' : "");
     const mailCell = isGroup ? esc(u)
-      : `<span title="${r.mail ? 'AD-Mail: ' + esc(r.mail) : 'keine AD-Mail aufgelöst (nur mit --ad-mail-attribute)'}">${esc(u)}${r.mail ? ' <span style="color:var(--muted)" title="AD-Mail: ' + esc(r.mail) + '">✉</span>' : ''}</span>`;
+      : `<span title="${r.mail ? 'AD-Mail: ' + esc(r.mail) : 'keine AD-Mail aufgelöst (nur mit --ad-mail-attribute)'}">${esc(u)}${r.mail ? ' <span style="color:var(--muted)" title="AD-Mail: ' + esc(r.mail) + '">' + icon("mail") + '</span>' : ''}</span>`;
     return `<tr><td>${esc(typ)}</td><td>${mailCell}</td><td>${esc(ROLE_NAMES[r.role] || r.role)}</td>
      <td>${esc(r.abteilung || "–")}${warn}</td>
      <td class="srcCol">${srcDisplay(r.sources || [])}</td>
-     <td>${isGroup ? `<button class="edit" title="Mitglieder der AD-Gruppe im AD nachschlagen" onclick="checkGroup('${esc(u)}')">👥 Mitglieder</button> ` : ""}<button class="edit" title="Rolle/Team bearbeiten" onclick="editRole('${esc(u)}')">✎ Bearbeiten</button>
-         <button class="del" title="Zuweisung entfernen" onclick="delRole('${esc(u)}')">✕ Löschen</button></td></tr>`;
+     <td>${isGroup ? `<button class="edit" title="Mitglieder der AD-Gruppe im AD nachschlagen" onclick="checkGroup('${esc(u)}')">${icon("users")} Mitglieder</button> ` : ""}<button class="edit" title="Rolle/Team bearbeiten" onclick="editRole('${esc(u)}')">${icon("edit")} Bearbeiten</button>
+         <button class="del" title="Zuweisung entfernen" onclick="delRole('${esc(u)}')">${icon("close")} Löschen</button></td></tr>`;
   }).join("");
   const firstRole = ROLE_ORDER[0];
   document.getElementById("mtbody").innerHTML =
@@ -3129,7 +3174,7 @@ function renderResTable() {
      <td>${fmtDate(r.created)}</td><td>${fmtDate(validUntil(r))}</td><td>${stBadge(r)}</td>
      ${showDec ? `<td>${esc(r.approved_by || r.rejected_by || r.cancelled_by || "–")}</td>` : ""}
      <td>${esc(r.comment || "–")}</td>
-     <td>${canCancel(r) ? `<button class="del" title="Anfrage stornieren" onclick="cancelRes('${esc(r.id)}')">⦸ Storno</button>` : ""}</td></tr>`).join("");
+     <td>${canCancel(r) ? `<button class="del" title="Anfrage stornieren" onclick="cancelRes('${esc(r.id)}')">${icon("close")} Storno</button>` : ""}</td></tr>`).join("");
   document.getElementById("rtbody").innerHTML =
     `<tr class="trtotal"><td></td><td>Summe genehmigt (${appr.length} von ${list.length})</td><td></td><td></td>
      <td class="num">${fmt(sumCpu(appr))}</td><td class="num">${fmt(sumRam(appr))}</td><td class="num">${fmt(sumStorage(appr))}</td>
@@ -3164,10 +3209,10 @@ function renderAppTable() {
   const action = r => {
     if (canDecide(r)) {
       const team = currentTeam(r);
-      const lbl = team ? "✓ Freigeben (" + esc(team) + ")" : "✓ Genehmigen";
+      const lbl = team ? icon("check") + " Freigeben (" + esc(team) + ")" : icon("check") + " Genehmigen";
       return `<button class="btn approve" onclick="approveRes('${esc(r.id)}')">${lbl}</button>
        <button class="btn" style="color:var(--crit)" title="Ablehnen"
-               onclick="rejectRes('${esc(r.id)}')">✕ Ablehnen</button>`;
+               onclick="rejectRes('${esc(r.id)}')">${icon("close")} Ablehnen</button>`;
     }
     const team = currentTeam(r);
     return '<span class="st pend">wartet auf ' + (team ? esc(team) : "Genehmigung") + '</span>';
@@ -3179,7 +3224,7 @@ function renderAppTable() {
     const cpuOk = (r.vcpu || 0) <= f.cpu, ramOk = (r.ram_gb || 0) <= f.ram;
     const cell = (v, ok, unit) =>
       `<td class="num free" style="color:${ok ? "var(--ok)" : "var(--crit)"}"
-           title="${ok ? "Antrag passt" : "Antrag überschreitet die freie Kapazität"}">${fmt(v)}${ok ? "" : " ⚠"}</td>`;
+           title="${ok ? "Antrag passt" : "Antrag überschreitet die freie Kapazität"}">${fmt(v)}${ok ? "" : " " + icon("warning")}</td>`;
     return cell(f.cpu, cpuOk) + cell(f.ram, ramOk);
   };
   const rows = paginate("atable", list).map(r =>
@@ -3245,7 +3290,7 @@ function renderStorage() {
           <td style="font-family:monospace;font-size:12px">${esc(r.naa||"–")}</td>
           <td>${esc(r.requested_by||"–")} · ${fmtDate(r.requested_on)}</td>
           <td>${done?`erledigt${r.done_by?" ("+esc(r.done_by)+")":""}`:'<b style="color:var(--warn)">offen</b>'}</td>
-          ${IS_ADMIN?`<td style="white-space:nowrap"><button class="btn" onclick="toggleStorDone('${esc(r.id)}',${done?'false':'true'})">${done?"wieder offen":"✓ erledigt"}</button> <button class="del" title="Anfrage löschen (z. B. versehentlich angelegt)" onclick="delStorReq('${esc(r.id)}')">✕ Löschen</button></td>`:""}
+          ${IS_ADMIN?`<td style="white-space:nowrap"><button class="btn" onclick="toggleStorDone('${esc(r.id)}',${done?'false':'true'})">${done?"wieder offen":icon("check") + " erledigt"}</button> <button class="del" title="Anfrage löschen (z. B. versehentlich angelegt)" onclick="delStorReq('${esc(r.id)}')">${icon("close")} Löschen</button></td>`:""}
         </tr>`; }).join("")}
       </table>
     </div>` : "";
@@ -3279,7 +3324,7 @@ function toggleStorDone(id, done) {
     .catch(() => notify("Ändern fehlgeschlagen."));
 }
 function delStorReq(id) {
-  askConfirm({ title: "Storage-Anfrage löschen", okLabel: "✕ Löschen", okClass: "danger",
+  askConfirm({ title: "Storage-Anfrage löschen", okLabel: "Löschen", okClass: "danger",
     message: "Diese Storage-Anfrage wirklich löschen? Das lässt sich nicht rückgängig machen." })
     .then(ok => { if (!ok) return;
       fetch("api/v1/storage-request/" + encodeURIComponent(id), { method: "DELETE" })
@@ -3295,7 +3340,7 @@ function openStorReq(cluster, lun, naa, curGb, resId, resName) {
   const opts = luns.map(l => `<option value="${esc(l.name)}" data-naa="${esc(l.naa)}" data-cap="${Math.round(l.cap)}"${l.name===lun?" selected":""}>${esc(l.name)} (${fmt(Math.round(l.cap))} GB${l.naa?", "+esc(l.naa):""})</option>`).join("");
   const selLun = luns.find(l => l.name === lun) || luns[0];
   const initCap = selLun ? Math.round(selLun.cap) : 0;
-  askConfirm({ title: "Storage-Erweiterung – " + cluster, okLabel: "✓ Anfragen",
+  askConfirm({ title: "Storage-Erweiterung – " + cluster, okLabel: "Anfragen",
     html: `
     <div style="font-size:13px;line-height:1.7">
       <label style="display:flex;align-items:center;gap:7px;color:var(--text);font-size:13px;margin:0 0 8px;cursor:pointer"><input type="radio" name="storKind" value="expand" style="width:auto;margin:0;flex:none" ${canExpand?"checked":"disabled"} onchange="storKindUI()"><span>Bestehende LUN vergrößern${canExpand?"":" <span style='color:var(--muted)'>(keine erweiterbare LUN)</span>"}</span></label>
@@ -3406,7 +3451,7 @@ function render() {
                  : '<tr><td colspan="10" style="color:var(--muted)">Kein Cluster entspricht dem Filter.</td></tr>');
   reSort("ktable"); renderColMenu("ktable"); applyCols("ktable");
   if (hoverIdx !== null && hc.style.display === "block")
-    hc.innerHTML = '<button class="hc-close" title="Schließen" onclick="hideCard()">✕</button>' +
+    hc.innerHTML = '<button class="hc-close" title="Schließen" onclick="hideCard()">' + icon("close") + '</button>' +
                    card(hoverIdx === -1 ? TOTAL : CLUSTERS[hoverIdx], hoverIdx, hoverIdx === -1);
 }
 
@@ -3417,7 +3462,7 @@ const hc = document.getElementById("hovercard");
 function showCard(idx, rowEl) {
   if (idx !== hoverIdx) CARD_NET_Q = "";   // beim Öffnen eines anderen Clusters Suche leeren
   hoverIdx = idx;
-  hc.innerHTML = '<button class="hc-close" title="Schließen" onclick="hideCard()">✕</button>' +
+  hc.innerHTML = '<button class="hc-close" title="Schließen" onclick="hideCard()">' + icon("close") + '</button>' +
                  card(idx === -1 ? TOTAL : CLUSTERS[idx], idx, idx === -1);
   hc.style.display = "block";
   // Ohne rowEl (Deep-Link) oben links positionieren
@@ -3693,7 +3738,7 @@ const I18N = {
   "Change-/Jira-Ticket": "change/Jira ticket",
   "Benutzer/Mail": "user/mail",
   "Team-Name wie im Dashboard": "team name as shown in the dashboard",
-  "⬇ Beispiel-CSV (Vorlage)": "⬇ Sample CSV (template)",
+  "Beispiel-CSV (Vorlage)": "Sample CSV (template)",
   "Vorlage mit Kopfzeile und zwei Beispielzeilen – in Excel öffnen und befüllen": "Template with header row and two sample rows – open in Excel and fill in",
   // Kapa-CSV-Import
   "Übernimmt eure bestehende Excel-Liste: in Excel als CSV speichern und hier hochladen. Erkannte Spalten (Reihenfolge egal, per Kopfzeile): Kapa-Nummer, Projekt, Cluster, CPU, RAM, Storage, Datum — optional Change, Anforderer, Team. Alle Zeilen kommen als genehmigt an (Freigebender „Import\"); die Gültigkeit rechnet ab dem Original-Datum — ältere Einträge laufen entsprechend sofort ab (wird gemeldet). Bereits vorhandene Kapa-Nummern werden übersprungen, ein erneuter Import erzeugt also keine Duplikate.": "Takes over your existing Excel list: save it as CSV in Excel and upload it here. Recognized columns (any order, by header): Kapa-Nummer, Projekt, Cluster, CPU, RAM, Storage, Datum — optional Change, Anforderer, Team. All rows arrive as approved (approver “Import”); validity counts from the original date — older entries expire immediately accordingly (reported). Existing kapa numbers are skipped, so re-importing does not create duplicates.",
@@ -3707,13 +3752,13 @@ const I18N = {
   "Kapazität (VMs)": "Capacity (VMs)",
   "Netzwerk (Portgruppen)": "Network (port groups)",
   "Storage (Datastores)": "Storage (datastores)",
-  "✓ Intervalle speichern": "✓ Save intervals",
-  "✓ Intervalle & Zeitzone speichern": "✓ Save intervals & time zone",
+  "Intervalle speichern": "Save intervals",
+  "Intervalle & Zeitzone speichern": "Save intervals & time zone",
   "Webhooks (Ereignisse an externe Systeme)": "Webhooks (events to external systems)",
   "Bei einem Ereignis schickt das Dashboard einen HTTP-POST mit JSON an die hinterlegten Ziele — für ITSM (ServiceNow/Jira), Automatisierung (Ansible AWX, n8n), Pipelines (GitLab/GitHub) oder Chat (Slack/Teams). Jeder Payload wird mit dem Secret HMAC-SHA256-signiert (Header X-Kapa-Signature), damit der Empfänger die Echtheit prüfen kann. Secrets werden nie zurück angezeigt und liegen bewusst nicht im Backup.":
     "On an event the dashboard sends an HTTP POST with JSON to the configured targets — for ITSM (ServiceNow/Jira), automation (Ansible AWX, n8n), pipelines (GitLab/GitHub) or chat (Slack/Teams). Each payload is HMAC-SHA256-signed with the secret (header X-Kapa-Signature) so the receiver can verify authenticity. Secrets are never shown back and are deliberately not in the backup.",
   "Aktiv": "Active", "Ziel-URL": "Target URL", "Ereignisse": "Events",
-  "+ Webhook hinzufügen": "+ Add webhook", "✓ Webhooks speichern": "✓ Save webhooks",
+  "+ Webhook hinzufügen": "+ Add webhook", "Webhooks speichern": "Save webhooks",
   "Anfrage angelegt": "Request created", "Anfrage genehmigt": "Request approved",
   "Anfrage abgelehnt": "Request rejected",
   "Storage-Anfrage angelegt": "Storage request created",
@@ -3760,7 +3805,7 @@ const I18N = {
   "Für Bereiche ohne Netzanbindung an ein vROps: Ein Kollege führt das PowerCLI-Skript gegen das isolierte vCenter aus und lädt das erzeugte JSON hier mit einem Quellnamen hoch. Die Cluster erscheinen dann wie eine eigene vROps-Quelle — inklusive Kapazitätsanfragen, VLAN-Suche und Storage-Übersicht. Die Daten sind statisch (Stand = Import-Datum, als Tag am Cluster sichtbar); die Auto-Freigabe klammert diese Cluster bewusst aus. Ein erneuter Import unter demselben Namen ersetzt die Quelle.": "For areas without network access to a vROps: a colleague runs the PowerCLI script against the isolated vCenter and uploads the resulting JSON here under a source name. The clusters then appear like a separate vROps source — including capacity requests, VLAN search and storage overview. The data is static (as of the import date, visible as a tag on the cluster); auto-approval deliberately excludes these clusters. Re-importing under the same name replaces the source.",
   "Aufruf: .\\kapa_export.ps1 -Server vcenter.insel.local": "Run: .\\kapa_export.ps1 -Server vcenter.island.local",
   "Offline-Quellen (Cluster ohne vROps-Anbindung)": "Offline sources (clusters without vROps connection)",
-  "⬇ PowerCLI-Skript (kapa_export.ps1)": "⬇ PowerCLI script (kapa_export.ps1)",
+  "PowerCLI-Skript (kapa_export.ps1)": "PowerCLI script (kapa_export.ps1)",
   "PowerCLI-Skript, das das Import-JSON erzeugt": "PowerCLI script that produces the import JSON",
   "JSON importieren": "Import JSON",
   "Quellname, z. B. RZ-Insel": "Source name, e.g. DC-Island",
@@ -3769,7 +3814,7 @@ const I18N = {
   "importiert am": "imported on",
   "Noch keine Offline-Quelle importiert.": "No offline source imported yet.",
   "importiere …": "importing …",
-  "✓ importiert – Daten werden neu berechnet": "✓ imported – data is being recalculated",
+  "importiert – Daten werden neu berechnet": "imported – data is being recalculated",
   "Bitte zuerst einen Quellnamen eingeben (z. B. RZ-Insel).": "Please enter a source name first (e.g. DC-Island).",
   "Ungültige Datei: es fehlt die clusters-Liste.": "Invalid file: the clusters list is missing.",
   "Import fehlgeschlagen.": "Import failed.",
@@ -3787,7 +3832,7 @@ const I18N = {
   "Portgruppen mit diesen VLAN-IDs. Einzelne IDs und Bereiche, durch Komma getrennt — z. B. 99, 205, 3900-3999. Wirkt nur auf Portgruppen mit einer einzelnen VLAN-ID (Trunk-Bereiche blendet bereits die Uplink-Erkennung aus). Leer = kein Filter.": "Port groups with these VLAN IDs. Single IDs and ranges, separated by comma — e.g. 99, 205, 3900-3999. Applies only to port groups with a single VLAN ID (trunk ranges are already hidden by the uplink detection). Empty = no filter.",
   "Netzwerk-Filter (Portgruppen ausblenden)": "Network filter (hide port groups)",
   "VLAN-ID-Filter": "VLAN ID filter",
-  "✓ gespeichert": "✓ saved",
+  "gespeichert": "saved",
   "Netzwerk-Filter geändert": "Network filter changed",
   "z. B. heartbeat, *-replikation, PG-Test-*": "e.g. heartbeat, *-replication, PG-Test-*",
   "z. B. 99, 205, 3900-3999": "e.g. 99, 205, 3900-3999",
@@ -3807,7 +3852,7 @@ const I18N = {
   "Backup fehlgeschlagen": "Backup failed",
   "API-Zugriff abgewiesen": "API access denied",
   "API-Schreibzugriff abgewiesen": "API write access denied",
-  "👥 Mitglieder": "👥 Members",
+  "Mitglieder": "Members",
   "direkte Mitglied(er)": "direct member(s)",
   "Liste gekürzt – es werden nicht alle Mitglieder angezeigt.": "List truncated – not all members are shown.",
   "Keine direkten Benutzer-Mitglieder gefunden.": "No direct user members found.",
@@ -3820,7 +3865,7 @@ const I18N = {
   "Wunschgröße (GB):": "Desired size (GB):",
   "Kommentar:": "Comment:",
   "Neue LUN, Größe (TB):": "New LUN, size (TB):",
-  "✓ Anfragen": "✓ Request",
+  "Anfragen": "Request",
   "optional, z. B. Change/Grund": "optional, e.g. change/reason",
   "(keine erweiterbare LUN)": "(no expandable LUN)",
   "Storage-Erweiterung angefragt": "Storage expansion requested",
@@ -3828,7 +3873,7 @@ const I18N = {
   "– wie Prüfen & Freigeben funktioniert": "– how reviewing & approving works",
   "Reviewer-Handbuch öffnen": "Open reviewer handbook",
   "Benutzerhandbuch öffnen": "Open user guide",
-  "📖 Benutzerhandbuch": "📖 User guide",
+  "Benutzerhandbuch": "User guide",
   "Storage-Anfrage löschen": "Delete storage request",
   "Storage-Erweiterung gelöscht": "Storage expansion deleted",
   "Diese Storage-Anfrage wirklich löschen? Das lässt sich nicht rückgängig machen.":
@@ -3866,7 +3911,7 @@ const I18N = {
   "Archiv der abgelehnten und stornierten Kapazitätsanfragen (Historie, zählt nicht gegen die Kapazität). Sichtbarkeit wie bei den Reservierungen: Anforderer sehen die des eigenen Teams, Reviewer/Admin/Auditor alle.": "Archive of rejected and cancelled capacity requests (history, does not count against capacity). Visibility as with reservations: requesters see their own team's, reviewer/admin/auditor see all.",
   "Alle Datastores/LUNs über alle Cluster. Neu angefragte Erweiterungen sind hervorgehoben; das Storage-Team ruft sie per API ab (/api/v1/storage-requests, auch als CSV inkl. NAA).": "All datastores/LUNs across all clusters. Newly requested expansions are highlighted; the storage team fetches them via API (/api/v1/storage-requests, also as CSV incl. NAA).",
   "Ist die Ankündigung aktiv, sieht jeder Benutzer sie einmal als Popup – nach dem Klick auf „Verstanden\" erscheint sie nicht erneut. Eine Änderung an Titel oder Text zeigt sie allen Benutzern noch einmal. Beispiele: Neues aus einem Release, neue Datacenter/Cluster, Wartungsfenster.": "When the announcement is active, every user sees it once as a popup – after clicking “Understood” it does not appear again. A change to the title or text shows it to all users once more. Examples: news from a release, new datacenter/cluster, maintenance window.",
-  "Anträge durchlaufen die Teams von oben nach unten. Erst wenn alle Teams freigegeben haben, ist ein Antrag genehmigt. Ohne Teams gilt einstufig (Admin genehmigt direkt). Reviewer werden oben ihrem Team zugewiesen. Die E-Mail/Verteiler je Team wird angeschrieben, sobald das Team im Workflow an der Reihe ist (siehe „Mail-Benachrichtigungen\"); mit „✓ Team-Adressen speichern\" sichern.": "Requests pass through the teams from top to bottom. Only once all teams have approved is a request granted. Without teams it is single-stage (admin approves directly). Reviewers are assigned to their team above. The per-team email/distribution list is notified as soon as the team is up in the workflow (see “Mail notifications”); save with “✓ Save team addresses”.",
+  "Anträge durchlaufen die Teams von oben nach unten. Erst wenn alle Teams freigegeben haben, ist ein Antrag genehmigt. Ohne Teams gilt einstufig (Admin genehmigt direkt). Reviewer werden oben ihrem Team zugewiesen. Die E-Mail/Verteiler je Team wird angeschrieben, sobald das Team im Workflow an der Reihe ist (siehe „Mail-Benachrichtigungen\"); mit „Team-Adressen speichern\" sichern.": "Requests pass through the teams from top to bottom. Only once all teams have approved is a request granted. Without teams it is single-stage (admin approves directly). Reviewers are assigned to their team above. The per-team email/distribution list is notified as soon as the team is up in the workflow (see “Mail notifications”); save with “Save team addresses”.",
   "Erfüllt der Ziel-Cluster nach Abzug des Antrags alle Schwellen, gibt das System markierte Stufen automatisch frei (Freigebender: „Auto-Freigabe\", vollständig im Audit-Log). Geprüft wird bei der Antragstellung und immer, wenn eine Stufe neu an der Reihe ist. Greift eine Schwelle nicht oder fehlen Daten (z. B. kein Workload-Wert), geht der Antrag ganz normal an das Team — die Auto-Freigabe lehnt nie ab.": "If the target cluster meets all thresholds after deducting the request, the system automatically approves marked stages (approver: “Auto-approval”, fully in the audit log). It is checked at submission and whenever a stage is newly up. If a threshold is not met or data is missing (e.g. no workload value), the request goes to the team as normal — auto-approval never rejects.",
   "Haken = die Rolle sieht das Merkmal. Wirkt im UI und im Datenpaket (serverseitig entfernt). Administratoren sehen immer alles. Hier geht es nur um Sichtbarkeit — Rechte (Genehmigen, Verwaltung, Team-Sicht der Anforderer) bleiben fest an den Rollen.": "Check = the role sees the feature. Applies in the UI and in the data package (removed server-side). Administrators always see everything. This is only about visibility — permissions (approve, administration, requesters' team view) stay fixed to the roles.",
   "Ist dies aktiv, können Freigebende beim Genehmigen und alle Berechtigten in der Storage-Übersicht eine LUN-Vergrößerung oder eine neue LUN anfragen. Das Storage-Team ruft die offenen Anfragen per API ab (/api/v1/storage-requests, auch CSV inkl. NAA) und meldet mit einem Token-Schreibrecht „Storage\" die Umsetzung zurück.": "When this is active, approvers (when granting) and all authorized users in the storage overview can request a LUN expansion or a new LUN. The storage team fetches the open requests via API (/api/v1/storage-requests, also CSV incl. NAA) and reports completion back with a token “Storage” write permission.",
@@ -3897,7 +3942,7 @@ const I18N = {
 "Cluster filtern …": "Filter clusters …", "Cluster suchen …": "Search clusters …",
 "Schließen": "Close", "Ausblenden": "Hide", "Abbrechen": "Cancel", "Bestätigen": "Confirm",
 "Hinweis": "Notice", "Übernehmen": "Apply", "Zurücksetzen": "Reset",
-"⚙ Spalten": "⚙ Columns", "alle einblenden": "show all", "Spalten ein-/ausblenden": "Show/hide columns",
+"Spalten": "Columns", "alle einblenden": "show all", "Spalten ein-/ausblenden": "Show/hide columns",
 // --- Kapazitätstabelle ---
 "Cluster": "Cluster", "Hosts": "Hosts", "VMs": "VMs", "vCPU frei": "vCPU free",
 "vCPU-Auslastung": "vCPU usage", "RAM frei (GB)": "RAM free (GB)", "RAM-Auslastung": "RAM usage",
@@ -3957,14 +4002,14 @@ const I18N = {
 "Archiv der": "Archive of", "abgelehnten": "rejected", "stornierten": "cancelled",
 "Kapazitätsanfragen (Historie, zählt nicht gegen die Kapazität). Sichtbarkeit wie bei den Reservierungen: Anforderer sehen die des eigenen Teams, Reviewer/Admin/Auditor alle.":
   "capacity requests (history – does not count against capacity). Visibility as with reservations: requesters see their own team's, reviewers/admins/auditors see all.",
-"Anfrage stornieren": "Cancel request", "⦸ Storno": "⦸ Cancel",
+"Anfrage stornieren": "Cancel request", "Storno": "Cancel", "Stornieren": "Cancel", 
 "Kommentar": "Comment", "Kommentar (optional)": "Comment (optional)",
 "kurze Begründung, max. 64 Zeichen": "short reason, max. 64 characters",
 // --- Genehmigungen ---
 "Cluster frei vCPU": "Cluster free vCPU", "Cluster frei RAM": "Cluster free RAM",
 "Frei im Ziel-Cluster nach genehmigten Reservierungen": "Free in target cluster after approved reservations",
 "Keine offenen Anträge – alles genehmigt.": "No open requests – everything approved.",
-"Antrag ablehnen": "Reject request", "Ablehnen": "Reject", "✕ Ablehnen": "✕ Reject",
+"Antrag ablehnen": "Reject request", "Ablehnen": "Reject",
 "Team ist dran": "team's turn",
 // --- Verwaltung: Reiter + Benutzer/Rollen ---
 "Benutzer & Rollen": "Users & roles", "Mail": "Mail", "Backup & Konfiguration": "Backup & configuration",
@@ -3973,11 +4018,11 @@ const I18N = {
 "benutzer@firma.local oder vorname.nachname": "user@example.com or first.last",
 "– Team wählen –": "– select team –", "+ Zuweisen": "+ Assign",
 "Rolle/Team bearbeiten": "Edit role/team", "Zuweisung entfernen": "Remove assignment",
-"Rollenzuweisung entfernen": "Remove role assignment", "Entfernen": "Remove", "✕ Entfernen": "✕ Remove",
+"Rollenzuweisung entfernen": "Remove role assignment", "Entfernen": "Remove",
 "Noch keine Rollen zugewiesen.": "No roles assigned yet.",
 "Ohne Team: sieht nur eigene Anfragen bzw. kann nichts freigeben": "Without a team: sees only own requests / cannot approve",
 "Dieses Team gibt es nicht (mehr) – bitte neu zuweisen": "This team no longer exists – please reassign",
-"⚠ unbekannt": "⚠ unknown", "⚠ kein Team": "⚠ no team",
+"unbekannt": "unknown", "kein Team": "no team",
 "Administrator": "Administrator", "Anforderer": "Requester", "Reviewer": "Reviewer",
 "Technische Prüfung": "Technical audit",
 "(admin)": "(admin)", "(anforderer)": "(requester)", "(reviewer)": "(reviewer)", "(auditor)": "(auditor)",
@@ -3988,17 +4033,17 @@ const I18N = {
 "Angezeigte Bezeichnung": "Displayed label",
 "Die angezeigten Namen der Rollen sind frei wählbar. Die Rechte bleiben an der internen Rolle (linke Spalte) gebunden und ändern sich dadurch nicht.":
   "Role display names can be chosen freely. Permissions stay bound to the internal role (left column) and are not affected.",
-"✓ Bezeichnungen speichern": "✓ Save labels",
+"Bezeichnungen speichern": "Save labels",
 "Genehmigungs-Teams (Prüfreihenfolge)": "Approval teams (review order)",
 "Anträge durchlaufen die Teams von oben nach unten. Erst wenn alle Teams freigegeben haben, ist ein Antrag genehmigt. Ohne Teams gilt einstufig (Admin genehmigt direkt). Reviewer werden oben ihrem Team zugewiesen. Die":
   "Requests pass through the teams from top to bottom. Only when all teams have approved is a request fully approved. Without teams, approval is single-stage (admin approves directly). Reviewers are assigned to their team above. The",
 "E-Mail / Verteiler (Team ist dran)": "Email / list (team's turn)", "E-Mail/Verteiler": "Email/list",
-"je Team wird angeschrieben, sobald das Team im Workflow an der Reihe ist (siehe „Mail-Benachrichtigungen\"); mit „✓ Team-Adressen speichern\" sichern.":
-  "each team is notified as soon as it is up in the workflow (see \"Mail notifications\"); save with \"✓ Save team addresses\".",
+"je Team wird angeschrieben, sobald das Team im Workflow an der Reihe ist (siehe „Mail-Benachrichtigungen\"); mit „Team-Adressen speichern\" sichern.":
+  "each team is notified as soon as it is up in the workflow (see \"Mail notifications\"); save with \"Save team addresses\".",
 "Neues Team, z. B. Team Betrieb": "New team, e.g. Operations team",
 "+ Hinzufügen": "+ Add", "nach oben": "move up", "nach unten": "move down",
-"✎ Umbenennen": "✎ Rename", "Team umbenennen": "Rename team", "Team entfernen": "Remove team",
-"✓ Speichern": "✓ Save", "✓ Team-Adressen speichern": "✓ Save team addresses",
+"Umbenennen": "Rename", "Team umbenennen": "Rename team", "Team entfernen": "Remove team",
+"Speichern": "Save", "Team-Adressen speichern": "Save team addresses",
 "Keine Teams – einstufig (Admin genehmigt direkt).": "No teams – single-stage (admin approves directly).",
 "team@firma.de": "team@example.com", "verteiler@firma.de": "list@example.com",
 // --- Verwaltung: Mail ---
@@ -4019,13 +4064,13 @@ const I18N = {
 "Erinnerung nach": "Remind after",
 "Tagen Wartezeit – danach alle so viele Tage erneut, bis entschieden ist.":
   "days of waiting – then again every that many days until decided.",
-"✓ Mail-Regeln speichern": "✓ Save mail rules",
+"Mail-Regeln speichern": "Save mail rules",
 "Mail-Vorlage (HTML)": "Mail template (HTML)",
 "Betreff und HTML-Text der Reservierungs-Mails. Verfügbare Variablen unten einfach anklicken, um sie an der Cursor-Position einzufügen. Leer lassen = eingebaute Standardvorlage. Die Vorschau rechts rendert beim Tippen live mit Beispieldaten.":
   "Subject and HTML body of the reservation emails. Click a variable below to insert it at the cursor position. Leave empty = built-in default template. The preview on the right renders live with sample data as you type.",
 "Betreff": "Subject", "HTML-Text": "HTML body",
 "Standardbetreff": "Default subject", "Standardvorlage (leer lassen)": "Default template (leave empty)",
-"✓ Vorlage speichern": "✓ Save template", "Vorschau": "Preview", "Standard einsetzen": "Insert default",
+"Vorlage speichern": "Save template", "Vorschau": "Preview", "Standard einsetzen": "Insert default",
 "Vorschau (Beispieldaten) · Betreff:": "Preview (sample data) · subject:",
 "aktuell": "up to date",
 "Vorschau nicht erreichbar": "preview unavailable",
@@ -4038,7 +4083,7 @@ const I18N = {
 "letzter Kommentar": "last comment", "ausführende Person": "acting person",
 "Zeitpunkt der Mail": "time of the email",
 "aktuell zuständiges Team (bei „Team ist dran“)": "team currently up (for \"team's turn\")",
-"← Zurück": "← Back", "Weiter →": "Next →", "Pro Seite": "Per page",
+"Zurück": "Back", "Weiter": "Next", "Pro Seite": "Per page",
 "vROps-Quelle": "vROps source", "vROps-Quellen": "vROps sources",
 "nichts angehakt = alle Quellen": "nothing ticked = all sources",
 "alle Quellen": "all sources", "vCPU-Anzahl": "vCPU count",
@@ -4055,8 +4100,8 @@ const I18N = {
 "Anzeigename (leer = Kategorie)": "Display name (empty = category)",
 "Kategorie derzeit in keinem Cluster-Tag": "category currently in no cluster tag",
 "Noch keine Tag-Kategorien – erst nach dem ersten Aria-Abruf verfügbar.": "No tag categories yet – available after the first Aria refresh.",
-"✓ Selektor speichern": "✓ Save selector",
-"⚠ derzeit ohne Werte": "⚠ currently without values",
+"Selektor speichern": "Save selector",
+"derzeit ohne Werte": "currently without values",
 "API-Tokens für externe Anwendungen (Endpunkte unter /api/v1/; Schreibrechte je Token per Klick)": "API tokens for external applications (endpoints under /api/v1/; write permissions per token, one click)",
 "API-Dokumentation öffnen": "Open API documentation",
 "(interaktiv, mit „Ausführen\") ·": "(interactive, with \"Run\") ·",
@@ -4064,12 +4109,12 @@ const I18N = {
 "Anwendung": "Application", "Name der Anwendung, z. B. Grafana oder CMDB-Sync": "Application name, e.g. Grafana or CMDB sync",
 "+ Token erzeugen": "+ Create token", "Token-Anfang": "Token prefix",
 "zuletzt benutzt": "last used", "erstellt": "created", "angelegt": "created",
-"✕ Widerrufen": "✕ Revoke", "API-Token widerrufen": "Revoke API token", "Widerrufen": "Revoke",
+"Widerrufen": "Revoke", "API-Token widerrufen": "Revoke API token",
 "Keine API-Tokens vorhanden.": "No API tokens.",
 "Neues API-Token – wird nur EINMAL angezeigt, jetzt kopieren:": "New API token – shown only ONCE, copy it now:",
 "Token konnte nicht erstellt werden.": "Token could not be created.",
 "Widerruf fehlgeschlagen.": "Revoke failed.",
-"Backup": "Backup", "💾 Backup jetzt erstellen": "💾 Create backup now",
+"Backup": "Backup", "Backup jetzt erstellen": "Create backup now",
 "Sichert alle Laufzeitdaten (Reservierungen, Rollen, Teams, Selektor, Log, Tokens) als tar.gz auf das konfigurierte SFTP-Ziel. Läuft automatisch nach dem konfigurierten Intervall – hier lässt sich ein Backup sofort auslösen.":
   "Saves all runtime data (reservations, roles, teams, selector, log, tokens) as tar.gz to the configured SFTP target. Runs automatically at the configured interval – here you can trigger a backup immediately.",
 "Backup läuft … (kann einen Moment dauern)": "Backup running … (may take a moment)",
@@ -4120,24 +4165,24 @@ const I18N = {
 "Kapazität": "Capacity",
 "Die aktuelle Cluster-Übersicht als CSV (Semikolon, für Excel) – mit den effektiv freien Werten nach Reservierungen und Tanzu-Namespaces. Rolle und Quellen-Filter werden serverseitig berücksichtigt.":
   "The current cluster overview as CSV (semicolons, for Excel) – with the effective free values after reservations and Tanzu namespaces. Role and source filters are applied server-side.",
-"⬇ Kapazität als CSV": "⬇ Capacity as CSV",
+"Kapazität als CSV": "Capacity as CSV",
 "CSV für Excel und Reports; JSON eignet sich als Sicherung oder zum Übertragen auf eine andere Installation.":
   "CSV for Excel and reports; JSON is suited as a backup or for moving to another installation.",
-"⬇ Reservierungen als CSV": "⬇ Reservations as CSV",
-"⬇ Reservierungen als JSON": "⬇ Reservations as JSON",
-"⬆ Reservierungen importieren (JSON)": "⬆ Import reservations (JSON)",
+"Reservierungen als CSV": "Reservations as CSV",
+"Reservierungen als JSON": "Reservations as JSON",
+"Reservierungen importieren (JSON)": "Import reservations (JSON)",
 "Automatisierung": "Automation",
 "Alle Exporte gibt es auch skriptbar über die REST-API (Bearer-Token, Verwaltung → API) – z. B. für Grafana, CMDB oder das Storage-Team.":
   "All exports are also scriptable via the REST API (bearer token, Administration → API) – e.g. for Grafana, CMDB or the storage team.",
-"📘 API-Dokumentation öffnen": "📘 Open API documentation",
-"⚠ Achtung: Der JSON-Import ersetzt den kompletten Reservierungs-Bestand durch den Inhalt der Datei – gedacht für Wiederherstellung oder Umzug. Vorher exportieren!":
-  "⚠ Caution: the JSON import replaces the entire reservation inventory with the file contents – meant for restore or migration. Export first!",
+"API-Dokumentation öffnen": "Open API documentation",
+"Achtung: Der JSON-Import ersetzt den kompletten Reservierungs-Bestand durch den Inhalt der Datei – gedacht für Wiederherstellung oder Umzug. Vorher exportieren!":
+  "Caution: the JSON import replaces the entire reservation inventory with the file contents – meant for restore or migration. Export first!",
 "Alte Reservierungen übernehmen?": "Adopt old reservations?",
 "Benutzername oder Passwort falsch.": "Wrong username or password.",
 "Zu viele Fehlversuche – bitte einige Minuten warten und erneut versuchen.": "Too many failed attempts – please wait a few minutes and try again.",
 "Nicht angemeldet": "Not signed in",
 "Keine Berechtigung für diese Aktion": "No permission for this action",
-"✎ Bearbeiten": "✎ Edit", "✕ Löschen": "✕ Delete",
+"Bearbeiten": "Edit", "Löschen": "Delete",
 "Hilfe": "Help", "Info Kapa-Berechnung": "How capacity is calculated",
 // --- Ankündigung ---
 "Ankündigung": "Announcement",
@@ -4150,7 +4195,7 @@ const I18N = {
 "z. B. Neu: Datacenter RZ-Sued verfügbar": "e.g. New: datacenter RZ-Sued available",
 "Der Text des Popups (Zeilenumbrüche bleiben erhalten, kein HTML).": "The popup text (line breaks are kept, no HTML).",
 "aktiv – Popup wird angezeigt": "active – popup is shown",
-"✓ Ankündigung speichern": "✓ Save announcement",
+"Ankündigung speichern": "Save announcement",
 "Verstanden": "Got it",
 "Speichern der Ankündigung fehlgeschlagen.": "Saving the announcement failed.",
 // --- Tanzu-Namespaces ---
@@ -4174,7 +4219,7 @@ const I18N = {
 "Nur angehakte Teams werden automatisch freigegeben — z. B. Team 1 prüft manuell, die weiteren Stufen laufen automatisch durch. Ohne Teams gilt der Haken sinngemäß für die einstufige Freigabe.":
   "Only checked teams are approved automatically — e.g. team 1 reviews manually, the later stages pass through automatically. Without teams, the thresholds apply to the single-stage approval.",
 "Keine Teams – einstufig (Haken entfällt, es gelten nur die Schwellen).": "No teams – single-stage (no checkboxes, only the thresholds apply).",
-"✓ Auto-Freigabe speichern": "✓ Save auto-approval",
+"Auto-Freigabe speichern": "Save auto-approval",
 "Speichern der Auto-Freigabe fehlgeschlagen.": "Saving the auto-approval failed.",
 "genehmigt (auto)": "approved (auto)",
 // --- Sichtbarkeits-Matrix ---
@@ -4190,8 +4235,8 @@ const I18N = {
 "Netzwerk & VLAN-Suche": "Network & VLAN search",
 "Storage-Drilldown (LUNs)": "Storage drill-down (LUNs)",
 "Entschieden von": "Decided by",
-"✓ Sichtbarkeit speichern": "✓ Save visibility",
-"✓ gespeichert – gilt beim nächsten Laden der Seite": "✓ saved – takes effect on next page load",
+"Sichtbarkeit speichern": "Save visibility",
+"gespeichert – gilt beim nächsten Laden der Seite": "saved – takes effect on next page load",
 "Speichern der Sichtbarkeit fehlgeschlagen.": "Saving the visibility failed.",
 "Schreibrechte": "Write permissions",
 // --- Storage-Erweiterungen ---
@@ -4204,7 +4249,7 @@ const I18N = {
 "Storage-Erweiterung angefragt.": "Storage expansion requested.",
 "Anfrage fehlgeschlagen.": "Request failed.",
 "Ändern fehlgeschlagen.": "Change failed.",
-"wieder offen": "reopen", "✓ erledigt": "✓ done",
+"wieder offen": "reopen", "erledigt": "done",
 "+ Storage-Erweiterung": "+ Storage expansion",
 "Bestehende LUN vergrößern": "Grow an existing LUN",
 "Neue LUN anlegen": "Create a new LUN",
@@ -4229,7 +4274,7 @@ const I18N = {
 "Leer = kein Filter.": "Empty = no filter.",
 ". Leer = kein Namensfilter.": ". Empty = no name filter.",
 "z. B. iso, backup, template": "e.g. iso, backup, template",
-"✓ Speichern & anwenden": "✓ Save & apply",
+"Speichern & anwenden": "Save & apply",
 "Storage-Erweiterungen erlauben": "Allow storage expansions",
 "Storage-Erweiterungen erlauben ": "Allow storage expansions ",
 "Ist dies aktiv, können Freigebende beim Genehmigen und alle Berechtigten in der Storage-Übersicht eine LUN-Vergrößerung oder eine neue LUN anfragen. Das Storage-Team ruft die offenen Anfragen per API ab":
@@ -4281,8 +4326,8 @@ const I18N_RX = [
   [/^Genehmigungen \((\d+)\)$/, "Approvals ($1)"],
   [/^wartet auf: (.+)$/, "waiting for: $1"],
   [/^wartet auf (.+)$/, "waiting for $1"],
-  [/^✓ Freigeben \((.+)\)$/, "✓ Approve ($1)"],
-  [/^✓ Freigeben$/, "✓ Approve"],
+  [/^Freigeben \((.+)\)$/, "Approve ($1)"],
+  [/^Freigeben$/, "Approve"],
   [/^(\d+) von (\d+)$/, "$1 of $2"],
   [/^(\d+)% belegt$/, "$1% used"],
   [/^(\d+)% belegt \(inkl\. Reservierungen\)$/, "$1% used (incl. reservations)"],
