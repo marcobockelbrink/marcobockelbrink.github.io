@@ -775,6 +775,27 @@ container variants live under [`deploy/`](deploy/):
 The former RPM/Ansible variants were retired with v2.10 (last in v2.9.1).
 Details and the decision guide: [`deploy/README.en.md`](deploy/README.en.md).
 
+## Verifying a release
+
+Every release is anchored cryptographically:
+
+- **Signed tags** — `git tag -v vX.Y` (SSH-signed, shown as *Verified* on GitHub).
+- **Container image provenance** (SLSA build attestation):
+  ```
+  gh attestation verify oci://ghcr.io/marcobockelbrink/kapa-dashboard:VERSION -R marcobockelbrink/vmware
+  ```
+- **Signed source bundle** attached to each release — a reproducible
+  `kapa-dashboard-vX.Y.tar.gz` (the deployable set: `aria_kapa.py` + `kapa/` +
+  `frontend/`) plus `SHA256SUMS` and a keyless **cosign** signature bundle:
+  ```
+  cosign verify-blob \
+    --bundle SHA256SUMS.cosign.bundle \
+    --certificate-identity-regexp '^https://github.com/marcobockelbrink/vmware/\.github/workflows/release\.yml@' \
+    --certificate-oidc-issuer https://token.actions.githubusercontent.com \
+    SHA256SUMS
+  sha256sum -c SHA256SUMS
+  ```
+
 ## Contributing
 
 Contributions welcome! Setup, tests and the pull-request flow are in
