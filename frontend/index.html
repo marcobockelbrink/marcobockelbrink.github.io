@@ -68,6 +68,11 @@ try { var _t = new URLSearchParams(location.search).get("theme")
   .bar { height:10px; background:var(--field); border-radius:5px; overflow:hidden; display:flex; }
   .bar i { display:block; height:100%; }
   .bar .r { background:repeating-linear-gradient(45deg,var(--res),var(--res) 4px,#4f46e5 4px,#4f46e5 8px); }
+  /* Balken-/Ampel-Utilities: Füllbreite über die Variable --w, Farbe je
+     Auslastung (statusTone/colorBg/colorText im JS). */
+  .bar-fill { width:var(--w,0%); }
+  .bg-ok { background:var(--ok); } .bg-warn { background:var(--warn); } .bg-crit { background:var(--crit); }
+  .text-ok { color:var(--ok); } .text-warn { color:var(--warn); } .text-crit { color:var(--crit); }
   .free { font-weight:600; }
   .kpis { display:flex; gap:14px; margin-top:10px; flex-wrap:wrap; }
   .ctabs { margin:0 0 14px; }

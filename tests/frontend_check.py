@@ -71,6 +71,25 @@ HARNESS = r"""
       if (!html || html.indexOf("card") < 0)
         throw new Error("card() lieferte kein Karten-Markup");
     });
+  // Auslastungs-Balken: nicht nur „JS läuft", sondern auch WIRKLICH SICHTBAR.
+  // Fängt CSS-Regressionen (fehlende .bar-fill/.bg-*-Regel -> Breite 0),
+  // die einem reinen JS-Fehler-Check entgehen. Prüft die berechnete Breite
+  // und die Ampelfarbe eines echten, gefüllten Balkens im DOM.
+  run("Balken sichtbar (Breite + Farbe)", function () {
+    var fills = [].slice.call(document.querySelectorAll(".bar .bar-fill"))
+      .filter(function (el) {
+        var w = (el.style.getPropertyValue("--w") || "").trim();
+        return w && w !== "0%";   // ein Balken mit echter Soll-Füllung
+      });
+    if (!fills.length) throw new Error("kein gefüllter .bar-fill im DOM");
+    var el = fills[0], cs = getComputedStyle(el);
+    if (parseFloat(cs.width) < 1)
+      throw new Error("Balken-Füllung hat 0px Breite (--w wirkt nicht; "
+                      + ".bar-fill-Regel fehlt?)");
+    var bg = cs.backgroundColor;
+    if (!bg || bg === "rgba(0, 0, 0, 0)" || bg === "transparent")
+      throw new Error("Balken-Füllung ohne Farbe (.bg-ok/warn/crit fehlt?)");
+  });
   document.title = errs.length ? ("FRONTEND_FAIL: " + errs.join(" | ")) : "FRONTEND_OK";
 })();
 </script>
