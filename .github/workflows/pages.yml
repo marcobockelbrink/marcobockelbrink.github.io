@@ -1,8 +1,10 @@
-# Veröffentlicht das Demo-Dashboard als öffentliche Live-Seite über GitHub Pages.
-# Das Skript erzeugt bei jedem Lauf einen FRISCHEN statischen Snapshot mit
-# Beispieldaten (--sample) – keine echten Systeme, keine Anmeldung, kein Server.
+# Veröffentlicht die Projekt-Homepage + das Demo-Dashboard über GitHub Pages.
+#   /        -> site/index.html (Landing-Page, self-contained)
+#   /demo/   -> frischer statischer Snapshot mit Beispieldaten (--sample)
+#   /assets/ -> Screenshots aus docs/
+# Keine echten Systeme, keine Anmeldung, kein Server.
 # Ergebnis:  https://marcobockelbrink.github.io/vmware/
-name: Live-Demo (GitHub Pages)
+name: Homepage + Live-Demo (GitHub Pages)
 
 on:
   push:
@@ -11,6 +13,8 @@ on:
       - aria_kapa.py
       - kapa/**
       - frontend/**
+      - site/**
+      - docs/screenshot*.png
       - .github/workflows/pages.yml
   workflow_dispatch:
 
@@ -33,11 +37,15 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-      - name: Demo-Dashboard erzeugen (statischer Snapshot, Beispieldaten)
+      - name: Seite zusammenstellen (Homepage + Demo + Assets)
         run: |
-          mkdir -p _site
-          python3 aria_kapa.py --sample --output _site/index.html
-          echo "Demo erzeugt: $(wc -c < _site/index.html) Bytes"
+          mkdir -p _site/demo _site/assets
+          cp site/index.html _site/index.html
+          cp docs/screenshot*.png _site/assets/
+          python3 aria_kapa.py --sample --output _site/demo/index.html
+          echo "Demo erzeugt: $(wc -c < _site/demo/index.html) Bytes"
+          # Alter Demo-Deeplink bleibt gültig: / zeigte früher direkt die Demo.
+          ls -la _site _site/demo _site/assets
 
       - uses: actions/configure-pages@983d7736d9b0ae728b81ab479565c72886d7745b # v5
       - uses: actions/upload-pages-artifact@56afc609e74202658d3ffba0e8f6dda462b719fa # v3
