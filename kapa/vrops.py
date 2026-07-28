@@ -43,8 +43,7 @@ class AriaOps:
         if params:
             url += "?" + urllib.parse.urlencode(params, doseq=True)
         data = json.dumps(body).encode() if body is not None else None
-        # nosemgrep: python.lang.security.audit.dynamic-urllib-use-detected.dynamic-urllib-use-detected
-        req = urllib.request.Request(url, data=data, method=method)
+        req = urllib.request.Request(url, data=data, method=method)  # nosemgrep: python.lang.security.audit.dynamic-urllib-use-detected.dynamic-urllib-use-detected
         req.add_header("Accept", "application/json")
         req.add_header("Content-Type", "application/json")
         if self.token:
@@ -110,8 +109,7 @@ class AriaOps:
             params = [("resourceId", rid) for rid in ids[i:i + chunk]] + \
                      [("statKey", k) for k in stat_keys]
             url = self.base + "/resources/stats/latest?" + urllib.parse.urlencode(params)
-            # nosemgrep: python.lang.security.audit.dynamic-urllib-use-detected.dynamic-urllib-use-detected
-            req = urllib.request.Request(url)
+            req = urllib.request.Request(url)  # nosemgrep: python.lang.security.audit.dynamic-urllib-use-detected.dynamic-urllib-use-detected
             req.add_header("Accept", "application/json")
             req.add_header("Authorization", "OpsToken " + self.token)
             with self._open(req, timeout=120) as r:

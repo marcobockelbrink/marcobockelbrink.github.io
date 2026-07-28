@@ -21,8 +21,7 @@ BASE = (sys.argv[1] if len(sys.argv) > 1 else "http://127.0.0.1:8085").rstrip("/
 
 def call(method, path, body=None):
     data = json.dumps(body).encode() if body is not None else None
-    # nosemgrep: python.lang.security.audit.dynamic-urllib-use-detected.dynamic-urllib-use-detected
-    req = urllib.request.Request(BASE + path, data=data, method=method,
+    req = urllib.request.Request(BASE + path, data=data, method=method,  # nosemgrep: python.lang.security.audit.dynamic-urllib-use-detected.dynamic-urllib-use-detected
                                  headers={"Content-Type": "application/json"})
     # nosemgrep: python.lang.security.audit.dynamic-urllib-use-detected.dynamic-urllib-use-detected  # Dev-Werkzeug: Ziel ist der lokale Testserver
     with urllib.request.urlopen(req, timeout=30) as r:

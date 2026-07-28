@@ -870,8 +870,7 @@ def make_handler(app):
                 headers["X-Kapa-Signature"] = "sha256=" + hmac.new(
                     secret.encode("utf-8"), bodyb, hashlib.sha256).hexdigest()
             try:
-                # nosemgrep: python.lang.security.audit.dynamic-urllib-use-detected.dynamic-urllib-use-detected
-                req = urllib.request.Request(url, data=bodyb, method="POST",
+                req = urllib.request.Request(url, data=bodyb, method="POST",  # nosemgrep: python.lang.security.audit.dynamic-urllib-use-detected.dynamic-urllib-use-detected
                                              headers=headers)
                 # Test-Ziel ist admin-eingegeben und auf http(s) geprüft
                 # nosemgrep: python.lang.security.audit.dynamic-urllib-use-detected.dynamic-urllib-use-detected
