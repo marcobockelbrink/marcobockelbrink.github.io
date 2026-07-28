@@ -775,3 +775,8 @@ container variants live under [`deploy/`](deploy/):
 
 The former RPM/Ansible variants were retired with v2.10 (last in v2.9.1).
 Details and the decision guide: [`deploy/README.en.md`](deploy/README.en.md).
+
+## Contributing
+
+Contributions welcome! Setup, tests and the pull-request flow are in
+[`CONTRIBUTING.md`](CONTRIBUTING.md). License: [MIT](LICENSE).

@@ -813,3 +813,8 @@ fertige Container-Varianten unter [`deploy/`](deploy/):
 
 Die früheren RPM-/Ansible-Varianten wurden mit v2.10 eingestellt
 (zuletzt in v2.9.1). Details und Auswahlhilfe: [`deploy/README.md`](deploy/README.md).
+
+## Mitmachen
+
+Beiträge willkommen! Einstieg, Tests und der Pull-Request-Flow stehen in
+[`CONTRIBUTING.md`](CONTRIBUTING.md). Lizenz: [MIT](LICENSE).

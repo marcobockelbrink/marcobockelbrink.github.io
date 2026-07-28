@@ -1,5 +1,17 @@
-# Code-Owner für das gesamte Repository. GitHub fordert automatisch ein Review
-# dieser Person an, sobald eine Pull-Request-Regel Reviews verlangt.
-# Code owner for the whole repository; requested for review automatically when
-# a branch/PR rule requires reviews.
-*       @marcobockelbrink
+# Code-Eigentümer: Wer wird bei einem Pull Request automatisch als Reviewer
+# angefragt. GitHub fragt jeweils die Owner an, die NICHT selbst Autor des PR
+# sind – so bekommt jede Änderung ein zweites Augenpaar, ganz ohne Review-Zwang.
+# Code owners: who GitHub auto-requests for review on a pull request (everyone
+# except the PR author) – a second pair of eyes without enforcing reviews.
+#
+# Das letzte passende Muster gewinnt. `*` = alles.
+
+# Standard für das ganze Repository:
+*                       @marcobockelbrink @schr456 @sahnebar
+
+# Frontend (HTML/CSS/JS):
+/frontend/              @marcobockelbrink @schr456
+
+# CI, Sicherheits-Workflows und Deployment – hier lohnt ein genauer Blick:
+/.github/               @marcobockelbrink
+/deploy/                @marcobockelbrink
