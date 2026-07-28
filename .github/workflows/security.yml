@@ -34,7 +34,7 @@ jobs:
         # sicherheitskritische Zufallswerte nutzen das secrets-Modul.
         run: bandit -r aria_kapa.py --skip B311,B110 -f sarif -o bandit.sarif || true
       - name: Ergebnis hochladen
-        uses: github/codeql-action/upload-sarif@4187e74d05793876e9989daffde9c3e66b4acd07 # v3
+        uses: github/codeql-action/upload-sarif@e4fba868fa4b1b91e1fdab776edc8cfbe6e9fb81 # v4.37.3
         with:
           sarif_file: bandit.sarif
           category: bandit
@@ -60,7 +60,7 @@ jobs:
             --config p/secrets \
             --sarif --output semgrep.sarif || true
       - name: Ergebnis hochladen
-        uses: github/codeql-action/upload-sarif@4187e74d05793876e9989daffde9c3e66b4acd07 # v3
+        uses: github/codeql-action/upload-sarif@e4fba868fa4b1b91e1fdab776edc8cfbe6e9fb81 # v4.37.3
         with:
           sarif_file: semgrep.sarif
           category: semgrep
@@ -84,7 +84,7 @@ jobs:
           output: trivy.sarif
           exit-code: "0"
       - name: Ergebnis hochladen
-        uses: github/codeql-action/upload-sarif@4187e74d05793876e9989daffde9c3e66b4acd07 # v3
+        uses: github/codeql-action/upload-sarif@e4fba868fa4b1b91e1fdab776edc8cfbe6e9fb81 # v4.37.3
         with:
           sarif_file: trivy.sarif
           category: trivy
