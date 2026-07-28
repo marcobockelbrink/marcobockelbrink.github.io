@@ -13,6 +13,7 @@ bar via Umgebungsvariable CHROME_BIN). Läuft lokal wie in der CI.
 
     python3 tests/frontend_check.py
 """
+import json
 import os
 import re
 import socket
@@ -60,6 +61,16 @@ HARNESS = r"""
   if (typeof vsanOptions === "function")
     run("vsanOptions", function () { vsanOptions(0.75); });
   if (typeof render === "function") run("render", function () { render(); });
+  // Cluster-Detailkarte rendern — der Pfad card() war bisher ungetestet
+  // (ein color()-Refactor-Bug wäre hier unentdeckt geblieben). Direkter
+  // Aufruf mit echten Demo-Daten statt DOM-Klick: robust und trifft
+  // exakt die Template-Logik inkl. Workload-/Storage-/Netzwerk-Teilen.
+  if (typeof card === "function")
+    run("card(CLUSTERS[0])", function () {
+      var html = card(CLUSTERS[0], 0, false);
+      if (!html || html.indexOf("card") < 0)
+        throw new Error("card() lieferte kein Karten-Markup");
+    });
   document.title = errs.length ? ("FRONTEND_FAIL: " + errs.join(" | ")) : "FRONTEND_OK";
 })();
 </script>
@@ -109,14 +120,20 @@ def main():
     try:
         base = f"http://127.0.0.1:{port}"
         t0 = time.time()
-        while time.time() - t0 < 25:
+        while time.time() - t0 < 30:
             try:
-                urllib.request.urlopen(base + "/healthz", timeout=2)
-                break
+                with urllib.request.urlopen(base + "/healthz", timeout=2) as r:
+                    h = json.loads(r.read().decode())
+                # WICHTIG: auf fertige Cluster-Daten warten — sonst wird die
+                # Seite mit leerem __DATA__ geholt und alle datengetriebenen
+                # Pfade (card(), Tabellen) laufen gegen eine leere Liste.
+                if h.get("clusters", 0) > 0 and not h.get("refreshing"):
+                    break
             except Exception:
-                time.sleep(0.5)
+                pass
+            time.sleep(0.5)
         else:
-            print("FEHLER: App nicht erreichbar.")
+            print("FEHLER: App nicht erreichbar oder Daten nicht bereit.")
             return 2
 
         # Ausgelieferte Seite holen und den Harness anhängen.
