@@ -28,7 +28,7 @@ spec:
         fsGroup: 10001
       containers:
         - name: kapa
-          image: ghcr.io/marcobockelbrink/kapa-dashboard:3.6.3
+          image: ghcr.io/marcobockelbrink/kapa-dashboard:3.7.0
           imagePullPolicy: IfNotPresent
           # Härtung (empfohlen, von Trivy geprüft): non-root, kein Privileg-
           # Aufstieg, read-only Root-FS (Schreibpfade sind /opt/kapa/data und

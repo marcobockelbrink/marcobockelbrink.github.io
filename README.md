@@ -1,820 +1,781 @@
-# VMware Kapazitätsplanung (Aria Operations)
+# VMware Capacity Planning (Aria Operations)
 
-> 🇬🇧 [English version: README.en.md](README.en.md)
+> 🇩🇪 [Deutsche Fassung: README.de.md](README.de.md)
 
 [![CodeQL](https://github.com/marcobockelbrink/vmware/actions/workflows/codeql.yml/badge.svg)](https://github.com/marcobockelbrink/vmware/actions/workflows/codeql.yml)
 [![Security-Scan](https://github.com/marcobockelbrink/vmware/actions/workflows/security.yml/badge.svg)](https://github.com/marcobockelbrink/vmware/actions/workflows/security.yml)
 [![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/marcobockelbrink/vmware/badge)](https://securityscorecards.dev/viewer/?uri=github.com/marcobockelbrink/vmware)
 [![Docker-Image (GHCR)](https://github.com/marcobockelbrink/vmware/actions/workflows/docker.yml/badge.svg)](https://github.com/marcobockelbrink/vmware/actions/workflows/docker.yml)
 [![Dependency-Review](https://github.com/marcobockelbrink/vmware/actions/workflows/dependency-review.yml/badge.svg)](https://github.com/marcobockelbrink/vmware/actions/workflows/dependency-review.yml)
-![nur Standardbibliothek](https://img.shields.io/badge/dependencies-0%20(stdlib%20only)-success)
-[![Lizenz: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
+![standard library only](https://img.shields.io/badge/dependencies-0%20(stdlib%20only)-success)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 
-**▶ [Live-Demo ansehen](https://marcobockelbrink.github.io/vmware/)** — statischer Snapshot mit Beispieldaten, keine Anmeldung.
+**▶ [View the live demo](https://marcobockelbrink.github.io/vmware/)** — static snapshot with sample data, no sign-in.
 
-Kapazitätsauswertung pro Cluster aus VMware Aria Operations mit browserbasiertem
-Dashboard und Reservierungsfunktion für künftige Kapazitätsanfragen.
+Per-cluster capacity reporting from VMware Aria Operations with a browser-based
+dashboard and a reservation workflow for upcoming capacity requests.
 
-![Dashboard mit Demo-Daten](docs/screenshot.png)
+![Dashboard with demo data](docs/screenshot.png)
 
-*Kapazitätsübersicht mit Demo-Daten: freie vCPU-, RAM- und Storage-Kapazität je
-Cluster mit Auslastungsbalken, Quellen-Badge (mehrere vROps), vROps-Quickfilter
-im Selektor und Spalten-Konfiguration (`python3 aria_kapa.py --sample --serve`).*
+*Capacity overview with demo data: free vCPU, RAM and storage capacity per
+cluster with usage bars, source badge (multiple vROps), vROps quick filter in
+the selector and column configuration (`python3 aria_kapa.py --sample --serve`).*
 
-## Funktionsüberblick
+## Feature overview
 
-Ein Python-Skript + `kapa/`-Backend-Paket + `frontend/`-Ordner (nur Standardbibliothek, **kein pip, kein Build**),
-das die Aria-Operations-Daten als Web-Dashboard aufbereitet. Die
-**Oberflächensprache folgt dem Browser**: Deutsch bleibt Deutsch, jede andere
-Browsersprache bekommt Englisch — inklusive Login, **API-Doku/OpenAPI-Spec**
-und **CSV-Export** (Spaltennamen/Statuswerte per `Accept-Language` bzw.
-`?lang=de|en`). Stabil deutsch bleiben die JSON-API-Felder und -Statuswerte
-(v1-Vertrag) und die gespeicherten Daten. Das Audit-Log wird als kanonische
-Aufzeichnung deutsch gespeichert; in der englischen Ansicht zeigt die
-Oberfläche die **Standard-Aktionen jedoch übersetzt** (eingetragene Namen,
-Cluster und Kommentare bleiben wie erfasst).
+A Python script + `kapa/` backend package + `frontend/` folder (standard library only, **no pip, no build**) that turns
+Aria Operations data into a web dashboard. The UI language follows the browser:
+German browsers get German, everything else English — including the login page,
+the **API docs/OpenAPI spec** and the **CSV export** (headers/status values via
+`Accept-Language` or `?lang=de|en`). The JSON API field names and status values
+(v1 contract) and the stored data stay German. The audit log is stored in
+German as the canonical record; in the English view the UI **does translate the
+standard actions**, though (entered names, clusters and comments stay as typed).
 
-**Kapazität & Auswertung**
-- **Mehrere benannte vROps-Quellen** (optional): 1–3 (oder mehr) Aria-Operations-Systeme, je mit/ohne Proxy, gemischt zu einer Übersicht; jeder Cluster trägt ein Quellen-Badge (Voraussetzung: eindeutige Cluster-Namen). Auch die **einzelne Quelle** aus `[kapa]` lässt sich per `source-name` benennen
-- Freie **vCPU / RAM / Storage** je Cluster mit Auslastungsbalken; frei = Kapazität − belegt − genehmigte Reservierungen
-- **N+1-Ausfallreserve** (`--failover-hosts`), **vSAN-Faktor** für nutzbare Netto-Kapazität, VM-**Ausschluss per Tag**, **Mindest-LUN-Größe** und **Namensfilter** (Datastores per Name-Teiltreffer oder `*`/`?`-Platzhalter komplett ausschließen, z. B. ISO/Backup; Verwaltung → Storage)
-- **Storage-Drilldown** je LUN/Datastore (sortierbar), **vSphere-Tags** je Cluster
-- **Workload %** je Cluster aus vROps (für Anforderer verborgen — auch serverseitig)
-- **Tanzu-/Kubernetes-Namespaces**: CPU-/RAM-**Reservierungen der vSphere-Namespaces**
-  zählen automatisch gegen die freie Kapazität (wie genehmigte Reservierungen);
-  Drilldown je Cluster, `tanzu-mhz-per-vcpu` für die MHz→vCPU-Umrechnung
-- **Cluster-Selektor**: vROps-Quellen-Filter (Bezeichnung frei wählbar, z. B. „RZ-Standort") + bis zu 3 kaskadierende Tag-Filter; **Filter-/Suchfelder**, **sortierbare Tabellen**
-- **Seitenweises Blättern** in allen großen Listen (Kapazität, VLAN-Suche, Storage, Reservierungen, Genehmigungen, Archiv, Log): einheitliche Leiste mit **100 / 200 / 300 Einträgen pro Seite** – ein gemeinsamer Mechanismus für alle Tabellen
-- **Spalten ein-/ausblenden** in allen Datentabellen („⚙ Spalten", je Benutzer gespeichert)
-- **Hell/Dunkel-Modus**: ☀️/🌙-Knopf in der Kopfleiste, je Benutzer gespeichert;
-  folgt sonst der Systemeinstellung (`prefers-color-scheme`); `?theme=light|dark`
-  überstimmt einmalig (z. B. Kiosk-Anzeigen)
-- **Auto-Aktualisierung** mit geschätztem Prozent-Fortschritt; **Import & Export** gebündelt im eigenen Reiter (Kapazitäts-CSV, Reservierungen als CSV/JSON, JSON-Restore für Admins, API-Verweis)
+**Capacity & reporting**
+- **Multiple named vROps sources** (optional): 1–3 (or more) Aria Operations systems, each with or without a proxy, merged into one overview; every cluster carries a source badge (requires unique cluster names). The **single source** from `[kapa]` can be named too via `source-name`
+- Free **vCPU / RAM / storage** per cluster with usage bars; free = capacity − used − approved reservations
+- **N+1 failover reserve** (`--failover-hosts`), **vSAN factor** for usable net capacity, VM **exclusion by tag**, **minimum LUN size** and **name filter** (exclude datastores by name substring or `*`/`?` wildcards, e.g. ISO/backup, entirely; Administration → Storage)
+- **Storage drill-down** per LUN/datastore (sortable), **vSphere tags** per cluster
+- **Workload %** per cluster from vROps (hidden from requesters — also server-side)
+- **Tanzu/Kubernetes namespaces**: CPU/RAM **reservations of vSphere namespaces**
+  automatically count against free capacity (like approved reservations);
+  per-cluster drill-down, `tanzu-mhz-per-vcpu` for the MHz→vCPU conversion
+- **Cluster selector**: vROps source filter (label freely renamable, e.g. "DC site") + up to 3 cascading tag filters; **filter/search fields**, **sortable tables**
+- **Pagination** on all large lists (capacity, VLAN search, storage, reservations, approvals, archive, log): one shared bar with **100 / 200 / 300 entries per page** — a single mechanism for every table
+- **Show/hide columns** in all data tables ("⚙ Columns", stored per user)
+- **Light/dark mode**: ☀️/🌙 button in the header, stored per user; otherwise
+  follows the system setting (`prefers-color-scheme`); `?theme=light|dark`
+  overrides once (e.g. kiosk displays)
+- **Auto-refresh** with estimated progress; **import & export** bundled in their own tab (capacity CSV, reservations as CSV/JSON, JSON restore for admins, API pointer)
 
-**Netzwerk & VLAN**
-- **Netzwerk-Reiter** je Cluster: Portgruppen mit VLAN-Nummern, direkt durchsuchbar
-- **VLAN-Suche** über alle Cluster (IP/Netz/Name → an welchem Cluster hängt es)
-- **Uplink-/Trunk-Portgruppen** (VLAN 0-4094) werden ausgeblendet (`--show-uplink-portgroups`)
+**Network & VLAN**
+- **Network tab** per cluster: port groups with VLAN numbers, searchable in place
+- **VLAN search** across all clusters (IP/subnet/name → which cluster carries it)
+- **Uplink/trunk port groups** (VLAN 0-4094) are hidden by default (`--show-uplink-portgroups`)
 
-**Reservierungen & Genehmigungs-Workflow**
-- Kapazitätsanfragen mit optionalem **Change/Jira-Ticket**; eigene Reservierungsseite mit **Suchmaske** und Summenzeile; **Kapa-ID-Format konfigurierbar** (`id-prefix`/`id-length`)
-- **Mehrstufige Genehmigung** über Teams (Prüfreihenfolge), Freigabe/Ablehnung/Storno, Status-Historie
-- **Auto-Freigabe** (Verwaltung → Auto-Freigabe): erfüllt der Ziel-Cluster nach Abzug
-  des Antrags einstellbare Schwellen (vCPU/RAM frei %, größte freie LUN %, Workload ≤ %),
-  werden **je Team angehakte Stufen automatisch freigegeben** (z. B. Stufe 1 manuell,
-  Stufe 2+3 automatisch) — Freigebender „Auto-Freigabe", Badge „genehmigt (auto)",
-  jede Prüfung samt Zahlen im Audit-Log; blockiert nie, lehnt nie ab
-- **Archiv** für abgelehnte/stornierte Anfragen (eigener Menüpunkt, dauerhaft, gleiche Team-Sichtbarkeit)
-- **Kapa-CSV-Import** (Verwaltung → Import): die bestehende Excel-Liste als CSV
-  hochladen (Excel-Eigenheiten wie Semikolon, BOM, `TT.MM.JJJJ`, Tausenderpunkt
-  werden verstanden; Spalten per Kopfzeile erkannt). Einträge kommen als
-  **genehmigt** an (Freigebender „Import"), Gültigkeit ab Original-Datum;
-  vorhandene Kapa-Nummern werden übersprungen (kein Duplikat beim Re-Import)
-- **Statistik (Trends)**: eigener Tab mit täglichen Snapshots der Datensammlung —
-  Ø RAM/vCPU/**Disk je VM**, VM-Anzahl, RAM-/Storage-Auslastung als Verlaufskurven
-  (selbst gezeichnete SVGs, kein CDN) plus **VM-Größenklassen** im Vorher/Nachher-
-  Vergleich. Beantwortet „werden unsere VMs immer größer?" mit Daten. Zeitraum &
-  Cluster wählbar, **CSV-Export**; Historie 2 Jahre (`--history-days`), Sichtbarkeit
-  je Rolle über die Matrix steuerbar
-- **Storage-Erweiterungen** (dynamisch aktivierbar): Freigebende fragen beim
-  Genehmigen — oder alle Berechtigten in der neuen **Storage-Übersicht** (Menü
-  zwischen VLAN-Suche und Reservierungen) — eine **LUN-Vergrößerung** oder eine
-  **neue LUN** an; das Storage-Team ruft die offenen Anfragen **per API** ab
-  (`/api/v1/storage-requests`, auch CSV **inkl. NAA und den ESXi-Hosts des
-  Clusters mit den WWPNs ihrer FC-HBAs** – fürs Zoning/LUN-Mapping und zur
-  System-Identifikation, falls die Namen im SAN nicht gepflegt sind) und meldet
-  die Umsetzung mit einem Token-Schreibrecht „Storage" zurück. Konfigurierbar (Verwaltung →
-  Storage): **Maximal-Größe** je Anfrage (Anfrage-Limit), Mindest-LUN-Größe
-  und Namensfilter
-- Automatischer **Ablauf** nach `--res-ttl-days`; Warnung, wenn eine Anfrage die freie Kapazität übersteigt
+**Reservations & approval workflow**
+- Capacity requests with optional **change/Jira ticket**; dedicated reservation page with **search field** and totals row; **configurable capa-ID format** (`id-prefix`/`id-length`)
+- **Multi-stage approval** via teams (review order), approve/reject/cancel, status history
+- **Auto-approval** (Administration → Auto-approval): if the target cluster meets
+  configurable thresholds after subtracting the request (vCPU/RAM free %, largest
+  free LUN %, workload ≤ %), **stages checked per team are approved automatically**
+  (e.g. stage 1 manual, stages 2+3 automatic) — approver "Auto-Freigabe", badge
+  "approved (auto)", every evaluation incl. numbers in the audit log; never blocks,
+  never rejects
+- **Archive** for rejected/cancelled requests (own menu item, permanent, same team visibility)
+- **Capacity CSV import** (Administration → Import): upload your existing Excel
+  list as CSV (Excel quirks like semicolons, BOM, `DD.MM.YYYY`, thousands dots
+  are understood; columns matched by header). Entries arrive as **approved**
+  (approver "Import"), validity from the original date; existing kapa numbers
+  are skipped (no duplicates on re-import)
+- **Statistics (trends)**: its own tab fed by daily snapshots of the data
+  collection — avg RAM/vCPU/**disk per VM**, VM count, RAM/storage utilization
+  as time-series charts (self-drawn SVGs, no CDN) plus **VM size classes** in a
+  before/after comparison. Answers "are our VMs getting bigger?" with data.
+  Range & cluster selectable, **CSV export**; history kept 2 years
+  (`--history-days`), visibility per role via the matrix
+- **Storage expansions** (dynamically enabled): approvers request — on approval
+  or in the new **storage overview** (menu between VLAN search and reservations)
+  — a **LUN expansion** or a **new LUN**; the storage team fetches the open
+  requests **via the API** (`/api/v1/storage-requests`, also CSV **incl. NAA and
+  the cluster's ESXi hosts with their FC-HBA WWPNs** – for zoning/LUN mapping and
+  system identification when SAN names aren't maintained) and reports completion
+  with a token "Storage" write permission. Configurable
+  (Administration → Storage): **maximum size** per request (request limit),
+  minimum LUN size and name filter
+- Automatic **expiry** after `--res-ttl-days`; warning when a request exceeds free capacity
 
-**Rollen, AD & Sicherheit**
-- Rollen **Admin / Reviewer / Anforderer / Auditor**, frei benennbar; team-basierte Sichtbarkeit
-- **vROps-Quellen-Filter je Benutzer/AD-Gruppe** (per Anhaken): eine Zuweisung lässt sich auf bestimmte Quellen beschränken (nichts angehakt = alle Quellen). Der Filter zieht durch **alles**, was der Benutzer sieht — Cluster, VLAN-Suche, Storage, Reservierungen, Kapazitätsanfragen. Mehrere Gruppen-Treffer werden **großzügig vereinigt**; auch Admins sind einschränkbar
-- **AD-Anmeldung** (LDAP, nur Stdlib), **AD-Gruppen** als Berechtigungssubjekt, Empfänger-Mail aus wählbarem **AD-Attribut**; **Sitzungen überleben Dienst-Neustarts** (Release-Update ohne Neu-Anmeldung)
-- Härtung: CSP/Security-Header, `Secure`-Cookies, **Login-Bremse**, Stored-XSS-sicheres Rendering
-- **Passwort-Detektor** in der Anmeldemaske: sieht die Eingabe im Benutzerfeld wie ein
-  (aus dem Passwort-Manager eingefügtes) Passwort aus, geht sie **weder ans AD noch ins
-  Audit-Log** — stattdessen freundlicher Hinweis an den Benutzer
+**Roles, AD & security**
+- Roles **Admin / Reviewer / Requester / Auditor**, freely renamable; team-based visibility
+- **Per-user/AD-group vROps source filter** (via checkboxes): an assignment can be restricted to specific sources (nothing ticked = all sources). The filter carries through **everything** the user sees — clusters, VLAN search, storage, reservations, capacity requests. Multiple group matches are merged **permissively (union)**; admins are restrictable too
+- **AD sign-in** (LDAP, stdlib only), **AD groups** as permission subjects, recipient mail from a selectable **AD attribute**; **sessions survive service restarts** (release updates without re-login)
+- Hardening: CSP/security headers, `Secure` cookies, **login throttle**, stored-XSS-safe rendering
+- **Password detector** in the sign-in form: if the username input looks like a
+  password (pasted from a password manager), it goes **neither to AD nor into the
+  audit log** — the user gets a friendly hint instead
 
-**Mail-Benachrichtigungen**
-- Pro interner Rolle konfigurierbar: **Anlage / Ablehnung / Freigabe / „Team ist dran" / Erinnerung**
-- **Erinnerungs-Mails** für liegengebliebene Anträge: wartet ein Antrag länger als
-  x Tage (einstellbar, Standard 2) auf seine aktuelle Freigabe-Stufe, wird das
-  zuständige Team (und/oder der Admin-Verteiler) erinnert — danach alle x Tage
-  erneut, bis entschieden ist
-- Empfänger gemischt: Antragsteller automatisch, Admin/Auditor per Verteiler, Teams per eigener Adresse
-- Dezente **HTML-Mails** (+ Klartext-Fallback)
-- **Editierbare Mail-Vorlage** (Verwaltung → Mail): Betreff + HTML frei anpassbar mit
-  `{{platzhaltern}}` (Klick fügt sie an der Cursor-Position ein), **Live-Vorschau** mit
-  Beispieldaten in einem sandboxed iframe, „Standard einsetzen"; leer = eingebaute Vorlage
+**Mail notifications**
+- Configurable per internal role: **created / rejected / approved / "team's turn" / reminder**
+- **Reminder mails** for stalled requests: if a request waits longer than
+  x days (configurable, default 2) for its current approval stage, the team
+  currently up (and/or the admin list) is reminded — then again every x days
+  until decided
+- Mixed recipients: requester automatically, admin/auditor via distribution list, teams via their own address
+- Clean **HTML emails** (+ plain-text fallback)
+- **Editable mail template** (Administration → Mail): subject + HTML fully customizable with
+  `{{placeholders}}` (click inserts them at the cursor position), **live preview** with
+  sample data in a sandboxed iframe, "insert default"; empty = built-in template
 
-**Ausgehende Webhooks** (Verwaltung → Webhooks)
-- Ereignisse (Anlage/Freigabe/Ablehnung/„Team ist dran"/Erinnerung, Storage-Anfragen,
-  Offline-Import) lösen einen **HTTP-POST mit JSON** an frei konfigurierbare Ziele aus —
-  für **ITSM** (ServiceNow/Jira), **Automatisierung** (Ansible AWX, n8n), **Pipelines**
-  (GitLab/GitHub) oder **Chat** (Slack/Teams)
-- Jeder Payload **HMAC-SHA256-signiert** (`X-Kapa-Signature`) → der Empfänger prüft die
-  Echtheit; **Test-Knopf** je Ziel; nicht blockierend, auditiert; Secrets nie zurück­gezeigt
-  und **nicht im Backup**. Details: [`config/WEBHOOKS.md`](config/WEBHOOKS.md)
+**Outbound webhooks** (Administration → Webhooks)
+- Events (created/approved/rejected/"team's turn"/reminder, storage requests, offline
+  import) trigger an **HTTP POST with JSON** to configurable targets — for **ITSM**
+  (ServiceNow/Jira), **automation** (Ansible AWX, n8n), **pipelines** (GitLab/GitHub) or
+  **chat** (Slack/Teams)
+- Every payload is **HMAC-SHA256-signed** (`X-Kapa-Signature`) so the receiver can verify
+  authenticity; per-target **test button**; non-blocking, audited; secrets never shown back
+  and **not in the backup**. Details: [`config/WEBHOOKS.en.md`](config/WEBHOOKS.en.md)
 
-**Verwaltung (Admin-UI)**
-- Unter-Reiter **Benutzer & Rollen / Cluster-Selektor / Mail / Ankündigung / Freigabe / Sichtbarkeit / Storage / Netzwerk / Import / API-Tokens / Backup & Konfiguration**
-- **Offline-Quellen (Cluster-Import)**: Bereiche **ohne Netzanbindung** an ein
-  vROps werden per mitgeliefertem **PowerCLI-Skript** (Download im Import-Tab)
-  exportiert und als JSON unter einem **festen Quellnamen** hochgeladen. Die
-  Cluster erscheinen wie eine eigene vROps-Quelle — inkl. Kapazitätsanfragen,
-  VLAN-Suche und Storage-Übersicht; dieselbe Kapazitäts-Rechnung (Overcommit,
-  N+1, vSAN-Faktor, Namens-/VLAN-Filter). Die Daten sind statisch (Import-Datum
-  als Tag am Cluster); die **Auto-Freigabe klammert Import-Cluster bewusst
-  aus**. Erneuter Import ersetzt die Quelle, mehrere Quellen parallel möglich
-- **Sichtbarkeits-Matrix**: je Rolle (außer Admin) per Haken einstellbar, welche
-  Merkmale sie sieht — Workload, Host-/VM-Listen, Netzwerk & VLAN-Suche,
-  Storage-Drilldown, vSphere-Tags, „Entschieden von". Wirkt im UI **und**
-  serverseitig im Datenpaket; Rechte (Genehmigen, Verwaltung, Team-Sicht)
-  bleiben fest an den Rollen
-- **Ankündigungs-Popup**: Admins veröffentlichen bei Bedarf eine Ankündigung
-  (Titel + Text, aktivierbar) — jeder Benutzer sieht sie **einmal** nach der
-  Anmeldung („Verstanden"-Merker je Benutzer); Textänderung zeigt sie allen
-  erneut. Ideal für Release-News, neue Datacenter oder Wartungsfenster
-- **Schreibgeschütztes Konfig-Sheet** (alle gesetzten Werte, Passwörter nur als „gesetzt: ja/nein")
-- **API-Tokens** für die v1-REST-API; **Schreibrechte je Token per Klick**
-  (Reservierungen anlegen/stornieren, Genehmigen/Ablehnen), Backup-auf-Knopfdruck
+**Administration (admin UI)**
+- Sub-tabs **Users & roles / Cluster selector / Mail / Announcement / Approval / Visibility / Storage / Network / Import / API tokens / Backup & configuration**
+- **Offline sources (cluster import)**: areas **without network access** to a
+  vROps are exported with the bundled **PowerCLI script** (download in the
+  import tab) and uploaded as JSON under a **fixed source name**. The clusters
+  appear like a separate vROps source — incl. capacity requests, VLAN search
+  and storage overview; same capacity math (overcommit, N+1, vSAN factor,
+  name/VLAN filters). Data is static (import date as a tag on the cluster);
+  **auto-approval deliberately excludes imported clusters**. Re-importing
+  replaces the source; multiple sources can coexist
+- **Visibility matrix**: per role (except admin), checkboxes control which
+  features it sees — workload, host/VM lists, network & VLAN search, storage
+  drill-down, vSphere tags, "decided by". Applies in the UI **and**
+  server-side in the payload; permissions (approving, administration, team
+  view) stay fixed to the roles
+- **Announcement popup**: admins publish an announcement on demand (title +
+  text, activatable) — every user sees it **once** after sign-in ("Got it"
+  marker per user); changing the text shows it to everyone again. Ideal for
+  release news, new datacenters or maintenance windows
+- **Read-only configuration sheet** (all configured values, passwords only as "set: yes/no")
+- **API tokens** for the v1 REST API; **write permissions per token, one click**
+  (create/cancel reservations, approve/reject), one-click backup
 
-**Betrieb & Technik**
-- Datenhaltung als **JSON-Dateien oder SQLite** (`--storage`), **atomare** Schreibvorgänge
-- **Performance**: gzip-komprimierte Antworten (Seite ~¼, JSON ~⅛ der Größe) und ein
-  **VLAN-Cache** — Portgruppen-VLANs werden zwischen Abrufen wiederverwendet (einmal
-  täglich Voll-Abruf), statt je Portgruppe einen API-Aufruf zu machen
-- **Gestaffelte Abruf-Intervalle** (Verwaltung → Backup & Konfiguration): wie ein
-  Cronjob bekommt jeder Teilbereich seinen eigenen Takt — **Kapazität** (VMs),
-  **Netzwerk** (Portgruppen), **Storage** (Datastores), z. B. 60/180/360 Minuten;
-  übersprungene Bereiche übernehmen den Stand des letzten Laufs. Der ⟳-Knopf
-  bietet Admins zusätzlich **„Alles / nur Kapazität / nur Netzwerk / nur
-  Storage" sofort aktualisieren** (Stand je Bereich sichtbar)
-- **Anzeige-Zeitzone frei einstellbar** (gleiche Seite): alle angezeigten Zeiten
-  (Stand, Log, Abgleich-Uhrzeiten, Mail-Zeitstempel) erscheinen in der gewählten
-  IANA-Zone (z. B. `Europe/Berlin`, inkl. automatischer Sommer-/Winterzeit);
-  leer = Server-Zeitzone. Der Abruf-Takt selbst rechnet in Sekunden und bleibt
-  unberührt
-- **SFTP-Backup** mit Rotation, **Audit-Log** (JSONL, rotierend), **`/healthz`**
-  fürs Monitoring (ohne Anmeldung: Status, Datenalter, Cluster-Anzahl)
-- **Eine INI** für alle nicht-geheimen Einstellungen, Geheimnisse als `.pass`-Dateien; optionaler **Aria-Proxy**
-- Auslieferung als **Docker/Podman** oder **Kubernetes** (Manifeste + Helm-Chart; fertiges Image auf **GHCR**, bei jedem Release automatisch gebaut) — klassisch per **systemd + nginx** weiterhin möglich
+**Operations & tech**
+- Data stored as **JSON files or SQLite** (`--storage`), **atomic** writes
+- **Performance**: gzip-compressed responses (page ~¼, JSON ~⅛ of the size) and a
+  **VLAN cache** — port group VLANs are reused between refreshes (full re-read
+  once a day) instead of one API call per port group
+- **Tiered refresh intervals** (Administration → Backup & configuration): like a
+  cron job, each area gets its own pace — **capacity** (VMs), **network** (port
+  groups), **storage** (datastores), e.g. 60/180/360 minutes; skipped areas keep
+  the state of the last run. The ⟳ button additionally offers admins **"refresh
+  everything / capacity only / network only / storage only" right now** (per-area
+  timestamps shown)
+- **Configurable display time zone** (same page): all displayed times (last
+  update, log, sync times, mail timestamps) appear in the chosen IANA zone
+  (e.g. `Europe/Berlin`, incl. automatic daylight saving); empty = server time
+  zone. The refresh schedule itself counts in seconds and is unaffected
+- **SFTP backup** with rotation, **audit log** (JSONL, rotating), **`/healthz`**
+  for monitoring (no sign-in: status, data age, cluster count)
+- **One INI** for all non-secret settings, secrets as `.pass` files; optional **Aria proxy**
+- Ships as **Docker/Podman** or **Kubernetes** (manifests + Helm chart; ready-made image on **GHCR**, built automatically on every release) — classic **systemd + nginx** still possible
 
-Details zu jedem Bereich in den folgenden Abschnitten. Die **Gesamtarchitektur
-mit Schaubildern** (Systemkontext, Datenflüsse, Workflow, Deployment) steht in
-[`docs/ARCHITEKTUR.md`](docs/ARCHITEKTUR.md).
+Details for each area in the sections below. The **overall architecture with
+diagrams** (system context, data flows, workflow, deployment) lives in
+[`docs/ARCHITECTURE.en.md`](docs/ARCHITECTURE.en.md).
 
 ## Dashboard
 
-- **Kompakte Tabellenansicht**: pro Cluster die freien **vCPU-, RAM- und
-  Storage**-Kapazitäten (nach Abzug genehmigter Reservierungen) mit
-  Auslastungsbalken. Die Erläuterungen zur Berechnung stehen hinter den Knöpfen
-  „ℹ Info Kapa-Berechnung" und „? Hilfe".
-- **Detailkarte in Reitern**: Klick auf den Clusternamen öffnet die Details,
-  aufgeteilt in **CPU & RAM** (Auslastung, Kennzahlen, Reservierungen inkl.
-  Antrags-Formular und darunter die **vSphere-Tags** des Clusters), **Storage**
-  (Auslastung und jede LUN, sortierbar nach Größe/Belegung), **Netzwerk** (die
-  Portgruppen des Clusters mit ihren VLAN-Nummern, **direkt im Reiter nach
-  IP/VLAN/Name durchsuchbar**) sowie — nur für Admin und Technische Prüfung —
-  **Hosts** und **VMs** (Reviewer und Anforderer sehen diese Reiter nicht;
-  die Listen fehlen auch serverseitig im Datenpaket). Ein Klick auf den Storage-Wert springt direkt in den Storage-Reiter.
-  Die Karte ist breit angelegt und lässt sich unten rechts frei in der Größe
-  ziehen.
-- **VLAN-Suche** (Tab „VLAN-Suche" bzw. `/vlan-suche`, zwischen Kapazität und
-  Reservierungen): durchsucht die Portgruppen **aller** Cluster. Weil die
-  Portgruppen-Namen die IP-Netze enthalten, findet man über eine Teil-Eingabe
-  (z. B. `10.2.30` oder `VLAN205`) sofort, **an welchem Cluster** ein Netz hängt.
-  Ergebnis als sortierbare Tabelle Portgruppe / VLAN / Cluster.
-  - **Netzwerk-Filter** (Verwaltung → Netzwerk): blendet Portgruppen nach
-    **Name** (Teiltreffer/Wildcards, wie beim Storage-Namensfilter) und/oder
-    **VLAN-ID** (einzelne IDs und Bereiche, z. B. `99, 3900-3999`) überall aus —
-    VLAN-Suche, Cluster-Detail und Datenpaket.
-- **Filterfeld** für Cluster bzw. Reservierungen (findet auch Change-Nummer,
-  Anforderer, Team, Status und ID)
-- **Cluster-Selektor**: Über der Kapazitätsliste blenden sich Schnellfilter
-  ein. Bei mehreren vROps-Quellen steht **ganz vorn ein „vROps"-Filter** (der
-  Quellenname aus der INI); ist nur eine Quelle konfiguriert, ist sie der
-  Standard. Danach folgen bis zu drei **kaskadierende** Auswahllisten anhand der
-  vSphere-Tags (z. B. Umgebung → Standort → Betreuung); die Tag-Werte richten
-  sich nach der gewählten Quelle. Stufe 2 zeigt nur Werte, die zur Wahl in
-  Stufe 1 passen. Welche
-  Tag-Kategorien die Stufen bilden, konfigurierst du frei im Tab „Verwaltung"
-  (Unterreiter „Cluster-Selektor"); pro Stufe lässt sich ein eigener
-  **Anzeigename** vergeben (z. B. Kategorie „Standort" → Beschriftung
-  „Rechenzentrum"). Gespeichert wird per Knopf „✓ Selektor speichern". Die
-  Werte kommen live aus den Tags.
-- **Sortierbare Tabellen**: Klick auf eine Spaltenüberschrift sortiert auf-/
-  absteigend (numerisch, nach Datum oder Text) – in allen Datentabellen
-  (Kapazität, Reservierungen, Genehmigungen, Log, Benutzer/Rollen, Tokens). Die
-  Genehmigungs-Teams behalten ihre manuelle Prüfreihenfolge.
-- **Spalten ein-/ausblenden**: Über den Knopf **„⚙ Spalten"** – in **allen
-  Datentabellen** (Kapazität, Reservierungen, Genehmigungen, Archiv, Log,
-  Benutzer/Rollen, API-Tokens, VLAN-Suche) – lassen sich einzelne Spalten aus-
-  und wieder einblenden. Die Auswahl wird **pro Benutzer** gespeichert (angemeldet
-  serverseitig, sonst lokal im Browser). Die kleinen Konfig-Tabellen mit fester
-  Reihenfolge (Genehmigungs-Teams, Rollen-Bezeichnungen, Cluster-Selektor)
-  behalten bewusst ihr Layout.
-- **Eigene Reservierungsseite** (Tab „Reservierungen" bzw. `/reservierungen`)
-  mit allen **aktiven** Kapazitätsanfragen, Status und Summenzeile (mit Suchfeld)
-- **Genehmigungs-Dashboard** (Tab „Genehmigungen" bzw. `/genehmigungen`):
-  offene Anträge genehmigen oder ablehnen
-- **Archiv** (Tab „Archiv" bzw. `/archiv`): abgelehnte und stornierte Anfragen als
-  Historie (durchsuchbar, zählt nicht gegen die Kapazität). Sie bleiben dauerhaft
-  erhalten und tauchen nicht mehr in der aktiven Reservierungsliste auf.
-  **Sichtbarkeit wie bei den Reservierungen**: Anforderer sehen die des eigenen
-  Teams, Reviewer/Admin/Auditor alle.
-- **Audit-Log** (Tab „Log" bzw. `/log`, nur Admins) mit **Von/Bis-Datumsfilter**
-  (Klick aufs Feld öffnet einen **Kalender** in der Browsersprache) und
-  **Seitenblätterung** (100 Einträge je Seite): protokolliert
-  Anmeldungen (auch fehlgeschlagene), Anträge, Genehmigungen/Ablehnungen,
-  Stornos, Importe, Rollenänderungen und Backups nach `data/kapa_log.jsonl`.
-  Die Datei **rotiert automatisch** ab 10 MB (`.1` … `.3`), und die Ansicht
-  liest nur das Dateiende – das Log kann also nicht unbegrenzt wachsen oder
-  den Aufruf ausbremsen.
-- **Export**: Reservierungen als **CSV** (Semikolon, direkt Excel-tauglich)
-  oder als JSON über die Knöpfe in der Kopfleiste; die **Kapazitätstabelle**
-  als CSV über den Knopf „Kapazität als CSV" (inkl. effektiv freier Werte
-  nach Reservierungen und Tanzu; auch per API: `/api/v1/data?format=csv`).
-- **Deep-Links**: `#cluster=Name` in der URL öffnet die Detailkarte direkt —
-  ein geöffneter Cluster steht automatisch teilbar in der Adresszeile
-  (praktisch für Tickets und Chats).
-- **Auto-Aktualisierung** im Serve-Modus (Standard: alle 30 Minuten, sichtbarer
-  Countdown) plus Knopf „⟳ Jetzt aktualisieren"
+- **Compact table view**: free **vCPU, RAM and storage** capacity per cluster
+  (after subtracting approved reservations) with usage bars. The calculation
+  notes sit behind the "ℹ How capacity is calculated" and "? Help" buttons.
+- **Detail card with tabs**: clicking a cluster name opens the details, split
+  into **CPU & RAM** (usage, key figures, reservations incl. request form and
+  the cluster's **vSphere tags** below), **Storage** (usage and every LUN,
+  sortable by size/usage), **Network** (the cluster's port groups with their
+  VLAN numbers, **searchable in place by IP/VLAN/name**) and — admins and
+  auditors only — **Hosts** and **VMs** (reviewers and requesters do not see
+  these tabs; the lists are also stripped from the server payload). Clicking the storage value jumps straight to the storage tab. The
+  card is wide and can be freely resized from its bottom-right corner.
+- **VLAN search** (tab "VLAN search", between capacity and reservations):
+  searches the port groups of **all** clusters. Because port group names
+  contain the IP subnets, a partial input (e.g. `10.2.30` or `VLAN205`)
+  immediately shows **which cluster** a network is attached to. Results as a
+  sortable table of port group / VLAN / cluster.
+  - **Network filter** (Administration → Network): hides port groups by
+    **name** (partial match/wildcards, like the storage name filter) and/or
+    **VLAN ID** (single IDs and ranges, e.g. `99, 3900-3999`) everywhere —
+    VLAN search, cluster detail and data package.
+- **Filter field** for clusters and reservations (also matches change number,
+  requester, team, status and ID)
+- **Cluster selector**: quick filters above the capacity list. With multiple
+  vROps sources a **"vROps" filter comes first** (the source name from the
+  INI); with a single source it is preselected. It is followed by up to three
+  **cascading** dropdowns based on the vSphere tags (e.g. environment →
+  location → operations team); tag values follow the chosen source. Level 2
+  only shows values matching the level-1 choice. Which tag categories form the
+  levels is freely configured in the "Administration" tab ("Cluster selector"
+  sub-tab); each level can carry its own **display name** (e.g. category
+  "Standort" → label "Data center"). Saved via "✓ Save selector". Values come
+  live from the tags.
+- **Sortable tables**: clicking a column header sorts ascending/descending
+  (numeric, by date or text) — in all data tables (capacity, reservations,
+  approvals, log, users/roles, tokens). Approval teams keep their manual
+  review order.
+- **Show/hide columns**: via the **"⚙ Columns"** button — in **all data
+  tables** (capacity, reservations, approvals, archive, log, users/roles, API
+  tokens, VLAN search) — individual columns can be hidden and shown again. The
+  selection is stored **per user** (server-side when signed in, otherwise
+  locally in the browser). The small config tables with fixed order (approval
+  teams, role labels, cluster selector) deliberately keep their layout.
+- **Dedicated reservation page** (tab "Reservations") with all **active**
+  capacity requests, status and totals row (with search field)
+- **Approval dashboard** (tab "Approvals"): approve or reject open requests
+- **Archive** (tab "Archive"): rejected and cancelled requests as history
+  (searchable, does not count against capacity). They are kept permanently and
+  no longer appear in the active reservation list. **Visibility as with
+  reservations**: requesters see their own team's, reviewers/admins/auditors
+  see all.
+- **Audit log** (tab "Log", admins only) with a **from/to date filter**
+  (clicking the field opens a **calendar** in the browser language) and
+  **pagination** (100 entries per page): records sign-ins (including failed
+  ones), requests, approvals/rejections, cancellations, imports, role changes
+  and backups to `data/kapa_log.jsonl`. The file **rotates automatically** at
+  10 MB (`.1` … `.3`) and the view only reads the file tail — the log can
+  neither grow without bounds nor slow down page loads.
+- **Export**: reservations as **CSV** (semicolon, Excel-ready) or as JSON via
+  the header buttons; the **capacity table** as CSV via the "Capacity as CSV"
+  button (incl. effective free values after reservations and Tanzu; also via
+  API: `/api/v1/data?format=csv`).
+- **Deep links**: `#cluster=Name` in the URL opens the detail card directly —
+  an open cluster automatically appears shareable in the address bar
+  (handy for tickets and chats).
+- **Auto-refresh** in serve mode (default: every 30 minutes, visible
+  countdown) plus a "⟳ Refresh now" button
 
 ## Screenshots
 
-Alle Aufnahmen mit Demo-Daten (`python3 aria_kapa.py --sample --serve`).
+All captures use demo data (`python3 aria_kapa.py --sample --serve`).
+The UI is bilingual — German browsers see it in German, all others in English.
 
-**Reservierungen** — alle Anfragen mit ID, Change-Nummer, Team, vCPU/RAM/Storage
-und Status: `beantragt`, `in Prüfung (n/3)`, `genehmigt`, `abgelehnt` und
-`storniert`. Jede Spalte ist per Klick sortierbar, „⦸ Storno" zieht eine Anfrage
-zurück:
+**Reservations** — all requests with ID, change number, team, vCPU/RAM/storage
+and status: `requested`, `in review (n/3)`, `approved`, `rejected` and
+`cancelled`. Every column sorts on click, "⦸ Cancel" withdraws a request:
 
-![Reservierungen](docs/screenshot-reservierungen.png)
+![Reservations](docs/screenshot-reservierungen.png)
 
-**Genehmigungen** — offene Anträge mit der freien Kapazität des Ziel-Clusters
-(⚠ markiert Anträge, die nicht mehr hineinpassen), dem Fortschritt der
-mehrstufigen Freigabe und der Schaltfläche für das jeweils zuständige Team:
+**Approvals** — open requests with the target cluster's free capacity
+(⚠ marks requests that no longer fit), the progress of the multi-stage
+approval and the button for the team currently up:
 
-![Genehmigungen](docs/screenshot-genehmigungen.png)
+![Approvals](docs/screenshot-genehmigungen.png)
 
-**Statistik** — Trends aus täglichen Snapshots: Ø RAM/vCPU/Disk je VM,
-VM-Anzahl und Auslastungen als Verlaufskurven, dazu die VM-Größenklassen im
-Vorher/Nachher-Vergleich:
+**Statistics** — trends from daily snapshots: avg RAM/vCPU/disk per VM,
+VM count and utilizations as time series, plus the VM size classes in a
+before/after comparison:
 
-![Statistik](docs/screenshot-statistik.png)
+![Statistics](docs/screenshot-statistik.png)
 
-**Verwaltung** (nur Admins) — Benutzer **und AD-Gruppen** mit Rolle und Team,
-frei wählbare Rollen-Bezeichnungen und die Genehmigungs-Teams in ihrer
-Prüfreihenfolge; Cluster-Selektor, Mail, Ankündigung, Auto-Freigabe,
-Sichtbarkeit, API-Tokens und Konfiguration liegen in eigenen Unterreitern:
+**Administration** (admins only) — users **and AD groups** with role and team,
+freely renamable role labels and the approval teams in their review order;
+cluster selector, mail, announcement, auto-approval, visibility, API tokens
+and configuration live in their own sub-tabs:
 
-![Verwaltung](docs/screenshot-verwaltung.png)
+![Administration](docs/screenshot-verwaltung.png)
 
-**Log** (nur Admins) — Audit-Log mit Anmeldungen, Anträgen, Freigaben,
-Ablehnungen, Stornos und Backups:
+**Log** (admins only) — audit log with sign-ins, requests, approvals,
+rejections, cancellations and backups:
 
-![Audit-Log](docs/screenshot-log.png)
+![Audit log](docs/screenshot-log.png)
 
-**Anmeldung** mit Active-Directory-Konto:
+**Sign-in** with an Active Directory account:
 
 ![Login](docs/screenshot-login.png)
 
-## Berechnung
+## Calculation
 
-- **CPU-Kapazität** = Summe physischer Cores aller ESXi-Hosts im Cluster × Überprovisionierungsfaktor (Standard: 6)
-- **RAM-Kapazität** = Summe physischer RAM aller Hosts (1:1)
-- **Storage-Kapazität** = Summe der Kapazität aller an den Cluster-Hosts
-  angedockten Datastores (vSAN **und** externe FC-LUNs). Die Zuordnung läuft
-  über die Host-Beziehungen in Aria (Datastore → angedockte Hosts → Cluster);
-  jeder Datastore zählt **je Cluster genau einmal**, auch wenn ihn alle Hosts
-  sehen (kein Doppeln geteilter LUNs). Wird keine Kapazität geliefert, zeigt die
-  Spalte „–". Der Abruf protokolliert im Log die zugeordneten Datastores, die
-  Summe je Cluster und die erkannten Storage-Typen – hilfreich zur Kontrolle.
-- **vSAN wird als nutzbare Kapazität gerechnet**: Weil die vSAN-Policy an der
-  nutzbaren Kapazität zehrt (RAID-1 ≈ 50 %, RAID-5 ≈ 75/67 %, RAID-6 ≈ 67 %),
-  zählt die Bruttokapazität nur anteilig. **vROps liefert dazu keinen sauberen
-  Wert** (nur physisch roh + belegt), daher ein **konfigurierbarer Faktor**:
-  global als Policy-Dropdown **und je Cluster überschreibbar** (Verwaltung →
-  Storage), Startwert über `--vsan-factor` (Standard `0.5`). Er wirkt auf
-  **Kapazität und Belegung**; in der **%-Auslastung kürzt er sich heraus**, die
-  bleibt also physisch korrekt.
-  Die LUN-Liste zeigt den **Storage-Typ** (vSAN/VMFS/NFS) und bei vSAN die
-  Bruttokapazität im Tooltip. Bei FC-/iSCSI-LUNs wird zusätzlich die
-  **NAA-Kennung** des Backing-Devices (`naa.6000…`) best effort gelesen — zuerst
-  aus den Datastore-Eigenschaften, andernfalls aus den **Metrik-Schlüsseln**
-  des Datastores (in vielen vROps-Versionen liegt die NAA nicht als Property,
-  sondern als Metrik-Instanz in der Gruppe **`Devices`**, z. B.
-  `Devices|naa.6000…|…`; die Kennung wird direkt aus dem Schlüsselnamen gelesen).
-  Sie steht im LUN-Tooltip, im Datenpaket (`/api/v1/data`, Feld `naa` je
-  Datastore) und damit im Cache. Zum Abgleich mit dem eigenen vROps nennt das
-  Log sowohl die geprüften **Properties** als auch die **Metrik-Schlüssel**
-  (`Datastore-Properties (Beispiel …)`, `Datastore-Metrik-Schlüssel (Beispiel …)`,
-  `NAA erkannt: X/Y`) — findet ein Datastore selbst keine, wird zusätzlich ein
-  verwandter Host auf `naa.…`-Schlüssel geprüft. Der Typ kommt aus den Datastore-Eigenschaften;
-  wird keiner geliefert, greift die Erkennung über den Datastore-Namen.
-  - **LUN-Detail**: Ein Klick auf den Storage-Wert (oder auf den Clusternamen)
-    öffnet die Detailkarte mit **jedem einzelnen Datastore/LUN** – wahlweise
-    sortiert nach **Größe** oder nach **Belegung**, mit Größe, belegtem Platz,
-    Belegung in % und freiem Platz.
-- **Ausfallreserve (N+1)**: pro Cluster wird der größte Host (Cores und RAM)
-  von der Gesamtkapazität abgezogen (`--failover-hosts`, Standard: 1, `0` = aus);
-  Storage bleibt davon unberührt.
-- **Belegt** = provisionierte vCPUs / RAM aller VMs bzw. belegter Datastore-Platz (inkl. powered-off)
-- **Frei** = Kapazität − belegt − genehmigte Reservierungen (für vCPU, RAM und Storage)
-- **Ausschluss per Tag**: Mit `--exclude-tag Kapa_Filter:Ja` werden VMs mit dem
-  angegebenen vROps-Tag (Kategorie:Wert) aus der Belegung herausgerechnet.
-- **vSphere-Tags**: Die Tags des Clusters kommen aus den **Eigenschaften** der
-  Ressource (`/resources/{id}/properties`) und werden in der Detailkarte
-  (Reiter „CPU & RAM") als Chips angezeigt. Ohne weitere Angabe werden alle
-  Eigenschaften übernommen, deren Schlüssel `tag` enthält; mit `--tag-property`
-  lässt sich das auf ein Präfix eingrenzen (z. B. `summary|tag`).
-  Enthält eine Eigenschaft **JSON** (z. B. `TagJson`), wird es aufgeschlüsselt
-  und nur die Tags werden gelistet — rohes JSON erscheint nie in der Anzeige.
-  Das Log nennt nach jedem Abruf die erkannten Schlüssel und einen Auszug des
-  Rohwerts — praktisch zum Feinjustieren.
-- **dvSwitches / Portgruppen**: Aria liefert die verteilten Switches
-  (`VmwareDistributedVirtualSwitch`) und Portgruppen
-  (`DistributedVirtualPortgroup`) als eigene Ressourcen. Die Zuordnung zum
-  Cluster läuft — wie beim Storage — über die angedockten Hosts
-  (dvSwitch → HostSystem → `summary|parentCluster`); die VLAN-Nummer wird best
-  effort aus den Portgruppen-Eigenschaften gelesen (pro Portgruppe über
-  `/resources/{id}/properties`, jeder Schlüssel mit „vlan" im Namen). Die VLANs bekannter
-  Portgruppen kommen aus dem **Cache des letzten Abrufs** (einmal täglich wird
-  alles frisch gelesen — Log: `VLANs: X aus Cache, Y per API`). Schlägt der
-  Abruf fehl, bleibt der Netzwerk-Reiter leer und der Rest läuft weiter. Das Log
-  meldet `dvSwitches: N, Portgruppen: M · zugeordnet: …` — dort nach dem nächsten
-  Abruf gegenprüfen.
-  **Uplink-/Trunk-Portgruppen** (Name enthält „uplink" oder VLAN ist eine breite
-  Trunk-Range wie `0-4094`) sind keine echten Netz-VLANs und werden
-  standardmäßig **ausgeblendet**; mit `--show-uplink-portgroups` lassen sie sich
-  wieder einblenden.
-- **Workload %**: Der vROps-Workload-Badge je Cluster (`badge|workload`) wird
-  best effort mitgelesen und in der Cluster-Detailkarte als Kennzahl angezeigt –
-  **für die Rolle Anforderer ausgeblendet** (weder im UI noch im Datenabruf).
+- **CPU capacity** = sum of physical cores of all ESXi hosts in the cluster × overcommit factor (default: 6)
+- **RAM capacity** = sum of physical RAM of all hosts (1:1)
+- **Storage capacity** = sum of the capacity of all datastores attached to the
+  cluster hosts (vSAN **and** external FC LUNs). Mapping follows the host
+  relationships in Aria (datastore → attached hosts → cluster); each datastore
+  counts **exactly once per cluster**, even if all hosts see it (no
+  double-counting of shared LUNs). If no capacity is reported, the column
+  shows "–". The refresh logs the mapped datastores, per-cluster totals and
+  detected storage types — useful for verification.
+- **vSAN counts as usable capacity**: because the vSAN policy eats into usable
+  capacity (RAID-1 ≈ 50 %, RAID-5 ≈ 75/67 %, RAID-6 ≈ 67 %), gross capacity only
+  counts partially. **vROps provides no clean value** for this (only physical raw
+  + used), hence a **configurable factor**: global as a policy dropdown **and
+  overridable per cluster** (Administration → Storage), seeded via `--vsan-factor`
+  (default `0.5`). It applies to **capacity and usage**; in the **% utilization it
+  cancels out**, so that stays physically correct. The
+  LUN list shows the **storage type** (vSAN/VMFS/NFS) and, for vSAN, the gross
+  capacity in a tooltip. For FC/iSCSI LUNs the **NAA identifier** of the
+  backing device (`naa.6000…`) is additionally read best effort — first from the
+  datastore properties, otherwise from the datastore's **metric keys** (in many
+  vROps versions the NAA is not a property but a metric instance in the
+  **`Devices`** group, e.g. `Devices|naa.6000…|…`; the identifier is read
+  straight from the key name). Shown in the LUN tooltip, included in the payload
+  (`/api/v1/data`, field `naa` per datastore) and thus in the cache. For
+  verification against your vROps the log lists both the inspected **properties**
+  and the **metric keys** (`Datastore-Properties (Beispiel …)`,
+  `Datastore-Metrik-Schlüssel (Beispiel …)`, `NAA erkannt: X/Y`) — if a datastore
+  finds none, a related host is additionally checked for `naa.…` keys. The type comes from the datastore properties; if none
+  is delivered, name-based detection kicks in.
+  - **LUN detail**: clicking the storage value (or the cluster name) opens the
+    detail card with **every single datastore/LUN** — sortable by **size** or
+    **usage**, with size, used space, usage % and free space.
+- **Failover reserve (N+1)**: per cluster, the largest host (cores and RAM) is
+  subtracted from total capacity (`--failover-hosts`, default: 1, `0` = off);
+  storage is unaffected.
+- **Used** = provisioned vCPUs / RAM of all VMs, or used datastore space (incl. powered-off)
+- **Free** = capacity − used − approved reservations (for vCPU, RAM and storage)
+- **Exclusion by tag**: with `--exclude-tag Kapa_Filter:Ja`, VMs carrying the
+  given vROps tag (category:value) are excluded from usage.
+- **vSphere tags**: cluster tags come from the resource **properties**
+  (`/resources/{id}/properties`) and are shown as chips in the detail card
+  ("CPU & RAM" tab). By default all properties whose key contains `tag` are
+  used; `--tag-property` narrows this to a prefix (e.g. `summary|tag`). If a
+  property contains **JSON** (e.g. `TagJson`), it is unpacked and only the
+  tags are listed — raw JSON never reaches the display. After each refresh the
+  log lists the detected keys and an excerpt of the raw value — handy for
+  fine-tuning.
+- **dvSwitches / port groups**: Aria delivers distributed switches
+  (`VmwareDistributedVirtualSwitch`) and port groups
+  (`DistributedVirtualPortgroup`) as separate resources. Cluster mapping
+  works — as with storage — via the attached hosts
+  (dvSwitch → HostSystem → `summary|parentCluster`); the VLAN number is read
+  best effort from the port group properties (per port group via
+  `/resources/{id}/properties`, any key containing "vlan"). VLANs of known port
+  groups come from the **cache of the previous refresh** (a full re-read runs
+  once a day — log: `VLANs: X aus Cache, Y per API`). If the fetch
+  fails, the network tab stays empty and everything else keeps working. The
+  log reports `dvSwitches: N, Portgruppen: M · zugeordnet: …` — check there
+  after the next refresh.
+  **Uplink/trunk port groups** (name contains "uplink" or the VLAN is a wide
+  trunk range like `0-4094`) are not real network VLANs and are **hidden** by
+  default; `--show-uplink-portgroups` brings them back.
+- **Workload %**: the vROps workload badge per cluster (`badge|workload`) is
+  read best effort and shown as a key figure in the cluster detail card —
+  **hidden from the requester role** (neither in the UI nor in the payload).
   Log: `Cluster-Workload gelesen: N/M`.
-- **Tanzu-/vSphere-Namespaces**: Läuft auf einem Cluster vSphere with Tanzu,
-  werden die **Namespace-Reservierungen** (CPU/RAM) aus vROps gelesen und
-  zählen — wie genehmigte manuelle Reservierungen — gegen die freie Kapazität.
-  Die CPU-Reservierung kommt in **MHz** und wird über `tanzu-mhz-per-vcpu`
-  (Standard 2500, `0` = CPU nicht zählen) in **vCPU-Äquivalente** umgerechnet
-  (aufgerundet). Die Detailkarte zeigt einen eigenen Abschnitt
-  „Tanzu-Namespaces" mit jedem Namespace (MHz, vCPU-Äquivalent, RAM) und die
-  Kennzahl „davon Tanzu-Namespaces". Die Worker-VMs der TKG-Cluster sind als
-  normale VMs ohnehin in der Belegung enthalten — die Namespace-Reservierung
-  sichert zusätzlich zugesagte, noch nicht materialisierte Kapazität ab
-  (bewusst konservativ). Der Abruf ist best effort: Resource-Kind und
-  Stat-Keys variieren je vROps-Version, deshalb probiert das System Kandidaten
-  durch und protokolliert das Ergebnis (`Tanzu: … Namespaces gefunden`,
-  `erkannte Schlüssel: …`) — nach dem ersten Abruf gegen das echte vROps im
-  Log gegenprüfen. Ohne Tanzu findet der Abruf nichts und ändert nichts.
-- **Cluster-Detailkarte überall**: Ein Klick auf einen **Clusternamen** öffnet
-  die Detailkarte – nicht nur in der Kapazitätsübersicht, sondern auch in den
-  Reservierungen, Genehmigungen und der VLAN-Suche.
-- Die Erläuterungen zur Berechnung und die Hilfe stehen im Dashboard hinter den
-  Buttons **„ℹ Info Kapa-Berechnung"** und **„? Hilfe"** (aufgeräumte Kopfzeile).
+- **Tanzu/vSphere namespaces**: if vSphere with Tanzu runs on a cluster, the
+  **namespace reservations** (CPU/RAM) are read from vROps and count — like
+  approved manual reservations — against free capacity. The CPU reservation
+  arrives in **MHz** and is converted to **vCPU equivalents** (rounded up) via
+  `tanzu-mhz-per-vcpu` (default 2500, `0` = do not count CPU). The detail card
+  shows a dedicated "Tanzu namespaces" section listing every namespace (MHz,
+  vCPU equivalent, RAM) plus the "of which Tanzu namespaces" key figure. TKG
+  worker VMs are already included in usage as regular VMs — the namespace
+  reservation additionally covers committed capacity that has not
+  materialized yet (deliberately conservative). The fetch is best effort:
+  resource kind and stat keys vary by vROps version, so the system probes
+  candidates and logs the outcome (`Tanzu: … Namespaces gefunden`,
+  `erkannte Schlüssel: …`) — check the log against your real vROps after the
+  first refresh. Without Tanzu the fetch finds nothing and changes nothing.
+- **Cluster detail card everywhere**: clicking a **cluster name** opens the
+  detail card — not only in the capacity overview but also in reservations,
+  approvals and the VLAN search.
+- The calculation notes and help live behind the **"ℹ How capacity is
+  calculated"** and **"? Help"** buttons (tidy header).
 
-## Verwendung
+## Usage
 
-Nur Python 3.8+ nötig, keine Zusatzpakete — läuft damit direkt auf jedem Linux-Host.
+Only Python 3.8+ required, no extra packages — runs directly on any Linux host.
 
-**Server-Modus** (empfohlen): Seite lädt sofort aus dem Datei-Cache
-(`data/kapa_cache.json`); beim allerersten Start ohne Cache werden die Daten
-automatisch abgerufen. Danach Aktualisierung alle 30 Minuten oder per Knopf:
-
-```bash
-python3 aria_kapa.py --url https://aria-ops.firma.de --user admin --insecure --serve
-# Dashboard: http://localhost:8080  ·  Reservierungen: http://localhost:8080/reservierungen
-```
-
-**Einmaliger Snapshot** (statisches HTML, Reservierungen dann nur im Browser):
+**Server mode** (recommended): the page loads instantly from the file cache
+(`data/kapa_cache.json`); on the very first start without a cache the data is
+fetched automatically. After that it refreshes every 30 minutes or on demand:
 
 ```bash
-python3 aria_kapa.py --url https://aria-ops.firma.de --user admin --insecure
+python3 aria_kapa.py --url https://aria-ops.example.com --user admin --insecure --serve
+# Dashboard: http://localhost:8080  ·  Reservations: http://localhost:8080/reservierungen
 ```
 
-**Demo ohne Aria-Verbindung:**
+**One-off snapshot** (static HTML, reservations then live in the browser only):
 
 ```bash
-python3 aria_kapa.py --sample                # statisch
-python3 aria_kapa.py --sample --serve        # Server-Modus
+python3 aria_kapa.py --url https://aria-ops.example.com --user admin --insecure
 ```
 
-Eine fertig generierte Demo liegt als
-[`kapa_dashboard_demo.html`](kapa_dashboard_demo.html) im Repo — herunterladen
-und im Browser öffnen, ganz ohne Installation (Reservierungen landen dann nur
-im localStorage des Browsers).
+**Demo without an Aria connection:**
 
-## Reservierungen (Kapazitätsanfragen)
+```bash
+python3 aria_kapa.py --sample                # static
+python3 aria_kapa.py --sample --serve        # server mode
+```
 
-Anlegen per Dialog („+ Neue Kapazitätsanfrage") oder direkt in der
-Detailkarte eines Clusters; Export/Import als JSON.
+A pre-built demo ships in the repo as
+[`kapa_dashboard_demo.html`](kapa_dashboard_demo.html) — download it and open
+it in a browser, no installation needed (reservations then live in the
+browser's localStorage only).
 
-- **Eindeutige ID**: Jede Anfrage erhält beim Anlegen automatisch eine
-  eindeutige ID (12 Zeichen). Sie wird in den Tabellen „Reservierungen" und
-  „Genehmigungen" als erste Spalte angezeigt und steht auch in der
-  Report-Mail, im CSV-Export (`/api/v1/reservations?format=csv`) und im
-  Audit-Log — so lässt sich jede Anfrage zweifelsfrei referenzieren.
+## Reservations (capacity requests)
 
-- **Change / Jira-Ticket (optional)**: Jede Anfrage kann eine Change-Nummer oder
-  ein Jira-Ticket tragen – frei wählbar, ohne festes Format und **kein
-  Pflichtfeld**. Der Wert erscheint in den Übersichten und in der Report-Mail;
-  fehlt er, steht dort „–".
+Create via the dialog ("+ New capacity request") or directly in a cluster's
+detail card; export/import as JSON.
 
-- **Ressourcen**: Je Anfrage werden **vCPU**, **RAM (GB)** und **Storage (GB)**
-  als **Ganzzahlen** erfasst (keine Kommazahlen). vCPU und RAM zählen gegen die
-  berechnete Cluster-Kapazität; die Storage-Größe wird zur Anfrage geführt und
-  überall mit angezeigt.
-- **Gültigkeit**: Reservierungen gelten automatisch ab dem Anlagetag für
-  30 Tage; das „gültig bis"-Datum wird in jeder Reservierung angezeigt.
-- **Mehrstufiger Genehmigungsprozess**: Sind Teams konfiguriert, durchläuft
-  jeder Antrag sie **nacheinander** in der festgelegten Reihenfolge. Der Status
-  wandert von „beantragt" → „in Prüfung" (sobald das erste Team freigegeben hat)
-  → „genehmigt" (erst wenn **alle** Teams freigegeben haben). Erst dann zählt
-  der Antrag gegen die Kapazität. Beim Status **„in Prüfung"** zeigt ein
-  Mouseover, welche Teams (mit Person und Datum) bereits freigegeben haben und
-  welches Team als Nächstes dran ist. Ein Team kann erst freigeben, wenn es an
-  der Reihe ist; jedes Team kann in seiner Stufe auch ablehnen. Ohne Teams
-  bleibt es einstufig (Admin genehmigt direkt).
-  - **Teams pflegen**: im Tab „Verwaltung" (Abschnitt „Genehmigungs-Teams")
-    – hinzufügen, per ↑/↓ in die richtige Prüfreihenfolge bringen, **umbenennen**
-    (✎, die Reihenfolge bleibt erhalten und zugewiesene Reviewer werden
-    automatisch übernommen) und entfernen. Gespeichert in `data/kapa_teams.json`.
-    Der Parameter `--approval-teams` dient nur noch zur **Erstbefüllung**, falls
-    diese Datei noch nicht existiert.
-  - **Reviewer einem Team zuordnen**: Bei der Rollenzuweisung (Abschnitt
-    „Benutzer und Rollen") wird für die Rolle *Reviewer* das Team über eine
-    **Auswahlliste** der vorhandenen Teams gesetzt. Nur so zugeordnete Benutzer
-    dürfen in der jeweiligen Stufe freigeben (serverseitig erzwungen).
-- **Genehmigungsübersicht** (Tab „Genehmigungen"): zeigt je Antrag die freie
-  Kapazität des Ziel-Clusters (⚠ wenn er nicht mehr hineinpasst), den
-  Fortschritt und – für das gerade zuständige Team bzw. Admins – die
-  Freigabe-/Ablehnen-Schaltflächen. Oben verlinkt ein **Reviewer-Handbuch**
-  (eigene, zweisprachige Doku-Seite unter `/reviewer-handbuch`, auch im
-  „? Hilfe"-Popup) die wichtigsten Abläufe für Prüfer – später erweiterbar.
-- **Benutzerhandbuch** für alle Rollen (`/benutzerhandbuch`, englisch
-  `/user-guide`): Schritt-für-Schritt-Anleitung von der Anmeldung über
-  „Kapazität anfragen" bis Storno/Archiv – zweisprachig, mit den
-  konfigurierten Rollennamen, verlinkt im Footer und im „? Hilfe"-Popup.
-- **Ablehnungen** bleiben 31 Tage (ab Ablehnung) als Historie sichtbar
-  (Status „abgelehnt"; im Mouseover steht, in welcher Stufe abgelehnt wurde).
-- **Storno**: Anfragen lassen sich nicht löschen, sondern **stornieren**. Das
-  darf ein Admin, der Anforderer selbst oder **jemand aus derselben Abteilung**
-  (Button „⦸ Storno" in der Reservierungsliste). Eine stornierte Anfrage bekommt
-  den Status „storniert", bleibt als Historie erhalten und zählt nicht mehr
-  gegen die Kapazität.
-- **Kommentar**: Beim Freigeben/Ablehnen/Stornieren kann ein Kommentar
-  (z. B. Begründung, **max. 64 Zeichen**) über einen schlanken Dialog erfasst
-  werden; er erscheint in der Reservierungsübersicht und in der Report-Mail.
-- **Entschieden von**: Die Übersicht zeigt, welcher Admin genehmigt bzw.
-  abgelehnt hat — für Anforderer ist diese Information verborgen (Spalte und
-  Datenfeld werden serverseitig entfernt); Admins und technische Prüfung
-  sehen sie.
-- **Mail-Benachrichtigungen** (SMTP-Server über `--smtp-server` vorausgesetzt):
-  In der **Verwaltung** legst du je interner Rolle fest, bei welchem Ereignis
-  eine Mail rausgeht — **Anlage**, **Ablehnung**, **Freigabe** (endgültige
-  Genehmigung) und **„Team ist dran"** (ein Team ist im Freigabe-Workflow an der
-  Reihe). Empfänger:
-  - **Anforderer** → der jeweilige Antragsteller (automatisch). Als Adresse dient
-    standardmäßig der Anmeldename (UPN); mit `--ad-mail-attribute mail` (o. Ä.)
-    wird stattdessen ein frei wählbares **AD-Attribut** ausgelesen (Service-Konto
-    `--ad-bind-dn` nötig; wird bei der Anmeldung aufgelöst und mit der
-    Reservierung gespeichert),
-  - **Admin/Auditor** → je eine frei eingetragene Verteiler-Adresse
-    (Admin fällt auf `--smtp-to` zurück, falls das Feld leer bleibt),
-  - **„Team ist dran"** → die pro Genehmigungs-Team hinterlegte Adresse.
+- **Unique ID**: every request automatically receives a unique ID on creation
+  (12 characters, format configurable via `id-prefix`/`id-length`). It appears
+  as the first column in the "Reservations" and "Approvals" tables and also in
+  the report email, the CSV export (`/api/v1/reservations?format=csv`) and the
+  audit log — every request can be referenced unambiguously.
+- **Change / Jira ticket (optional)**: every request can carry a change number
+  or Jira ticket — free-form, no fixed format, **not mandatory**. The value
+  appears in the overviews and the report email; if absent, "–" is shown.
+- **Resources**: each request records **vCPU**, **RAM (GB)** and
+  **storage (GB)** as **integers**. vCPU and RAM count against calculated
+  cluster capacity; the storage size is carried with the request and shown
+  everywhere.
+- **Validity**: reservations are automatically valid from their creation day
+  for 30 days; the "valid until" date is shown on every reservation.
+- **Multi-stage approval process**: with teams configured, every request
+  passes through them **in order**. The status moves from "requested" →
+  "in review" (once the first team has approved) → "approved" (only when
+  **all** teams have approved). Only then does the request count against
+  capacity. While **"in review"**, a mouseover shows which teams (with person
+  and date) have already approved and which team is next. A team can only
+  approve when it is its turn; every team can also reject at its stage.
+  Without teams the process is single-stage (admin approves directly).
+  - **Managing teams**: in the "Administration" tab ("Approval teams"
+    section) — add, order via ↑/↓, **rename** (✎, the order is kept and
+    assigned reviewers move along automatically) and remove. Stored in
+    `data/kapa_teams.json`. The `--approval-teams` parameter only serves as
+    **initial seeding** if that file does not exist yet.
+  - **Assigning reviewers to a team**: when assigning roles ("Users and
+    roles" section), the *Reviewer* role picks its team from a **dropdown** of
+    existing teams. Only users assigned this way may approve at that stage
+    (enforced server-side).
+- **Approval overview** (tab "Approvals"): shows per request the free capacity
+  of the target cluster (⚠ if it no longer fits), the progress and — for the
+  team currently up, and admins — the approve/reject buttons. At the top a
+  **reviewer handbook** (its own bilingual doc page at `/reviewer-handbuch`,
+  also in the "? Help" popup) links the key workflows for reviewers — extendable
+  later.
+- **User guide** for all roles (`/benutzerhandbuch`, English `/user-guide`):
+  step-by-step from signing in through "requesting capacity" to
+  cancel/archive — bilingual, uses the configured role names, linked in the
+  footer and the "? Help" popup.
+- **Rejections** stay visible for 31 days (from rejection) as history
+  (status "rejected"; the mouseover shows at which stage).
+- **Cancellation**: requests cannot be deleted, only **cancelled**. Allowed
+  for an admin, the requester, or **someone from the same team** ("⦸ Cancel"
+  button in the reservation list). A cancelled request gets status
+  "cancelled", stays as history and no longer counts against capacity.
+- **Comment**: when approving/rejecting/cancelling, a comment (e.g. a reason,
+  **max. 64 characters**) can be captured via a lean dialog; it appears in the
+  reservation overview and the report email.
+- **Decided by**: the overview shows which admin approved or rejected — hidden
+  from requesters (column and data field are stripped server-side); admins and
+  auditors see it.
+- **Mail notifications** (requires an SMTP server via `--smtp-server`): in
+  **Administration** you define per internal role which event triggers an
+  email — **created**, **rejected**, **approved** (final approval) and
+  **"team's turn"** (a team is up in the approval workflow). Recipients:
+  - **Requester** → the respective requester (automatic). By default the
+    sign-in name (UPN) serves as the address; with `--ad-mail-attribute mail`
+    (or similar) a freely selectable **AD attribute** is read instead
+    (requires the `--ad-bind-dn` service account; resolved at sign-in and
+    stored with the reservation),
+  - **Admin/Auditor** → a freely entered distribution address each
+    (admin falls back to `--smtp-to` if the field is empty),
+  - **"Team's turn"** → the address stored per approval team.
 
-  Die Mail enthält die Reservierungsdaten; der Versand läuft asynchron und
-  best-effort (Fehler nur im Log). Beim **Anlegen** eines Antrags wird zusätzlich
-  automatisch das erste Team benachrichtigt, nach jeder Freigabe das nächste.
+  The email contains the reservation data; delivery is asynchronous and
+  best-effort (errors only in the log). On **creation** of a request the first
+  team is notified automatically, after each approval the next one.
 
-  **Mail-Vorlage editieren:** Im selben Reiter lassen sich **Betreff** und
-  **HTML-Text** der Mails frei anpassen. Verfügbare Variablen (z. B. `{{name}}`,
-  `{{cluster}}`, `{{vcpu}}`, `{{ram_gb}}`, `{{approvals}}`, `{{von}}`, `{{action}}`)
-  werden als anklickbare Chips angezeigt und an der Cursor-Position eingefügt; die
-  Werte werden serverseitig HTML-escaped eingesetzt (Layout-HTML des Admins bleibt
-  erhalten). „**Vorschau**" rendert die Vorlage mit Beispieldaten in einem
-  isolierten `sandbox`-iframe, „**Standard einsetzen**" lädt die eingebaute Vorlage.
-  Leere Felder = eingebaute Standardvorlage. Gespeichert wird in `kapa_mail.json`
-  (kein Passwort), Änderungen landen im Audit-Log.
-- **Serve-Modus**: Reservierungen liegen zentral auf dem Server in
-  `data/kapa_reservierungen.json` — alle Nutzer sehen denselben Stand.
-- **Statisches HTML**: Speicherung lokal im Browser (localStorage).
-- **Automatischer Ablauf**: Reservierungen werden `--res-ttl-days` Tage nach
-  Anlage automatisch gelöscht (Standard: 31, `0` = nie löschen); die angezeigte
-  Gültigkeit endet einen Tag davor (30 Tage).
+  **Editing the mail template:** in the same tab, the **subject** and **HTML
+  body** of the emails are fully customizable. Available variables (e.g.
+  `{{name}}`, `{{cluster}}`, `{{vcpu}}`, `{{ram_gb}}`, `{{approvals}}`,
+  `{{von}}`, `{{action}}`) appear as clickable chips and are inserted at the
+  cursor position; values are HTML-escaped server-side (the admin's layout
+  HTML is preserved). "**Preview**" renders the template with sample data in
+  an isolated `sandbox` iframe, "**Insert default**" loads the built-in
+  template. Empty fields = built-in default. Stored in `kapa_mail.json`
+  (no password), changes are audit-logged.
+- **Serve mode**: reservations live centrally on the server in
+  `data/kapa_reservierungen.json` — every user sees the same state.
+- **Static HTML**: stored locally in the browser (localStorage).
+- **Automatic expiry**: reservations are deleted `--res-ttl-days` days after
+  creation (default: 31, `0` = never); the displayed validity ends one day
+  earlier (30 days).
 
-## Datenspeicher
+## Data store
 
-Alle Schreibvorgänge erfolgen **atomar** (erst in eine Temp-Datei, dann
-umbenennen), sodass ein Absturz mitten im Speichern keine halb geschriebene,
-beschädigte Datei hinterlassen kann. Über `--storage` (bzw. `storage =` in der
-INI) wird die Ablageform gewählt:
+All writes are **atomic** (write to a temp file first, then rename), so a
+crash mid-save can never leave a half-written, corrupted file. `--storage`
+(or `storage =` in the INI) selects the backend:
 
-- **`json`** (Standard): Je Sammlung eine gut lesbare, notfalls von Hand
-  editierbare `.json`-Datei im `--data-dir` (`kapa_reservierungen.json`,
-  `kapa_rollen.json`, `kapa_teams.json` …). Für den üblichen Betrieb völlig
-  ausreichend.
-- **`sqlite`**: Eine einzelne `data/kapa.db` (SQLite steckt in der
-  Python-Standardbibliothek — **kein** zusätzliches Modul, kein Server, kein
-  Port). Reservierungen werden **inkrementell** geschrieben (nur die geänderte
-  Zeile statt der ganzen Liste); die kleinen Sammlungen liegen als
-  Schlüssel-Wert-Einträge in derselben Datei. Sinnvoll erst bei sehr vielen
-  (mehrere Tausend) aktiven Reservierungen.
+- **`json`** (default): one readable, hand-editable `.json` file per
+  collection in `--data-dir` (`kapa_reservierungen.json`, `kapa_rollen.json`,
+  `kapa_teams.json` …). Entirely sufficient for normal operation.
+- **`sqlite`**: a single `data/kapa.db` (SQLite ships with the Python
+  standard library — **no** extra module, no server, no port). Reservations
+  are written **incrementally** (only the changed row instead of the whole
+  list); the small collections live as key-value entries in the same file.
+  Worth it only with very many (several thousand) active reservations.
 
-Beim **erstmaligen Umstellen** auf `sqlite` übernimmt das Dashboard vorhandene
-JSON-Daten **einmalig automatisch** in die neue `kapa.db` (Rollen, Teams,
-Selektor, Rollennamen, Tokens und alle Reservierungen). Die JSON-Dateien bleiben
-als Sicherung liegen — ein Rückwechsel auf `json` ist damit jederzeit möglich.
-Das Audit-Log (`kapa_log.jsonl`) und der Aria-Cache bleiben in beiden Modi
-eigene Dateien.
+On the **first switch** to `sqlite` the dashboard migrates existing JSON data
+**automatically once** into the new `kapa.db` (roles, teams, selector, role
+labels, tokens and all reservations). The JSON files remain as a safety net —
+switching back to `json` stays possible at any time. The audit log
+(`kapa_log.jsonl`) and the Aria cache remain separate files in both modes.
 
-## API für externe Anwendungen
+## API for external applications
 
-Unter `/api/v1/` gibt es eine stabile REST-API für externe
-Anwendungen (Grafana, CMDB, Reporting …). Admins erzeugen dafür im Tab
-„Verwaltung" benannte Bearer-Tokens (werden nur einmal angezeigt, nur der
-Hash wird gespeichert, einzeln widerrufbar, Nutzung im Audit-Log):
+Under `/api/v1/` there is a stable REST API for external
+applications (Grafana, CMDB, reporting …). Admins create named bearer tokens
+in the "Administration" tab (shown only once, only the hash is stored,
+individually revocable, usage audit-logged):
 
 ```bash
 curl -H "Authorization: Bearer kapa_..." \
   "https://host/capa/api/v1/reservations?status=genehmigt&format=csv"
 ```
 
-Endpunkte (lesend): `/api/v1/reservations` (Filter: `cluster`, `status`,
-`abteilung`; `format=csv`), `/api/v1/data` (Cluster-Kapazitäten),
-`/api/v1/status`. **Schreibend** (Schreibrechte je Token per Klick in der
-Verwaltung, Audit-geloggt): `POST /api/v1/reservations` (anlegen) und
-`…/{id}/cancel` mit Recht „Reservierungen", `…/{id}/approve` und
-`…/{id}/reject` mit Recht „Genehmigungen" — Details in
-[`config/API.md`](config/API.md).
+Read endpoints: `/api/v1/reservations` (filters: `cluster`, `status`,
+`abteilung`; `format=csv`), `/api/v1/data` (cluster capacities),
+`/api/v1/status`. **Write** (write permissions per token, one click in the
+administration, audit-logged): `POST /api/v1/reservations` (create) and
+`…/{id}/cancel` with the "Reservations" permission, `…/{id}/approve` and
+`…/{id}/reject` with the "Approvals" permission — details in
+[`config/API.en.md`](config/API.en.md).
 
-**Sprache:** Die JSON-Feldnamen und Statuswerte sind Teil des stabilen
-v1-Vertrags und bleiben deutsch. **CSV-Spalten/Statuswerte** und die
-**OpenAPI-Beschreibungen** folgen dagegen `Accept-Language` (bzw. explizit
-`?lang=de|en`) — Aufrufe ohne Header (curl, Skripte) bekommen unverändert
-Deutsch, bestehende Consumer sehen keine Änderung.
+**Language:** JSON field names and status values are part of the stable v1
+contract and stay German (`status=genehmigt` etc.). **CSV headers/status
+values** and the **OpenAPI descriptions**, however, follow `Accept-Language`
+(or explicitly `?lang=de|en`) — requests without the header (curl, scripts)
+keep getting German, so existing consumers see no change.
 
-**Interaktive Doku im Dashboard**: unter **`/api/v1/docs`** (auch verlinkt im Tab
-„Verwaltung → API") – eine selbst-enthaltene, offline lauffähige
-Swagger-artige Seite mit „Ausführen"-Knopf je Endpunkt. Die maschinenlesbare
-**OpenAPI-3.0-Spec** liegt unter **`/api/v1/openapi.json`** und lässt sich in
-Swagger Editor, Postman o. Ä. importieren. Textfassung: [`config/API.md`](config/API.md).
+**Interactive docs in the dashboard**: at **`/api/v1/docs`** (also linked from
+"Administration → API") — a self-contained, offline-capable
+Swagger-style page with a "Run" button per endpoint. The machine-readable
+**OpenAPI 3.0 spec** lives at **`/api/v1/openapi.json`** and imports into
+Swagger Editor, Postman etc. Text version: [`config/API.en.md`](config/API.en.md).
 
-## Rollenkonzept und AD-Anmeldung
+## Role concept and AD sign-in
 
-Mit `--ad-url` verlangt der Serve-Modus eine Anmeldung mit dem
-Active-Directory-Konto (LDAP Simple Bind, nur Standardbibliothek):
+With `--ad-url`, serve mode requires signing in with an Active Directory
+account (LDAP simple bind, standard library only):
 
 ```bash
-python3 aria_kapa.py --url https://aria-ops.firma.de --user svc-aria --serve \
-  --ad-url ldaps://dc01.firma.local --ad-domain firma.local \
-  --admin-user vorname.nachname@firma.local
+python3 aria_kapa.py --url https://aria-ops.example.com --user svc-aria --serve \
+  --ad-url ldaps://dc01.example.com --ad-domain example.com \
+  --admin-user first.last@example.com
 ```
 
-| Rolle | Rechte |
+| Role | Permissions |
 |---|---|
-| **Anforderer** | Kapazitätsanfragen stellen; eigene, noch offene Anträge zurückziehen; sieht nur Anfragen der **eigenen Abteilung**, nicht wer entschieden hat; keine Host-/VM-Listen, kein Workload (Standard — per Sichtbarkeits-Matrix anpassbar) |
-| **Reviewer** | Mitglied eines Genehmigungsteams; gibt Anträge frei bzw. lehnt sie ab, **wenn das eigene Team an der Reihe ist** (Tab „Genehmigungen"); sieht alle Anträge, aber keine Verwaltung/Log und keine Host-/VM-Listen (Standard — per Sichtbarkeits-Matrix anpassbar) |
-| **Administrator** | Anträge in jeder Stufe genehmigen/ablehnen (mit Kommentar), Daten aus Aria aktualisieren, alle Reservierungen verwalten, Import, Rollen/Teams pflegen (Tab „Verwaltung"); sieht alles |
-| **Technische Prüfung** | Alle Daten und Seiten einsehen — keinerlei Änderungen möglich |
+| **Requester** | Submit capacity requests; withdraw own still-open requests; sees only requests of the **own team**, not who decided; no host/VM lists, no workload (default — adjustable via the visibility matrix) |
+| **Reviewer** | Member of an approval team; approves or rejects requests **when their team is up** ("Approvals" tab); sees all requests but no administration/log and no host/VM lists (default — adjustable via the visibility matrix) |
+| **Administrator** | Approve/reject at any stage (with comment), refresh Aria data, manage all reservations, import, manage roles/teams ("Administration" tab); sees everything |
+| **Auditor** | View all data and pages — no changes possible |
 
-- **Rollen zuweisen**: Tab „Verwaltung" (`/verwaltung`) — AD-Benutzernamen
-  eintragen, Rolle wählen und im Feld „Abteilung / Team" bei **Anforderern** die
-  das **Team** (eines der im selben Tab gepflegten Genehmigungs-Teams, per
-  Auswahlliste) angeben – für **Anforderer und Reviewer** gleichermaßen; Admin
-  und Auditor brauchen kein Team. Gespeichert in `data/kapa_rollen.json`.
-  Bestehende Zuweisungen lassen sich per Klick bearbeiten oder entfernen.
-- **Team-Sicht (nur Anforderer)**: Ein **Anforderer** sieht in der
-  Reservierungsliste nur die Anfragen des **eigenen Teams** (fremde genehmigte
-  bleiben anonymisiert als „(anderes Team)" enthalten, damit die freie
-  Kapazität stimmt). **Reviewer, Admin und Auditor sehen alle** Anfragen – der
-  mehrstufige Genehmigungsprozess bleibt dadurch unberührt.
-- **Standardrolle**: Jeder erfolgreich am AD angemeldete Benutzer **ohne**
-  explizite Zuweisung gilt automatisch als **Anforderer** — er kann Anfragen
-  stellen, aber nichts freigeben. Reviewer-, Admin- und Auditor-Rechte gibt es
-  nur über eine ausdrückliche Zuweisung.
-- **AD-Gruppen berechtigen**: In der Verwaltung lässt sich (Typ „AD-Gruppe")
-  auch einer ganzen **AD-Gruppe** eine Rolle (und ein Team) zuweisen — genau wie
-  einem Benutzer. Jedes Mitglied der Gruppe erhält dann diese Rolle. Dafür ist
-  ein **Service-Konto** nötig (`--ad-bind-dn`/`--ad-bind-password`/`--ad-base-dn`),
-  mit dem das System nach der Anmeldung die AD-Gruppen (`memberOf`) des Benutzers
-  sucht. Direkt zugewiesene Benutzerrollen haben Vorrang; bei mehreren Gruppen
-  gewinnt die höchste Berechtigung.
-- **AD-Gruppen-Check**: Neben jeder AD-Gruppe steht in der Verwaltung ein Button
-  **„👥 Mitglieder"**. Ein Klick schlägt die Gruppe live im Verzeichnis nach und
-  zeigt ihre **direkten Benutzer-Mitglieder** (Name · UPN) im Popup — praktisch,
-  um zu prüfen, ob Service-Konto, Base-DN und Gruppenname sauber greifen. Nutzt
-  eine einzige Suche (`(memberOf=…)`), verschachtelte Gruppen werden nicht
-  aufgelöst.
-- **Rollen-Bezeichnungen umbenennen**: Die angezeigten Namen der vier Rollen
-  sind im Tab „Verwaltung" (Abschnitt „Rollen-Bezeichnungen") **frei wählbar**
-  (z. B. „Anforderer" → „Antragsteller"), gespeichert in
-  `data/kapa_rollennamen.json`. Die internen Rollen-Schlüssel und damit die
-  **Rechte bleiben unverändert** — nur die Anzeige ändert sich.
-- **Abteilungssicht**: Anforderer sehen nur Anfragen ihrer Abteilung.
-  Fremde *genehmigte* Reservierungen bleiben anonymisiert als
-  „(andere Abteilung)" sichtbar, damit die freie Kapazität stimmt;
-  fremde offene/abgelehnte Anträge sind komplett ausgeblendet.
-- **Bootstrap**: `--admin-user` (kommagetrennt) definiert Immer-Admins,
-  damit der erste Admin die Verwaltung öffnen kann.
-- Benutzernamen ohne `@` werden automatisch um `--ad-domain` ergänzt
-  (`max` → `max@firma.local`).
-- Alle Rechte werden **serverseitig** geprüft; die Oberfläche blendet
-  nicht erlaubte Aktionen zusätzlich aus.
-- `ldaps://` verwenden — bei `ldap://` gehen Passwörter unverschlüsselt
-  über das Netz (`--ad-insecure` für Self-Signed-Zertifikate).
-- Ohne `--ad-url` läuft alles wie bisher ohne Anmeldung (Vollzugriff).
+- **Assigning roles**: "Administration" tab — enter the AD user name, pick a
+  role and, for **requesters and reviewers** alike, the **team** (one of the
+  approval teams managed in the same tab, via dropdown); admin and auditor
+  need no team. Stored in `data/kapa_rollen.json`. Existing assignments can be
+  edited or removed with a click.
+- **Team visibility (requesters only)**: a **requester** only sees the
+  requests of the **own team** in the reservation list (foreign approved ones
+  stay included anonymized as "(other team)" so free capacity stays correct).
+  **Reviewers, admins and auditors see all** requests — the multi-stage
+  approval process is unaffected.
+- **Default role**: every user who successfully signs in against AD
+  **without** an explicit assignment automatically counts as a **requester** —
+  they can submit requests but approve nothing. Reviewer, admin and auditor
+  rights only exist through an explicit assignment.
+- **Authorizing AD groups**: administration can also assign a role (and team)
+  to an entire **AD group** (type "AD group") — exactly like a user. Every
+  member of the group then receives that role. This requires a **service
+  account** (`--ad-bind-dn`/`--ad-bind-password`/`--ad-base-dn`) with which
+  the system looks up the user's AD groups (`memberOf`) after sign-in.
+  Directly assigned user roles take precedence; with multiple groups the
+  highest permission wins.
+- **AD group check**: next to each AD group, administration shows a **"👥
+  Members"** button. A click looks the group up live in the directory and shows
+  its **direct user members** (name · UPN) in a popup — handy to verify that the
+  service account, base DN and group name resolve cleanly. Uses a single search
+  (`(memberOf=…)`); nested groups are not resolved.
+- **Renaming role labels**: the displayed names of the four roles are freely
+  changeable in the "Administration" tab ("Role labels" section), stored in
+  `data/kapa_rollennamen.json`. Internal role keys and therefore
+  **permissions stay unchanged** — only the display changes.
+- **Bootstrap**: `--admin-user` (comma-separated) defines always-admins so the
+  first admin can open the administration.
+- User names without `@` are automatically completed with `--ad-domain`
+  (`max` → `max@example.com`).
+- All permissions are enforced **server-side**; the UI additionally hides
+  disallowed actions.
+- Use `ldaps://` — with `ldap://` passwords cross the network unencrypted
+  (`--ad-insecure` for self-signed certificates).
+- Without `--ad-url` everything runs as before without sign-in (full access).
 
-### Härtung
+### Hardening
 
-- **Session-Cookie** mit `HttpOnly`, `SameSite=Lax` und `Secure`. Da das
-  Dashboard hinter dem HTTPS-nginx läuft, ist `Secure` Standard; nur für
-  einen lokalen HTTP-Test ohne Proxy lässt es sich mit `--cookie-insecure`
-  abschalten.
-- **Sicherheits-Header** auf jeder Antwort: `Content-Security-Policy`,
-  `X-Frame-Options: DENY` (kein Clickjacking), `X-Content-Type-Options: nosniff`,
-  `Referrer-Policy: same-origin`.
-- **Ausgabe-Escaping**: aus Aria stammende Namen (Cluster, Hosts, VMs) werden
-  script-tag-sicher eingebettet, sodass sie kein JavaScript einschleusen können.
-- **Login-Bremse**: nach 5 Fehlversuchen je Benutzer/IP wird die Anmeldung für
-  einige Minuten mit `429` gesperrt (Schutz vor Password-Spraying). Eine
-  einheitliche Fehlermeldung verrät nicht, welche Konten berechtigt sind.
-  AD-Ausfälle zählen dabei bewusst nicht als Fehlversuch.
-- **Request-Größe** ist begrenzt (2 MiB), damit ein großer Body den Dienst
-  nicht überlasten kann.
+- **Session cookie** with `HttpOnly`, `SameSite=Lax` and `Secure`. Since the
+  dashboard runs behind the HTTPS nginx, `Secure` is the default; only for a
+  local HTTP test without a proxy can it be disabled via `--cookie-insecure`.
+- **Security headers** on every response: `Content-Security-Policy`,
+  `X-Frame-Options: DENY` (no clickjacking), `X-Content-Type-Options:
+  nosniff`, `Referrer-Policy: same-origin`.
+- **Output escaping**: names coming from Aria (clusters, hosts, VMs) are
+  embedded script-tag-safe so they cannot inject JavaScript.
+- **Login throttle**: after 5 failed attempts per user, sign-in is blocked for
+  a few minutes with `429` (protection against password spraying). A uniform
+  error message does not reveal which accounts are authorized. AD outages
+  deliberately do not count as failed attempts.
+- **Request size** is limited (2 MiB) so a large body cannot overload the
+  service.
 
-## Konfiguration (ein einfaches Modell)
+## Configuration (one simple model)
 
-Es gibt bewusst **eine** Konfigurationsdatei und ein klares Prinzip — jede
-Einstellung hat **genau eine Quelle**:
+There is deliberately **one** configuration file and one clear principle —
+every setting has **exactly one source**:
 
-| Was | Wohin |
+| What | Where |
 |---|---|
-| **Alle nicht-geheimen Einstellungen** (Aria-URL/-User, Berechnung, Netzwerk, Mail-Server, Backup-Ziel, AD-Verbindung, Server-Port …) | **`kapa.ini`** (Vorlage: [`config/kapa.ini.example`](config/kapa.ini.example)) |
-| **Geheimnisse** (Passwörter, SSH-Key) | eigene **`.pass`-Dateien** (root:kapa, `0640`); die INI nennt nur den **Pfad** (`password-file`, `ad-bind-password-file`, …) |
-| **Fachdaten** (Rollen, Teams, Mail-Regeln, Selektor, Tokens) | **Admin-UI** → Data-Store unter `--data-dir` |
+| **All non-secret settings** (Aria URL/user, calculation, network, mail server, backup target, AD connection, server port …) | **`kapa.ini`** (template: [`config/kapa.ini.en.example`](config/kapa.ini.en.example)) |
+| **Secrets** (passwords, SSH key) | separate **`.pass` files** (root:kapa, `0640`); the INI only names the **path** (`password-file`, `ad-bind-password-file`, …) |
+| **Business data** (roles, teams, mail rules, selector, tokens) | **admin UI** → data store under `--data-dir` |
 
 ```bash
 python3 aria_kapa.py --config /etc/kapa/kapa.ini --serve
 ```
 
-Die systemd-Unit ruft genau das auf — es gibt **keine `kapa.env`** mehr, die
-Werte überschreiben könnte. Kommandozeilen-Argumente überschreiben die INI (für
-Ad-hoc-Tests); unbekannte Schlüssel werden mit Fehlermeldung abgewiesen. Die im
-System gesetzten Werte sind im Admin-UI unter **„Backup & Konfiguration"**
-schreibgeschützt einsehbar (Passwörter nur als „gesetzt: ja/nein").
+The systemd unit calls exactly that — there is **no `kapa.env`** anymore that
+could override values. Command-line arguments override the INI (for ad-hoc
+tests); unknown keys are rejected with an error. The configured values can be
+inspected read-only in the admin UI under **"Backup & configuration"**
+(passwords only as "set: yes/no").
 
-> Migration von älteren Versionen (kapa.env + KAPA_EXTRA_ARGS): Werte aus der
-> `kapa.env` in die `kapa.ini` übernehmen, Passwörter in `.pass`-Dateien legen
-> und deren Pfade in der INI eintragen, dann die vereinfachte Unit einspielen.
-> `kapa.env` wird nicht mehr benötigt (Details: [`config/kapa.env.example`](config/kapa.env.example)).
+> Migration from older versions (kapa.env + KAPA_EXTRA_ARGS): move the values
+> from `kapa.env` into `kapa.ini`, put passwords into `.pass` files and
+> reference their paths in the INI, then install the simplified unit.
+> `kapa.env` is no longer needed (details: [`config/kapa.env.example`](config/kapa.env.example)).
 
-**SFTP-Backup**: Mit `--backup-target backup@srv:/backup/kapa` werden die
-Datendateien (Reservierungen, Rollen, Audit-Log, Cache) regelmäßig als
-`tar.gz` per scp übertragen — Standard: **zweimal täglich**
-(`--backup-interval 43200`). **Rotation**: Archive älter als 30 Tage werden
-auf dem Ziel automatisch gelöscht (`--backup-keep-days`, per sftp, auch auf
-sftp-only-Servern). Authentifizierung bevorzugt per SSH-Key (`--backup-key`);
-ein Passwort (`--backup-password` bzw. `BACKUP_PASSWORD`) funktioniert nur
-mit installiertem `sshpass`. Admins können ein Backup jederzeit **manuell
-auslösen** – im Tab „Verwaltung" (Abschnitt „Backup") per Knopf oder direkt über
-`POST /api/backup`. Ergebnisse (auch Fehler) landen im Audit-Log.
+**SFTP backup**: with `--backup-target backup@srv:/backup/kapa` the data files
+(reservations, roles, audit log, cache) are regularly transferred as `tar.gz`
+via scp — default: **twice a day** (`--backup-interval 43200`). **Rotation**:
+archives older than 30 days are deleted automatically on the target
+(`--backup-keep-days`, via sftp, works on sftp-only servers too).
+Authentication preferably via SSH key (`--backup-key`); a password
+(`--backup-password` or `BACKUP_PASSWORD`) only works with `sshpass`
+installed. Admins can trigger a backup **manually** at any time — in the
+"Administration" tab ("Backup" section) or directly via `POST /api/backup`.
+Results (including errors) land in the audit log.
 
-**Restore**: Schritt-für-Schritt-Anleitung in
-[`config/RESTORE.md`](config/RESTORE.md).
+**Restore**: step-by-step guide in [`config/RESTORE.en.md`](config/RESTORE.en.md).
 
-## Optionen
+## Options
 
-| Option | Beschreibung |
+| Option | Description |
 |---|---|
-| `--config kapa.ini` | Alle Optionen aus INI-Datei laden |
-| `--cpu-factor 6` | CPU-Überprovisionierungsfaktor |
-| `--failover-hosts 1` | Ausfall-Hosts pro Cluster (N+1), `0` = aus |
-| `--auth-source local` | Auth-Quelle (z. B. AD-Quelle) |
-| `--insecure` | TLS-Zertifikat nicht prüfen (Self-Signed) |
-| `--aria-proxy http://proxy:3128` | optionaler HTTP(S)-Proxy für die Aria-Anfragen (abgesicherte Umgebungen) |
-| `--serve --port 8080` | Webserver-Modus |
-| `--bind 0.0.0.0` | Bind-Adresse für `--serve` |
-| `--refresh-interval 1800` | Auto-Aktualisierung in Sekunden (`0` = aus) |
-| `--data-dir /var/lib/kapa` | Basisordner aller Laufzeitdaten (Standard `data/`); bei CI/CD außerhalb des Deploy-Verzeichnisses wählen |
-| `--cache kapa_cache.json` | Datei-Cache der letzten Abfrage |
-| `--res-file data/kapa_reservierungen.json` | Reservierungsdatei (Serve-Modus) |
-| `--res-ttl-days 31` | Reservierungen nach N Tagen löschen (`0` = nie) |
-| `--id-prefix KAPA-`, `--id-length 12` | Aufbau der Kapa-ID: Präfix + N zufällige Hex-Zeichen |
-| `--exclude-tag Kapa_Filter:Ja` | VMs mit diesem vROps-Tag (Kategorie:Wert) aus der Auswertung ausschließen |
-| `--contact-info "…"` | Kontakt-/Impressumszeile (Footer + Login) für Rückfragen |
-| `--ad-bind-dn`, `--ad-bind-password`, `--ad-base-dn` | Service-Konto für die AD-Gruppen-Berechtigung (memberOf-Suche) |
-| `--approval-teams "A,B,C"` | **Erstbefüllung** der Genehmigungs-Teams (nur wenn `--teams-file` noch fehlt); danach Pflege im Tab „Verwaltung" |
-| `--teams-file data/kapa_teams.json` | Datei mit den Genehmigungs-Teams (Pflege über die Verwaltungsseite) |
-| `--rolenames-file data/kapa_rollennamen.json` | Datei mit den frei wählbaren Rollen-Bezeichnungen (Pflege über die Verwaltungsseite) |
-| `--ad-url ldaps://dc01…` | AD-Anmeldung aktivieren |
-| `--ad-domain firma.local` | Domäne für Benutzernamen ohne `@` |
-| `--login-hint "…"` | Platzhalter im Benutzername-Feld der Anmeldemaske (Standard: „Active-Directory-Benutzername") |
-| `--ad-insecure` | LDAPS-Zertifikat nicht prüfen |
-| `--cookie-insecure` | Session-Cookie ohne `Secure` (nur lokaler HTTP-Test) |
-| `--admin-user a@…,b@…` | Immer-Admins (Bootstrap) |
-| `--roles-file data/kapa_rollen.json` | Rollendatei |
-| `--smtp-server mail.firma.local:25` | Mailserver für Reports |
-| `--smtp-from`, `--smtp-to` | Absender / Report-Empfänger (kommagetrennt) |
-| `--smtp-user`, `--smtp-password`, `--smtp-tls` | SMTP-Anmeldung / STARTTLS |
-| `--backup-target user@srv:/pfad` | SFTP/SCP-Backupziel |
-| `--backup-key`, `--backup-password` | SSH-Key (empfohlen) bzw. Passwort (braucht sshpass) |
-| `--backup-port 22`, `--backup-interval 43200` | SSH-Port / Backup-Intervall in s (2×/Tag) |
-| `--backup-keep-days 30` | Rotation: ältere Archive auf dem Ziel löschen |
-| `--password-file datei` | Aria-Passwort aus `.pass`-Datei (Pfad gehört in die INI) |
-| `--ad-bind-password-file`, `--smtp-password-file`, `--backup-password-file` | dito für AD-Service-Konto / SMTP / Backup |
-| `--log-file data/kapa_log.jsonl` | Audit-Log-Datei |
-| `--tokens-file data/kapa_tokens.json` | API-Token-Datei |
-| `--output datei.html` | Ausgabedatei (statischer Modus) |
-| `--json datei.json` | Rohdaten zusätzlich als JSON |
+| `--config kapa.ini` | Load all options from an INI file |
+| `--cpu-factor 6` | CPU overcommit factor |
+| `--failover-hosts 1` | Failover hosts per cluster (N+1), `0` = off |
+| `--auth-source local` | Auth source (e.g. AD source) |
+| `--insecure` | Skip TLS certificate verification (self-signed) |
+| `--aria-proxy http://proxy:3128` | optional HTTP(S) proxy for the Aria requests (locked-down environments) |
+| `--serve --port 8080` | Web server mode |
+| `--bind 0.0.0.0` | Bind address for `--serve` |
+| `--refresh-interval 1800` | Auto-refresh in seconds (`0` = off) |
+| `--data-dir /var/lib/kapa` | Base folder for all runtime data (default `data/`); with CI/CD choose a path outside the deploy directory |
+| `--cache kapa_cache.json` | File cache of the last fetch |
+| `--res-file data/kapa_reservierungen.json` | Reservation file (serve mode) |
+| `--res-ttl-days 31` | Delete reservations after N days (`0` = never) |
+| `--id-prefix KAPA-`, `--id-length 12` | Capa-ID format: prefix + N random hex characters |
+| `--exclude-tag Kapa_Filter:Ja` | Exclude VMs with this vROps tag (category:value) from the evaluation |
+| `--contact-info "…"` | Contact/imprint line (footer + login) for inquiries |
+| `--ad-bind-dn`, `--ad-bind-password`, `--ad-base-dn` | Service account for AD group authorization (memberOf lookup) |
+| `--approval-teams "A,B,C"` | **Initial seeding** of the approval teams (only if `--teams-file` is missing); manage in "Administration" afterwards |
+| `--teams-file data/kapa_teams.json` | File with the approval teams (managed via the admin page) |
+| `--rolenames-file data/kapa_rollennamen.json` | File with the freely renamable role labels (managed via the admin page) |
+| `--ad-url ldaps://dc01…` | Enable AD sign-in |
+| `--ad-domain example.com` | Domain for user names without `@` |
+| `--login-hint "…"` | Placeholder in the username field of the sign-in form (default: "Active-Directory-Benutzername") |
+| `--ad-insecure` | Skip LDAPS certificate verification |
+| `--cookie-insecure` | Session cookie without `Secure` (local HTTP test only) |
+| `--admin-user a@…,b@…` | Always-admins (bootstrap) |
+| `--roles-file data/kapa_rollen.json` | Roles file |
+| `--smtp-server mail.example.com:25` | Mail server for reports |
+| `--smtp-from`, `--smtp-to` | Sender / report recipients (comma-separated) |
+| `--smtp-user`, `--smtp-password`, `--smtp-tls` | SMTP auth / STARTTLS |
+| `--backup-target user@srv:/path` | SFTP/SCP backup target |
+| `--backup-key`, `--backup-password` | SSH key (recommended) or password (needs sshpass) |
+| `--backup-port 22`, `--backup-interval 43200` | SSH port / backup interval in s (2×/day) |
+| `--backup-keep-days 30` | Rotation: delete older archives on the target |
+| `--password-file file` | Aria password from a `.pass` file (path belongs in the INI) |
+| `--ad-bind-password-file`, `--smtp-password-file`, `--backup-password-file` | same for the AD service account / SMTP / backup |
+| `--log-file data/kapa_log.jsonl` | Audit log file |
+| `--tokens-file data/kapa_tokens.json` | API token file |
+| `--output file.html` | Output file (static mode) |
+| `--json file.json` | Raw data additionally as JSON |
 
-Alle JSON-Datendateien (Cache, Reservierungen, Rollen, Teams, Log, Tokens,
-`--json`-Export) liegen standardmäßig im Ordner `data/`, der komplett per
-`.gitignore` vom Repository ausgeschlossen ist. Der Basisordner ist über
-`--data-dir` frei wählbar; explizite Pfade (z. B. `--cache /pfad/cache.json`)
-werden respektiert.
+All JSON data files (cache, reservations, roles, teams, log, tokens, `--json`
+export) live in the `data/` folder by default, which is fully excluded from
+the repository via `.gitignore`. The base folder is freely selectable via
+`--data-dir`; explicit paths (e.g. `--cache /path/cache.json`) are respected.
 
-> **Wichtig bei CI/CD (GitLab-Pipeline o. Ä.):** Legt die Laufzeitdaten mit
-> `--data-dir` **außerhalb** des Deploy-Verzeichnisses ab (z. B.
-> `/var/lib/kapa`). `data/` ist gitignored, also im Repository/Artefakt nicht
-> enthalten. Deployt die Pipeline den Code über das Zielverzeichnis (per
-> `git clean -fdx`, `rsync --delete` oder „Verzeichnis leeren und neu
-> befüllen"), löscht sie damit den mitliegenden `data/`-Ordner bei **jedem**
-> Deploy. Liegen die Daten unter `/var/lib/kapa`, bleiben sie unberührt. Die
-> mitgelieferte systemd-Unit ist bereits so konfiguriert.
+> **Important with CI/CD (GitLab pipeline etc.):** put the runtime data
+> **outside** the deploy directory via `--data-dir` (e.g. `/var/lib/kapa`).
+> `data/` is gitignored, i.e. not part of the repository/artifact. If the
+> pipeline deploys over the target directory (via `git clean -fdx`,
+> `rsync --delete` or "empty and refill"), it deletes the adjacent `data/`
+> folder on **every** deploy. Under `/var/lib/kapa` the data stays untouched.
+> The shipped systemd unit is already configured that way.
 
-## Betrieb auf einem Linux-Host (systemd + nginx)
+## Running on a Linux host (systemd + nginx)
 
-Fertige Vorlagen liegen unter [`config/`](config/):
+Ready-made templates live under [`config/`](config/):
 
-- **`config/kapa-dashboard.service`** — systemd-Unit: läuft als eigener
-  Benutzer `kapa` unter `/opt/kapa`, bindet nur an `127.0.0.1:8080`,
-  Neustart bei Fehlern, gehärtete Sandbox. Ruft schlicht
-  `--config /etc/kapa/kapa.ini --serve` auf (kein `EnvironmentFile`, keine
-  `${VARS}`). Installationsschritte stehen als Kommentar in der Datei.
-- **`config/kapa.ini.example`** — die eine Konfigurationsdatei
-  (`/etc/kapa/kapa.ini`, Mode 640): Aria, Berechnung, Netzwerk, Server, AD,
-  Mail, Backup. Empfehlung: eigenes **Nur-Lese-Servicekonto** in Aria
-  Operations verwenden – das Skript liest ausschließlich.
-- **Passwörter als eigene `.pass`-Dateien** (root:kapa, `0640`); die INI nennt
-  nur den Pfad. Beispiel Aria (analog `ad_bind.pass`, `smtp.pass`, `backup.pass`):
+- **`config/kapa-dashboard.service`** — systemd unit: runs as its own `kapa`
+  user under `/opt/kapa`, binds only to `127.0.0.1:8080`, restarts on
+  failure, hardened sandbox. Simply calls `--config /etc/kapa/kapa.ini
+  --serve` (no `EnvironmentFile`, no `${VARS}`). Installation steps are
+  documented as comments in the file.
+- **`config/kapa.ini.example`** (English: `kapa.ini.en.example`) — the single configuration file
+  (`/etc/kapa/kapa.ini`, mode 640): Aria, calculation, network, server, AD,
+  mail, backup. Recommendation: use a dedicated **read-only service account**
+  in Aria Operations — the script only reads.
+- **Passwords as separate `.pass` files** (root:kapa, `0640`); the INI only
+  names the path. Example for Aria (same for `ad_bind.pass`, `smtp.pass`,
+  `backup.pass`):
   ```bash
-  sudo sh -c 'echo "DAS-ARIA-PASSWORT" > /etc/kapa/aria.pass'
+  sudo sh -c 'echo "THE-ARIA-PASSWORD" > /etc/kapa/aria.pass'
   sudo chown root:kapa /etc/kapa/aria.pass && sudo chmod 640 /etc/kapa/aria.pass
   ```
-  dann in der INI `password-file = /etc/kapa/aria.pass` setzen. So taucht das
-  Passwort weder in `ps aux` noch in `systemctl show` auf. Rangfolge überall:
-  Parameter > Passwort-Datei > Umgebungsvariable (`ARIA_PASSWORD` usw. als
-  optionaler Rückfall, siehe `config/kapa.env.example`).
-- **`config/nginx-kapa.conf`** — Snippet für den bestehenden 443er-Server:
-  stellt das Dashboard unter `https://<host>/capa/` bereit (Redirect
-  `/capa` → `/capa/`, Prefix-Stripping, Cookie-Pfad). Die Weboberfläche
-  nutzt relative API-Pfade und funktioniert daher unverändert unter dem
-  Unterpfad. Einbinden per `include`, dann `nginx -t && systemctl reload nginx`.
+  then set `password-file = /etc/kapa/aria.pass` in the INI. The password
+  never shows up in `ps aux` or `systemctl show`. Precedence everywhere:
+  parameter > password file > environment variable (`ARIA_PASSWORD` etc. as
+  an optional fallback, see `config/kapa.env.example`).
+- **`config/nginx-kapa.conf`** — snippet for the existing 443 server: serves
+  the dashboard at `https://<host>/capa/` (redirect `/capa` → `/capa/`,
+  prefix stripping, cookie path). The web UI uses relative API paths and thus
+  works unchanged under the sub-path. Include it, then
+  `nginx -t && systemctl reload nginx`.
 
-Ohne `--ad-url` hat der eingebaute Webserver keine Authentifizierung — dann
-nur im vertrauenswürdigen Verwaltungsnetz betreiben. TLS übernimmt der
-Reverse-Proxy; das Dashboard selbst spricht nur HTTP auf localhost.
+Without `--ad-url` the built-in web server has no authentication — only run
+it in a trusted management network then. TLS is the reverse proxy's job; the
+dashboard itself speaks plain HTTP on localhost.
 
-Die laufende Version wird im Footer der Weboberfläche und per
-`aria_kapa.py --version` angezeigt.
+The running version is shown in the web UI footer and via
+`aria_kapa.py --version`.
 
-### Smoke-Tests
+### Smoke tests
 
-Vor jedem Release läuft eine End-zu-End-Testsuite (nur Standardbibliothek,
-kein pytest) gegen einen frisch gestarteten Sample-Server:
+An end-to-end test suite (standard library only, no pytest) runs against a
+freshly started sample server before every release:
 
 ```bash
-python3 tests/smoke.py     # 23 Checks, ~15 s, Exit-Code 0 = grün
+python3 tests/smoke.py     # 23 checks, ~15 s, exit code 0 = green
 ```
 
-Geprüft werden u. a. gzip, Freitext-Härtung, Token-Schreibrechte samt
-zweistufiger Freigabe, CSV/Sprache, OpenAPI, Mail-Regeln/-Vorlage,
-Ankündigung, Prefs und der INI-Sektions-Wächter.
+Covered: gzip, free-text hardening, token write permissions incl. two-stage
+approval, CSV/language, OpenAPI, mail rules/template, announcement, prefs
+and the INI section guard.
 
-### Auslieferung: Docker & Kubernetes
+### Delivery: Docker & Kubernetes
 
-Neben der manuellen Installation aus `config/` (systemd + nginx) gibt es
-fertige Container-Varianten unter [`deploy/`](deploy/):
+Besides the manual installation from `config/` (systemd + nginx), ready-made
+container variants live under [`deploy/`](deploy/):
 
-- **[`deploy/docker/`](deploy/docker/)** — Container-Image auf Basis von Red Hat
-  UBI 9 (läuft als nicht-root, auch mit Podman) samt `docker-compose.yml`.
-  Bei jedem Release wird das Image automatisch gebaut und als **GitHub Package**
-  veröffentlicht: `docker pull ghcr.io/marcobockelbrink/kapa-dashboard:latest`
-  (amd64 + arm64, feste Versions-Tags für Rollbacks).
-- **[`deploy/kubernetes/`](deploy/kubernetes/)** — Cluster-Betrieb wahlweise
-  über **einfache Manifeste** (`kubectl apply`: Deployment, Service, PVC,
-  ConfigMap-INI, Secret, Ingress-Beispiel) oder das **Helm-Chart**
-  (`deploy/kubernetes/helm/kapa-dashboard`). Ein Replikat mit PVC,
-  Liveness/Readiness auf `/healthz`, OpenShift-kompatibel.
+- **[`deploy/docker/`](deploy/docker/)** — container image based on Red Hat
+  UBI 9 (runs as non-root, works with Podman too) incl. `docker-compose.yml`.
+  On every release the image is built automatically and published as a
+  **GitHub package**: `docker pull ghcr.io/marcobockelbrink/kapa-dashboard:latest`
+  (amd64 + arm64, fixed version tags for rollbacks).
+- **[`deploy/kubernetes/`](deploy/kubernetes/)** — cluster operation via
+  **plain manifests** (`kubectl apply`: deployment, service, PVC, ConfigMap
+  INI, secret, ingress example) or the **Helm chart**
+  (`deploy/kubernetes/helm/kapa-dashboard`). Single replica with a PVC,
+  liveness/readiness on `/healthz`, OpenShift-compatible.
 
-Die früheren RPM-/Ansible-Varianten wurden mit v2.10 eingestellt
-(zuletzt in v2.9.1). Details und Auswahlhilfe: [`deploy/README.md`](deploy/README.md).
+The former RPM/Ansible variants were retired with v2.10 (last in v2.9.1).
+Details and the decision guide: [`deploy/README.en.md`](deploy/README.en.md).
 
-## Mitmachen
+## Contributing
 
-Beiträge willkommen! Einstieg, Tests und der Pull-Request-Flow stehen in
-[`CONTRIBUTING.md`](CONTRIBUTING.md). Lizenz: [MIT](LICENSE).
+Contributions welcome! Setup, tests and the pull-request flow are in
+[`CONTRIBUTING.md`](CONTRIBUTING.md). License: [MIT](LICENSE).

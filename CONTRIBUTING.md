@@ -6,7 +6,7 @@ das Projekt bewusst so hält.
 
 > 🇬🇧 English: this guide is German (the project's primary language). The code
 > comments and commit messages are German too; docs exist bilingually
-> (`README.md`/`README.en.md`, `docs/ARCHITEKTUR.md`/`ARCHITECTURE.en.md`).
+> (`README.md`/`README.de.md`, `docs/ARCHITEKTUR.md`/`ARCHITECTURE.en.md`).
 
 ## Grundprinzipien (bitte beachten)
 
