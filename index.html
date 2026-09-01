@@ -1,13 +1,215 @@
 <!doctype html>
-<html lang="en">
+<html lang="de">
 <head>
 <meta charset="utf-8">
-<title>Redirecting…</title>
-<meta http-equiv="refresh" content="0; url=https://marcobockelbrink.github.io/vmware/">
-<link rel="canonical" href="https://marcobockelbrink.github.io/vmware/">
-<script>location.replace("https://marcobockelbrink.github.io/vmware/");</script>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Marco Bockelbrink — Projekte</title>
+<meta name="description" content="Werkzeuge, die ohne Abhängigkeitsbaum laufen: Kapazitätsplanung für VMware Aria Operations, Zeitmessung für Rennen, eine Vereins-App.">
+<meta name="color-scheme" content="light dark">
+<style>
+  /* Diese Seite lädt nichts nach: keine Webschrift, kein Framework, kein
+     Build. Das ist keine Sparsamkeit, sondern das Thema — sie hält sich an
+     das, was sie über die drei Projekte behauptet.
+
+     Anzeigeschrift ist deshalb der Systemsatz in Monospace: Das hier sind
+     Werkzeuge, keine Produkte mit Kampagne. */
+  :root {
+    --grund:   #f4f6f7;
+    --flaeche: #ffffff;
+    --tinte:   #161e22;
+    --leise:   #5a686f;
+    --linie:   #d3dbdf;
+    --akzent:  #1f6f4f;   /* Reserve, Spielraum, freie Kapazität */
+    --akzent-tief: #16523a;
+    --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+    --sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --grund:   #0f1417;
+      --flaeche: #171e22;
+      --tinte:   #e6ecef;
+      --leise:   #94a4ac;
+      --linie:   #2c383e;
+      --akzent:  #6cc79b;
+      --akzent-tief: #a9e0c4;
+    }
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--grund); color: var(--tinte);
+    font-family: var(--sans); font-size: 17px; line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+  .blatt { max-width: 760px; margin: 0 auto; padding: 56px 22px 40px; }
+
+  /* ------------------------------------------------------------ Kopf */
+  .name {
+    font-family: var(--mono); font-size: .82rem; letter-spacing: .16em;
+    text-transform: uppercase; color: var(--leise); margin: 0 0 22px;
+  }
+  h1 {
+    font-family: var(--mono); font-weight: 600;
+    font-size: clamp(1.65rem, 4.6vw, 2.5rem); line-height: 1.18;
+    letter-spacing: -.015em; margin: 0 0 16px; text-wrap: balance;
+  }
+  h1 em { font-style: normal; color: var(--akzent); }
+  .these { margin: 0; max-width: 58ch; color: var(--leise); }
+
+  hr { border: 0; border-top: 1px solid var(--linie); margin: 40px 0 0; }
+
+  /* --------------------------------------------------------- Projekte */
+  .projekt { padding: 34px 0; border-bottom: 1px solid var(--linie); }
+  .projekt:last-of-type { border-bottom: 0; }
+  .kopfzeile {
+    display: flex; align-items: baseline; justify-content: space-between;
+    gap: 14px; flex-wrap: wrap; margin-bottom: 6px;
+  }
+  h2 {
+    font-family: var(--mono); font-weight: 600; font-size: 1.28rem;
+    letter-spacing: -.01em; margin: 0;
+  }
+  .marke {
+    font-family: var(--mono); font-size: .72rem; letter-spacing: .12em;
+    text-transform: uppercase; color: var(--leise);
+    border: 1px solid var(--linie); border-radius: 999px; padding: 3px 10px;
+    white-space: nowrap;
+  }
+  .projekt p { margin: 0 0 14px; max-width: 62ch; }
+  .projekt p:last-child { margin-bottom: 0; }
+
+  /* Die Bauweise in einer Zeile -- der eigentliche rote Faden. */
+  .bau {
+    font-family: var(--mono); font-size: .82rem; color: var(--leise);
+    display: flex; flex-wrap: wrap; gap: 6px 14px; margin: 0 0 16px;
+  }
+  .bau span::before { content: "· "; opacity: .5; }
+  .bau span:first-child::before { content: ""; }
+
+  a.tuer {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-family: var(--mono); font-size: .92rem; font-weight: 600;
+    color: var(--akzent-tief); text-decoration: none;
+    border-bottom: 2px solid var(--akzent); padding-bottom: 2px;
+  }
+  a.tuer:hover { color: var(--akzent); }
+  a.tuer:focus-visible {
+    outline: 3px solid var(--akzent); outline-offset: 4px; border-radius: 3px;
+  }
+  a.tuer .pfeil { transition: transform .18s ease; }
+  a.tuer:hover .pfeil { transform: translateX(3px); }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+
+  /* Kein Link ist auch eine Aussage -- sie wird hingeschrieben, nicht
+     durch eine Lücke angedeutet. */
+  .keintuer {
+    font-family: var(--mono); font-size: .82rem; color: var(--leise);
+    border-left: 2px solid var(--linie); padding-left: 12px;
+  }
+
+  footer {
+    margin-top: 12px; padding-top: 26px; border-top: 1px solid var(--linie);
+    font-size: .86rem; color: var(--leise);
+  }
+  footer p { margin: 0 0 8px; max-width: 62ch; }
+  footer a { color: var(--akzent-tief); }
+  @media (prefers-color-scheme: dark) { footer a { color: var(--akzent); } }
+</style>
 </head>
 <body>
-<p>Redirecting to <a href="https://marcobockelbrink.github.io/vmware/">marcobockelbrink.github.io/vmware</a> …</p>
+<main class="blatt">
+
+  <p class="name">Marco Bockelbrink</p>
+  <h1>Werkzeuge, die <em>ohne Abhängigkeitsbaum</em> laufen.</h1>
+  <p class="these">
+    Drei Sachen, die ich gebaut habe. Sie haben wenig gemeinsam — ein
+    Rechenzentrum, eine Rennstrecke, ein Verein — außer der Bauweise: kein
+    Paketmanager, kein Build-Schritt, nichts, was in zwei Jahren nicht mehr
+    installierbar ist.
+  </p>
+
+  <hr>
+
+  <section class="projekt">
+    <div class="kopfzeile">
+      <h2>VMware Kapazitätsplanung</h2>
+      <span class="marke">Aria Operations</span>
+    </div>
+    <p>
+      Wie viel Platz ist im Cluster noch übrig, und wer hat schon etwas
+      davon reserviert? Liest die Zahlen aus VMware Aria Operations und
+      zeigt sie je Cluster als Dashboard — mit einem Weg, künftige
+      Kapazität anzumelden und freigeben zu lassen, statt sie in einer
+      Tabelle zu verwalten.
+    </p>
+    <p class="bau">
+      <span>Python, nur Standardbibliothek</span>
+      <span>kein pip</span>
+      <span>kein Build</span>
+      <span>Oberfläche folgt der Browsersprache</span>
+    </p>
+    <p class="keintuer">
+      Demo zurzeit nicht erreichbar — die Projektseite ist im Repo
+      vorbereitet, aber nicht veröffentlicht.
+    </p>
+  </section>
+
+  <section class="projekt">
+    <div class="kopfzeile">
+      <h2>einfachstoppen.de</h2>
+      <span class="marke">live</span>
+    </div>
+    <p>
+      Zeitmessung für ein Rennen mit zwei Handys: eines schickt die
+      Teilnehmer los, eines stoppt sie im Ziel, alle anderen sehen die
+      Ergebnisse live. Kein Konto, keine Installation. Die Uhren der Geräte
+      werden gegeneinander abgeglichen, und im Funkloch merkt sich das
+      Gerät die Tipps und schickt sie später mit ihrer echten Zeit nach.
+    </p>
+    <p class="bau">
+      <span>Python, FastAPI, SQLite</span>
+      <span>Oberfläche in reinem JavaScript</span>
+      <span>kein Build-Schritt</span>
+      <span>deutsch und englisch</span>
+    </p>
+    <a class="tuer" href="https://einfachstoppen.de">
+      einfachstoppen.de <span class="pfeil" aria-hidden="true">→</span>
+    </a>
+  </section>
+
+  <section class="projekt">
+    <div class="kopfzeile">
+      <h2>MTB Bielefeld</h2>
+      <span class="marke">Vereins-App</span>
+    </div>
+    <p>
+      Die App des Vereins: Termine, Anmeldungen zu Touren und
+      Jugendtrainings, Fotoalben. Läuft samt eigener Schnittstelle auf einem
+      kleinen Server. Das Vereinsblau darin ist nicht geschätzt, sondern aus
+      der verbindlichen Druckdefinition umgerechnet — dieselben Farben trägt
+      auch einfachstoppen.
+    </p>
+    <p class="bau">
+      <span>React Native</span>
+      <span>eigene API</span>
+      <span>PostgreSQL</span>
+    </p>
+    <p class="keintuer">
+      Kein Link: die App steht in keinem App Store.
+    </p>
+  </section>
+
+  <footer>
+    <p>
+      Diese Seite lädt nichts nach — keine Webschrift, kein Framework, kein
+      Build. Eine Datei.
+    </p>
+    <p>
+      <a href="https://github.com/marcobockelbrink">github.com/marcobockelbrink</a>
+    </p>
+  </footer>
+
+</main>
 </body>
 </html>
