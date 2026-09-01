@@ -7,207 +7,266 @@
 <meta name="description" content="Werkzeuge, die ohne Abhängigkeitsbaum laufen: Kapazitätsplanung für VMware Aria Operations, Zeitmessung für Rennen, eine Vereins-App.">
 <meta name="color-scheme" content="light dark">
 <style>
-  /* Diese Seite lädt nichts nach: keine Webschrift, kein Framework, kein
-     Build. Das ist keine Sparsamkeit, sondern das Thema — sie hält sich an
-     das, was sie über die drei Projekte behauptet.
-
-     Anzeigeschrift ist deshalb der Systemsatz in Monospace: Das hier sind
-     Werkzeuge, keine Produkte mit Kampagne. */
+  /* Diese Seite lädt keine Schrift und kein Framework nach. Das ist nicht
+     Sparsamkeit, sondern das Thema: sie hält sich an das, was sie über die
+     drei Projekte behauptet. Anzeigeschrift ist deshalb der Systemsatz in
+     Monospace -- das hier sind Werkzeuge, keine Produkte mit Kampagne. */
   :root {
-    --grund:   #f4f6f7;
-    --flaeche: #ffffff;
-    --tinte:   #161e22;
-    --leise:   #5a686f;
-    --linie:   #d3dbdf;
-    --akzent:  #1f6f4f;   /* Reserve, Spielraum, freie Kapazität */
-    --akzent-tief: #16523a;
+    --grund:   #f6f8f7;
+    --tinte:   #141c1e;
+    --lesbar:  #4e5f64;
+    --leise:   #606f75;
+    --linie:   #dae2e1;
+    --haarlinie: #e6ecea;
+    --punkt:   #b3c0bf;
+    --kante:   #c9d4d2;
+    --rahmen:  #d8e0dd;
+    --akzent:  #1f6f4f;    /* Reserve, Spielraum, freie Kapazität */
+    --akzent-hell: #14543a;
+    --schatten: 0 18px 44px -22px rgba(20, 40, 35, .28);
     --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
     --sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   }
   @media (prefers-color-scheme: dark) {
     :root {
-      --grund:   #0f1417;
-      --flaeche: #171e22;
-      --tinte:   #e6ecef;
-      --leise:   #94a4ac;
-      --linie:   #2c383e;
+      --grund:   #0e1416;
+      --tinte:   #e9eff0;
+      --lesbar:  #a9b8bd;
+      --leise:   #8b9ca1;
+      --linie:   #263135;
+      --haarlinie: #1e282b;
+      --punkt:   #3c4a4e;
+      --kante:   #2c383c;
+      --rahmen:  #26332f;
       --akzent:  #6cc79b;
-      --akzent-tief: #a9e0c4;
+      --akzent-hell: #a5e0c2;
+      --schatten: 0 22px 50px -22px rgba(0, 0, 0, .9);
     }
   }
 
   * { box-sizing: border-box; }
   body {
     margin: 0; background: var(--grund); color: var(--tinte);
-    font-family: var(--sans); font-size: 17px; line-height: 1.55;
+    font-family: var(--sans); font-size: 17px; line-height: 1.6;
     -webkit-font-smoothing: antialiased;
   }
-  .blatt { max-width: 760px; margin: 0 auto; padding: 56px 22px 40px; }
+  .blatt { max-width: 1180px; margin: 0 auto; padding: 40px 22px 48px; }
+  @media (min-width: 900px) { .blatt { padding: 72px 56px 64px; } }
+
+  a { color: var(--akzent); text-decoration: none; }
+  a:hover { color: var(--akzent-hell); }
+  a:focus-visible { outline: 3px solid var(--akzent); outline-offset: 4px; border-radius: 3px; }
+
+  .mono { font-family: var(--mono); }
 
   /* ------------------------------------------------------------ Kopf */
-  .name {
-    font-family: var(--mono); font-size: .82rem; letter-spacing: .16em;
-    text-transform: uppercase; color: var(--leise); margin: 0 0 22px;
+  .kopf {
+    display: flex; flex-wrap: wrap; justify-content: space-between;
+    align-items: baseline; gap: 10px 24px;
+    padding-bottom: 12px; border-bottom: 1px solid var(--linie);
   }
+  .name {
+    font-family: var(--mono); font-size: .78rem; letter-spacing: .18em;
+    text-transform: uppercase; color: var(--leise); margin: 0;
+  }
+  .kopf a { font-family: var(--mono); font-size: .78rem; letter-spacing: .06em; }
+
+  /* --------------------------------------------------------- Aufschlag */
+  .aufschlag { padding: 44px 0 40px; display: flex; flex-direction: column; gap: 22px; }
+  @media (min-width: 900px) { .aufschlag { padding: 76px 0 64px; gap: 26px; } }
   h1 {
-    font-family: var(--mono); font-weight: 600;
-    font-size: clamp(1.65rem, 4.6vw, 2.5rem); line-height: 1.18;
-    letter-spacing: -.015em; margin: 0 0 16px; text-wrap: balance;
+    font-family: var(--mono); font-weight: 600; margin: 0;
+    font-size: clamp(1.95rem, 5.4vw, 3.15rem); line-height: 1.13;
+    letter-spacing: -.025em; max-width: 19ch; text-wrap: balance;
   }
   h1 em { font-style: normal; color: var(--akzent); }
-  .these { margin: 0; max-width: 58ch; color: var(--leise); }
-
-  hr { border: 0; border-top: 1px solid var(--linie); margin: 40px 0 0; }
+  .these { margin: 0; max-width: 60ch; color: var(--lesbar); font-size: 1.04rem; }
 
   /* --------------------------------------------------------- Projekte */
-  .projekt { padding: 34px 0; border-bottom: 1px solid var(--linie); }
-  .projekt:last-of-type { border-bottom: 0; }
-  .kopfzeile {
-    display: flex; align-items: baseline; justify-content: space-between;
-    gap: 14px; flex-wrap: wrap; margin-bottom: 6px;
+  .projekt {
+    display: grid; grid-template-columns: minmax(0, 1fr);
+    gap: 28px; align-items: center;
+    padding: 38px 0; border-top: 1px solid var(--linie);
   }
-  h2 {
-    font-family: var(--mono); font-weight: 600; font-size: 1.28rem;
-    letter-spacing: -.01em; margin: 0;
+  @media (min-width: 900px) {
+    .projekt {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1.08fr);
+      gap: 56px; padding: 52px 0;
+    }
   }
+  .text { display: flex; flex-direction: column; gap: 18px; min-width: 0; }
   .marke {
-    font-family: var(--mono); font-size: .72rem; letter-spacing: .12em;
+    font-family: var(--mono); font-size: .72rem; letter-spacing: .16em;
     text-transform: uppercase; color: var(--leise);
-    border: 1px solid var(--linie); border-radius: 999px; padding: 3px 10px;
-    white-space: nowrap;
   }
-  .projekt p { margin: 0 0 14px; max-width: 62ch; }
-  .projekt p:last-child { margin-bottom: 0; }
+  .marke.live { color: var(--akzent); }
+  h2 {
+    font-family: var(--mono); font-weight: 600; margin: 0;
+    font-size: clamp(1.35rem, 3.4vw, 1.7rem); letter-spacing: -.015em;
+  }
+  .projekt p { margin: 0; color: var(--lesbar); }
 
-  /* Die Bauweise in einer Zeile -- der eigentliche rote Faden. */
+  /* Die Bauweise in einer Zeile -- der eigentliche rote Faden der Seite. */
   .bau {
-    font-family: var(--mono); font-size: .82rem; color: var(--leise);
-    display: flex; flex-wrap: wrap; gap: 6px 14px; margin: 0 0 16px;
+    display: flex; flex-wrap: wrap; gap: 8px 16px;
+    border-top: 1px solid var(--haarlinie); padding-top: 14px;
+    font-family: var(--mono); font-size: .76rem; letter-spacing: .04em;
+    color: var(--leise);
   }
-  .bau span::before { content: "· "; opacity: .5; }
-  .bau span:first-child::before { content: ""; }
+  .bau i { font-style: normal; color: var(--punkt); }
 
-  a.tuer {
-    display: inline-flex; align-items: center; gap: 8px;
-    font-family: var(--mono); font-size: .92rem; font-weight: 600;
-    color: var(--akzent-tief); text-decoration: none;
-    border-bottom: 2px solid var(--akzent); padding-bottom: 2px;
+  .tuer {
+    align-self: flex-start; margin-top: 6px;
+    display: inline-flex; align-items: center; gap: 9px;
+    font-family: var(--mono); font-size: .95rem; font-weight: 600;
+    border-bottom: 2px solid var(--akzent); padding-bottom: 3px;
   }
-  a.tuer:hover { color: var(--akzent); }
-  a.tuer:focus-visible {
-    outline: 3px solid var(--akzent); outline-offset: 4px; border-radius: 3px;
-  }
-  a.tuer .pfeil { transition: transform .18s ease; }
-  a.tuer:hover .pfeil { transform: translateX(3px); }
-  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+  .tuer svg { transition: transform .18s ease; }
+  .tuer:hover svg { transform: translateX(3px); }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
 
-  /* Kein Link ist auch eine Aussage -- sie wird hingeschrieben, nicht
-     durch eine Lücke angedeutet. */
+  /* Kein Link ist auch eine Aussage -- sie wird hingeschrieben. */
   .keintuer {
-    font-family: var(--mono); font-size: .82rem; color: var(--leise);
-    border-left: 2px solid var(--linie); padding-left: 12px;
+    margin: 6px 0 0; font-family: var(--mono); font-size: .8rem; line-height: 1.5;
+    color: var(--leise); border-left: 2px solid var(--kante); padding-left: 13px;
   }
 
-  footer {
-    margin-top: 12px; padding-top: 26px; border-top: 1px solid var(--linie);
-    font-size: .86rem; color: var(--leise);
+  .bild { display: flex; justify-content: center; min-width: 0; }
+  .bild img { display: block; width: 100%; height: auto; }
+  .rahmen-breit, .rahmen-hoch {
+    border: 1px solid var(--rahmen); overflow: hidden; box-shadow: var(--schatten);
   }
-  footer p { margin: 0 0 8px; max-width: 62ch; }
-  footer a { color: var(--akzent-tief); }
-  @media (prefers-color-scheme: dark) { footer a { color: var(--akzent); } }
+  .rahmen-breit { border-radius: 10px; width: 100%; }
+  .rahmen-hoch  { border-radius: 20px; width: 100%; max-width: 268px; }
+  @media (min-width: 900px) { .rahmen-hoch { max-width: 300px; } }
+  .schmal { max-width: 232px; }
+  @media (min-width: 900px) { .schmal { max-width: 262px; } }
+
+  /* ------------------------------------------------------------- Fuß */
+  footer {
+    border-top: 1px solid var(--linie); padding-top: 30px; margin-top: 34px;
+    display: flex; flex-wrap: wrap; justify-content: space-between;
+    align-items: baseline; gap: 14px 24px;
+  }
+  footer p { margin: 0; max-width: 56ch; font-size: .9rem; color: var(--leise); }
+  footer a { font-family: var(--mono); font-size: .85rem; }
 </style>
 </head>
 <body>
 <main class="blatt">
 
-  <p class="name">Marco Bockelbrink</p>
-  <h1>Werkzeuge, die <em>ohne Abhängigkeitsbaum</em> laufen.</h1>
-  <p class="these">
-    Drei Sachen, die ich gebaut habe. Sie haben wenig gemeinsam — ein
-    Rechenzentrum, eine Rennstrecke, ein Verein — außer der Bauweise: kein
-    Paketmanager, kein Build-Schritt, nichts, was in zwei Jahren nicht mehr
-    installierbar ist.
-  </p>
+  <div class="kopf">
+    <p class="name">Marco Bockelbrink</p>
+    <a href="https://github.com/marcobockelbrink">github.com/marcobockelbrink</a>
+  </div>
 
-  <hr>
+  <div class="aufschlag">
+    <h1>Werkzeuge, die <em>ohne Abhängigkeitsbaum</em> laufen.</h1>
+    <p class="these">
+      Drei Sachen, die ich gebaut habe. Sie haben wenig gemeinsam — ein
+      Rechenzentrum, eine Rennstrecke, ein Verein — außer der Bauweise: kein
+      Paketmanager, kein Build-Schritt, nichts, was in zwei Jahren nicht mehr
+      installierbar ist.
+    </p>
+  </div>
 
   <section class="projekt">
-    <div class="kopfzeile">
-      <h2>VMware Kapazitätsplanung</h2>
+    <div class="text">
       <span class="marke">Aria Operations</span>
+      <h2>VMware Kapazitätsplanung</h2>
+      <p>
+        Wie viel Platz ist im Cluster noch übrig, und wer hat schon etwas
+        davon reserviert? Liest die Zahlen aus VMware Aria Operations und
+        zeigt sie je Cluster als Dashboard — mit einem Weg, künftige
+        Kapazität anzumelden und freigeben zu lassen, statt sie in einer
+        Tabelle zu verwalten.
+      </p>
+      <div class="bau">
+        <span>Python, nur Standardbibliothek</span><i>·</i>
+        <span>kein pip</span><i>·</i>
+        <span>kein Build</span><i>·</i>
+        <span>Oberfläche folgt der Browsersprache</span>
+      </div>
+      <p class="keintuer">
+        Demo zurzeit nicht erreichbar — die Projektseite ist im Repo
+        vorbereitet, aber nicht veröffentlicht.
+      </p>
     </div>
-    <p>
-      Wie viel Platz ist im Cluster noch übrig, und wer hat schon etwas
-      davon reserviert? Liest die Zahlen aus VMware Aria Operations und
-      zeigt sie je Cluster als Dashboard — mit einem Weg, künftige
-      Kapazität anzumelden und freigeben zu lassen, statt sie in einer
-      Tabelle zu verwalten.
-    </p>
-    <p class="bau">
-      <span>Python, nur Standardbibliothek</span>
-      <span>kein pip</span>
-      <span>kein Build</span>
-      <span>Oberfläche folgt der Browsersprache</span>
-    </p>
-    <p class="keintuer">
-      Demo zurzeit nicht erreichbar — die Projektseite ist im Repo
-      vorbereitet, aber nicht veröffentlicht.
-    </p>
+    <div class="bild">
+      <div class="rahmen-breit">
+        <img src="bilder/vmware.jpg" width="1000" height="523"
+             alt="Kapazitätsübersicht je Cluster mit Auslastungsbalken">
+      </div>
+    </div>
   </section>
 
   <section class="projekt">
-    <div class="kopfzeile">
+    <div class="text">
+      <span class="marke live">live</span>
       <h2>einfachstoppen.de</h2>
-      <span class="marke">live</span>
+      <p>
+        Zeitmessung für ein Rennen mit zwei Handys: eines schickt die
+        Teilnehmer los, eines stoppt sie im Ziel, alle anderen sehen die
+        Ergebnisse live. Kein Konto, keine Installation. Die Uhren der Geräte
+        werden gegeneinander abgeglichen, und im Funkloch merkt sich das
+        Gerät die Tipps und schickt sie später mit ihrer echten Zeit nach.
+      </p>
+      <div class="bau">
+        <span>Python, FastAPI, SQLite</span><i>·</i>
+        <span>Oberfläche in reinem JavaScript</span><i>·</i>
+        <span>kein Build-Schritt</span><i>·</i>
+        <span>deutsch und englisch</span>
+      </div>
+      <a class="tuer" href="https://einfachstoppen.de">einfachstoppen.de
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor"
+             stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M3 8h9"></path><path d="M8.5 4.5 12 8l-3.5 3.5"></path>
+        </svg>
+      </a>
     </div>
-    <p>
-      Zeitmessung für ein Rennen mit zwei Handys: eines schickt die
-      Teilnehmer los, eines stoppt sie im Ziel, alle anderen sehen die
-      Ergebnisse live. Kein Konto, keine Installation. Die Uhren der Geräte
-      werden gegeneinander abgeglichen, und im Funkloch merkt sich das
-      Gerät die Tipps und schickt sie später mit ihrer echten Zeit nach.
-    </p>
-    <p class="bau">
-      <span>Python, FastAPI, SQLite</span>
-      <span>Oberfläche in reinem JavaScript</span>
-      <span>kein Build-Schritt</span>
-      <span>deutsch und englisch</span>
-    </p>
-    <a class="tuer" href="https://einfachstoppen.de">
-      einfachstoppen.de <span class="pfeil" aria-hidden="true">→</span>
-    </a>
+    <div class="bild">
+      <!-- Die App selbst kennt hell und dunkel. Auf heller Seite eine dunkle
+           Aufnahme zu zeigen sähe aus wie ein fremdes Bild. -->
+      <picture class="rahmen-hoch">
+        <source media="(prefers-color-scheme: dark)" srcset="bilder/einfachstoppen.png">
+        <img src="bilder/einfachstoppen-hell.png" width="422" height="620"
+             alt="Siegerehrung: die ersten drei auf dem Treppchen, dahinter die Rangliste">
+      </picture>
+    </div>
   </section>
 
   <section class="projekt">
-    <div class="kopfzeile">
-      <h2>MTB Bielefeld</h2>
+    <div class="text">
       <span class="marke">Vereins-App</span>
+      <h2>MTB Bielefeld</h2>
+      <p>
+        Die App des Vereins: Termine, Anmeldungen zu Touren und
+        Jugendtrainings, Fotoalben. Läuft samt eigener Schnittstelle auf einem
+        kleinen Server. Das Vereinsblau darin ist nicht geschätzt, sondern aus
+        der verbindlichen Druckdefinition umgerechnet — dieselben Farben trägt
+        auch einfachstoppen.
+      </p>
+      <div class="bau">
+        <span>React Native</span><i>·</i>
+        <span>eigene API</span><i>·</i>
+        <span>PostgreSQL</span>
+      </div>
+      <p class="keintuer">Kein Link: die App steht in keinem App Store.</p>
     </div>
-    <p>
-      Die App des Vereins: Termine, Anmeldungen zu Touren und
-      Jugendtrainings, Fotoalben. Läuft samt eigener Schnittstelle auf einem
-      kleinen Server. Das Vereinsblau darin ist nicht geschätzt, sondern aus
-      der verbindlichen Druckdefinition umgerechnet — dieselben Farben trägt
-      auch einfachstoppen.
-    </p>
-    <p class="bau">
-      <span>React Native</span>
-      <span>eigene API</span>
-      <span>PostgreSQL</span>
-    </p>
-    <p class="keintuer">
-      Kein Link: die App steht in keinem App Store.
-    </p>
+    <div class="bild">
+      <div class="rahmen-hoch schmal">
+        <img src="bilder/mtb.png" width="212" height="460"
+             alt="Terminliste der Vereins-App mit Touren und Trainings">
+      </div>
+    </div>
   </section>
 
   <footer>
     <p>
-      Diese Seite lädt nichts nach — keine Webschrift, kein Framework, kein
-      Build. Eine Datei.
+      Keine Webschrift, kein Framework, kein Build — eine HTML-Datei und drei
+      Aufnahmen.
     </p>
-    <p>
-      <a href="https://github.com/marcobockelbrink">github.com/marcobockelbrink</a>
-    </p>
+    <a href="https://github.com/marcobockelbrink">github.com/marcobockelbrink</a>
   </footer>
 
 </main>
