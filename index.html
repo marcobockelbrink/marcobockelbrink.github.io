@@ -150,6 +150,7 @@
   }
   footer p { margin: 0; max-width: 56ch; font-size: .9rem; color: var(--leise); }
   footer a { font-family: var(--mono); font-size: .85rem; }
+  .fusslinks { display: flex; flex-wrap: wrap; gap: 8px 22px; }
 </style>
 </head>
 <body>
@@ -187,10 +188,12 @@
         <span>kein Build</span><i>·</i>
         <span>Oberfläche folgt der Browsersprache</span>
       </div>
-      <p class="keintuer">
-        Demo zurzeit nicht erreichbar — die Projektseite ist im Repo
-        vorbereitet, aber nicht veröffentlicht.
-      </p>
+      <a class="tuer" href="vmware/">Demo ansehen
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor"
+             stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M3 8h9"></path><path d="M8.5 4.5 12 8l-3.5 3.5"></path>
+        </svg>
+      </a>
     </div>
     <div class="bild">
       <div class="rahmen-breit">
@@ -266,7 +269,10 @@
       Keine Webschrift, kein Framework, kein Build — eine HTML-Datei und drei
       Aufnahmen.
     </p>
-    <a href="https://github.com/marcobockelbrink">github.com/marcobockelbrink</a>
+    <span class="fusslinks">
+      <a href="impressum/">Impressum &amp; Datenschutz</a>
+      <a href="https://github.com/marcobockelbrink">github.com/marcobockelbrink</a>
+    </span>
   </footer>
 
 </main>

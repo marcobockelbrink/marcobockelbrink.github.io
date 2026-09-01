@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Impressum &amp; Datenschutz — Marco Bockelbrink</title>
+<meta name="robots" content="noindex">
+<meta name="color-scheme" content="light dark">
+<style>
+  /* Diese Seite lädt keine Schrift und kein Framework nach. Das ist nicht
+     Sparsamkeit, sondern das Thema: sie hält sich an das, was sie über die
+     drei Projekte behauptet. Anzeigeschrift ist deshalb der Systemsatz in
+     Monospace -- das hier sind Werkzeuge, keine Produkte mit Kampagne. */
+  :root {
+    --grund:   #f6f8f7;
+    --tinte:   #141c1e;
+    --lesbar:  #4e5f64;
+    --leise:   #606f75;
+    --linie:   #dae2e1;
+    --haarlinie: #e6ecea;
+    --punkt:   #b3c0bf;
+    --kante:   #c9d4d2;
+    --rahmen:  #d8e0dd;
+    --akzent:  #1f6f4f;    /* Reserve, Spielraum, freie Kapazität */
+    --akzent-hell: #14543a;
+    --schatten: 0 18px 44px -22px rgba(20, 40, 35, .28);
+    --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+    --sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --grund:   #0e1416;
+      --tinte:   #e9eff0;
+      --lesbar:  #a9b8bd;
+      --leise:   #8b9ca1;
+      --linie:   #263135;
+      --haarlinie: #1e282b;
+      --punkt:   #3c4a4e;
+      --kante:   #2c383c;
+      --rahmen:  #26332f;
+      --akzent:  #6cc79b;
+      --akzent-hell: #a5e0c2;
+      --schatten: 0 22px 50px -22px rgba(0, 0, 0, .9);
+    }
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--grund); color: var(--tinte);
+    font-family: var(--sans); font-size: 17px; line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  .blatt { max-width: 720px; margin: 0 auto; padding: 40px 22px 48px; }
+  @media (min-width: 900px) { .blatt { padding: 72px 24px 64px; } }
+
+  a { color: var(--akzent); text-decoration: none; }
+  a:hover { color: var(--akzent-hell); text-decoration: underline; }
+  a:focus-visible { outline: 3px solid var(--akzent); outline-offset: 3px; border-radius: 3px; }
+  p a, li a { text-decoration: underline; text-underline-offset: 3px; }
+
+  h1 {
+    font-family: var(--mono); font-weight: 600; margin: 0;
+    font-size: clamp(1.6rem, 4.4vw, 2.1rem); line-height: 1.15; letter-spacing: -.02em;
+  }
+  h2 {
+    font-family: var(--mono); font-weight: 600; margin: 44px 0 0;
+    font-size: 1.2rem; letter-spacing: -.01em;
+  }
+  h3 {
+    font-family: var(--mono); font-weight: 600; margin: 26px 0 0;
+    font-size: .82rem; letter-spacing: .12em; text-transform: uppercase; color: var(--leise);
+  }
+  p, li { color: var(--lesbar); }
+  p { margin: 10px 0 0; max-width: 62ch; }
+  ul { margin: 10px 0 0; padding-left: 20px; max-width: 62ch; }
+  li { margin: 6px 0; }
+  address { font-style: normal; margin: 12px 0 0; line-height: 1.7; }
+  .zurueck {
+    display: inline-flex; align-items: center; gap: 8px; margin-bottom: 30px;
+    font-family: var(--mono); font-size: .82rem;
+  }
+  .stand {
+    margin-top: 46px; padding-top: 22px; border-top: 1px solid var(--linie);
+    font-family: var(--mono); font-size: .78rem; color: var(--leise);
+  }
+</style>
+</head>
+<body>
+<main class="blatt">
+
+  <a class="zurueck" href="../">
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor"
+         stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="M13 8H4"></path><path d="M7.5 4.5 4 8l3.5 3.5"></path>
+    </svg>
+    Zur Übersicht
+  </a>
+
+  <h1>Impressum &amp; Datenschutz</h1>
+
+  <h2>Impressum</h2>
+  <h3>Angaben gemäß § 5 DDG</h3>
+  <address>
+    <b>Marco Bockelbrink</b><br>
+    Hasenweg 7<br>
+    32051 Herford<br>
+    Deutschland
+  </address>
+
+  <h3>Kontakt</h3>
+  <p>E-Mail: <a href="mailto:app@bockelbrink.net">app@bockelbrink.net</a></p>
+
+  <h3>Verantwortlich für den Inhalt</h3>
+  <p>Marco Bockelbrink, Anschrift wie oben.</p>
+
+  <h3>Art des Angebots</h3>
+  <p>
+    Eine persönliche Übersicht eigener Projekte. Kein Verkauf, keine Werbung,
+    keine entgeltlichen Leistungen, kein Vertragsschluss über diese Seite.
+  </p>
+
+  <h2>Datenschutz</h2>
+  <h3>Verantwortlicher im Sinne der DSGVO</h3>
+  <p>
+    Marco Bockelbrink, Hasenweg 7, 32051 Herford,
+    <a href="mailto:app@bockelbrink.net">app@bockelbrink.net</a>
+  </p>
+
+  <h3>Was diese Seite nicht tut</h3>
+  <p>
+    Sie setzt keine Cookies, speichert nichts im Browser und lädt nichts von
+    fremden Servern nach — keine Webschrift, kein Analysedienst, keine
+    eingebetteten Inhalte Dritter. Die Bilder und die Demo liegen auf
+    demselben Server wie die Seite. Ein Formular gibt es nicht; wer schreiben
+    möchte, nutzt die E-Mail-Adresse oben.
+  </p>
+
+  <h3>Was der Server trotzdem sieht</h3>
+  <p>
+    Die Seite wird von <b>GitHub Pages</b> ausgeliefert (GitHub, Inc., 88 Colin
+    P. Kelly Jr. Street, San Francisco, CA 94107, USA; Vertretung in der EU:
+    GitHub B.V., Vijzelstraat 68–72, 1017 HL Amsterdam, Niederlande). Beim
+    Aufruf überträgt Ihr Browser technisch notwendig Ihre IP-Adresse,
+    Zeitpunkt, angeforderte Adresse, Verweisseite und Browserkennung an
+    GitHub. GitHub verarbeitet diese Daten zum Ausliefern und zur Abwehr von
+    Angriffen; darauf habe ich keinen Einfluss und erhalte davon keine
+    Auswertung.
+  </p>
+  <p>
+    Rechtsgrundlage ist das berechtigte Interesse am sicheren Betrieb der
+    Seite, Art. 6 Abs. 1 lit. f DSGVO. Die Übermittlung in die USA stützt sich
+    auf die Zertifizierung von GitHub unter dem EU-US Data Privacy Framework.
+    Näheres in der Datenschutzerklärung von GitHub:
+    <a href="https://docs.github.com/site-policy/privacy-policies/github-general-privacy-statement">docs.github.com/site-policy</a>.
+  </p>
+
+  <h3>Ihre Rechte</h3>
+  <ul>
+    <li>Auskunft über die zu Ihnen gespeicherten Daten (Art. 15 DSGVO)</li>
+    <li>Berichtigung, Löschung und Einschränkung der Verarbeitung
+        (Art. 16–18 DSGVO)</li>
+    <li>Widerspruch gegen die Verarbeitung (Art. 21 DSGVO)</li>
+    <li>Beschwerde bei einer Aufsichtsbehörde (Art. 77 DSGVO) — zuständig ist
+        die Landesbeauftragte für Datenschutz und Informationsfreiheit
+        Nordrhein-Westfalen</li>
+  </ul>
+
+  <h3>Verlinkte Angebote</h3>
+  <p>
+    Von hier führen Links zu <a href="https://einfachstoppen.de">einfachstoppen.de</a>
+    und zu GitHub. Für deren Inhalte und deren Umgang mit Daten sind die
+    jeweiligen Anbieter verantwortlich; dort gelten deren eigene Angaben.
+  </p>
+
+  <p class="stand">Stand: 1. September 2026</p>
+
+</main>
+</body>
+</html>
