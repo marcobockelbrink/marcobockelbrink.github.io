@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Marco Bockelbrink — Projekte</title>
-<meta name="description" content="Werkzeuge, die ohne Abhängigkeitsbaum laufen: Kapazitätsplanung für VMware Aria Operations, Zeitmessung für Rennen, eine Vereins-App.">
+<meta name="description" content="Werkzeuge, die ohne Abhängigkeitsbaum laufen: Kapazitätsplanung für VMware Aria Operations, Zeitmessung für Rennen, eine Vereins-App, ein Spiel.">
 <meta name="color-scheme" content="light dark">
 <style>
   /* Diese Seite lädt keine Schrift und kein Framework nach. Das ist nicht
@@ -164,10 +164,11 @@
   <div class="aufschlag">
     <h1>Werkzeuge, die <em>ohne Abhängigkeitsbaum</em> laufen.</h1>
     <p class="these">
-      Drei Sachen, die ich gebaut habe. Sie haben wenig gemeinsam — ein
-      Rechenzentrum, eine Rennstrecke, ein Verein — außer der Bauweise: kein
-      Paketmanager, kein Build-Schritt, nichts, was in zwei Jahren nicht mehr
-      installierbar ist.
+      Sechs Sachen, die ich gebaut habe: ein Rechenzentrum, eine Rennstrecke,
+      ein Verein, ein Bikepark, eine Platine, ein Synchronisierer. Wo es
+      geht, gilt dieselbe Regel: so wenig Abhängigkeiten wie möglich, nichts,
+      was in zwei Jahren nicht mehr installierbar ist. Wo ein Gerät oder ein
+      Store dazukommt, steht es dabei.
     </p>
   </div>
 
@@ -264,10 +265,86 @@
     </div>
   </section>
 
+  <section class="projekt">
+    <div class="text">
+      <span class="marke">Hardware · Beta</span>
+      <h2>einfachstoppen Tor und Kamera</h2>
+      <p>
+        Zwei genauere Zeitquellen für einfachstoppen: eine Lichtschranke und ein Startstab auf ESP32-C3, dazu eine iPhone-App, die vom Stativ aus jeden Durchgang auf die Hundertstel stoppt. Fotos verlassen das Handy nie, an den Server geht nur der Zeitpunkt. Die Bauanleitung ist ein Vorschlag zum Nachbauen, kein fertiges Produkt; was am Gerät noch nicht geprüft ist, steht im Repo dazu.
+      </p>
+      <div class="bau">
+        <span>ESP32-C3, C++</span><i>·</i>
+        <span>Bluetooth</span><i>·</i>
+        <span>React Native, TestFlight-Beta</span>
+      </div>
+      <a class="tuer" href="https://einfachstoppen.de/bauen">Bauanleitung
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor"
+             stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M3 8h9"></path><path d="M8.5 4.5 12 8l-3.5 3.5"></path>
+        </svg>
+      </a>
+      <a class="tuer" href="https://github.com/marcobockelbrink/einfachstoppen-tor">Quellcode (Tor)
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor"
+             stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M3 8h9"></path><path d="M8.5 4.5 12 8l-3.5 3.5"></path>
+        </svg>
+      </a>
+    </div>
+    <div class="bild">
+      <div class="rahmen-breit">
+        <img src="bilder/tor.svg" width="1000" height="320"
+             alt="Übersicht: Sender, Tor, Handy und Server">
+      </div>
+    </div>
+  </section>
+
+  <section class="projekt">
+    <div class="text">
+      <span class="marke">Spiel · in Arbeit</span>
+      <h2>My little Bikepark</h2>
+      <p>
+        Ein Tycoon-Spiel über Bikeparks: Der Spieler zeichnet Strecken in den Ettelsberg bei Willingen, der aus amtlichen Höhendaten nachgebaut ist, und finanziert sie mit Besuchern. Gespielt mit zwei Daumen, offline, auf iOS und Android.
+      </p>
+      <div class="bau">
+        <span>Godot 4, GDScript</span><i>·</i>
+        <span>keine kostenpflichtigen Plugins</span><i>·</i>
+        <span>amtliche Höhendaten</span>
+      </div>
+      <p class="keintuer">Kein Link: das Repository ist privat, das Spiel nicht veröffentlicht.</p>
+    </div>
+    <div class="bild">
+      <div class="rahmen-hoch schmal">
+        <img src="bilder/bikepark.png" width="390" height="844"
+             alt="Bergübersicht mit Konturlinien und Geländenamen">
+      </div>
+    </div>
+  </section>
+
+  <section class="projekt" style="grid-template-columns:minmax(0,1fr)">
+    <div class="text">
+      <span class="marke">Open Source · experimentell</span>
+      <h2>zitadel-netbird-sync</h2>
+      <p>
+        Spiegelt Zitadel-Projekte und ihre Mitglieder in NetBird-Gruppen, über die normale NetBird-API. Damit geht es auch mit NetBird Cloud, wo Gruppen sonst nur aus einer festen Liste von Anbietern kommen. Läuft ohne Datenbank, der Probelauf ist Standard.
+      </p>
+      <div class="bau">
+        <span>Go, nur Standardbibliothek</span><i>·</i>
+        <span>eine statische Binärdatei</span><i>·</i>
+        <span>ohne Zustand</span>
+      </div>
+      <a class="tuer" href="https://github.com/marcobockelbrink/zitadel-netbird-sync">Quellcode
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor"
+             stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M3 8h9"></path><path d="M8.5 4.5 12 8l-3.5 3.5"></path>
+        </svg>
+      </a>
+    </div>
+  </section>
+
   <footer>
     <p>
-      Keine Webschrift, kein Framework, kein Build — eine HTML-Datei und drei
-      Aufnahmen.
+      Diese Seite selbst: keine Webschrift, kein Framework, kein Build — HTML
+      und ein paar Aufnahmen.
     </p>
     <span class="fusslinks">
       <a href="impressum/">Impressum &amp; Datenschutz</a>

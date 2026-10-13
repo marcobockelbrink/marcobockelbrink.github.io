@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 320" role="img" aria-labelledby="t d" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif">
+  <title id="t">Übersicht: Sender, Tor, Handy, Server</title>
+  <desc id="d">Der Sender schickt Infrarot-Bursts zum Tor. Das Tor funkt Durchgänge per Bluetooth an die Kamera-App auf dem Handy, die sie an den Server meldet. Die Anbindung am Handy ist noch nicht gebaut.</desc>
+  <defs>
+    <marker id="pf" markerUnits="userSpaceOnUse" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="12" markerHeight="12" orient="auto">
+      <path d="M0 0 L10 5 L0 10 z" fill="#92a2aa"/>
+    </marker>
+    <marker id="pb" markerUnits="userSpaceOnUse" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="12" markerHeight="12" orient="auto">
+      <path d="M0 0 L10 5 L0 10 z" fill="#62aeda"/>
+    </marker>
+  </defs>
+  <rect width="1000" height="320" fill="#0e1316"/>
+
+  <g fill="#192024" stroke="#354046" stroke-width="2">
+    <rect x="30" y="100" width="160" height="100" rx="12"/>
+    <rect x="290" y="100" width="160" height="100" rx="12"/>
+    <rect x="810" y="100" width="160" height="100" rx="12"/>
+  </g>
+  <!-- Handy gestrichelt: Anbindung fehlt noch -->
+  <rect x="550" y="100" width="160" height="100" rx="12" fill="#192024" stroke="#d9a64a" stroke-width="2" stroke-dasharray="7 5"/>
+
+  <g fill="#e4e9ec" font-size="20" font-weight="600" text-anchor="middle">
+    <text x="110" y="136">Sender</text>
+    <text x="370" y="136">Tor</text>
+    <text x="630" y="136">Handy</text>
+    <text x="890" y="136">Server</text>
+  </g>
+  <g fill="#92a2aa" font-size="14" text-anchor="middle">
+    <text x="110" y="162">ESP32-C3</text>
+    <text x="110" y="182">IR-LED 940 nm</text>
+    <text x="370" y="162">ESP32-C3 + TSOP</text>
+    <text x="370" y="182">stempelt den Abriss</text>
+    <text x="630" y="162">Kamera-App</text>
+    <text x="630" y="182">Abgleich, Melden</text>
+    <text x="890" y="162">einfachstoppen.de</text>
+    <text x="890" y="182">paart mit dem Tipp</text>
+  </g>
+
+  <path d="M192 150 H286" stroke="#62aeda" stroke-width="3" stroke-dasharray="3 6" fill="none" marker-end="url(#pb)"/>
+  <path d="M452 150 H546" stroke="#92a2aa" stroke-width="2.5" fill="none" marker-end="url(#pf)"/>
+  <path d="M712 150 H806" stroke="#92a2aa" stroke-width="2.5" fill="none" marker-end="url(#pf)"/>
+
+  <g font-size="13" text-anchor="middle">
+    <text x="240" y="128" fill="#62aeda">Infrarot</text>
+    <text x="240" y="176" fill="#92a2aa">38 kHz</text>
+    <text x="240" y="194" fill="#92a2aa">in Bursts</text>
+    <text x="500" y="128" fill="#e4e9ec">Bluetooth LE</text>
+    <text x="500" y="176" fill="#92a2aa">Zeit der</text>
+    <text x="500" y="194" fill="#92a2aa">Tor-Uhr</text>
+    <text x="760" y="128" fill="#e4e9ec">HTTPS</text>
+    <text x="760" y="176" fill="#92a2aa">POST</text>
+    <text x="760" y="194" fill="#92a2aa">/kamera</text>
+  </g>
+
+  <text x="630" y="232" font-size="13" text-anchor="middle" fill="#d9a64a">Anbindung noch nicht gebaut</text>
+  <text x="500" y="288" font-size="13" text-anchor="middle" fill="#92a2aa">Das Tor weiß nicht, wer durchlief. Es verfeinert einen Tipp und ersetzt keinen.</text>
+</svg>
