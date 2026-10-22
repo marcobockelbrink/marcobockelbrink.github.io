@@ -139,6 +139,12 @@
   .bild .grafik { width: 92%; height: auto; }
   .karte h3, .karte h4 { margin: 0; font-size: 22px; font-weight: 600; }
   .karte p { margin: 0; font-size: 15px; line-height: 1.5; color: var(--leise); }
+  .kartenlinks { display: flex; flex-wrap: wrap; gap: 4px 18px; margin-top: auto; }
+  .kartenlinks a {
+    display: inline-flex; align-items: center; gap: 6px; min-height: 44px;
+    font-family: var(--mono); font-size: 13px; color: var(--akzent);
+  }
+  .kartenlinks a:hover { text-decoration: underline; text-underline-offset: 4px; }
   .karte .hinweis { margin-top: auto; font-family: var(--mono); font-size: 12px; color: #8a948f; }
 
   footer {
@@ -233,13 +239,18 @@
             <p>Rennen stoppen mit zwei Handys. Kein Konto, keine Installation.</p>
           </a>
 
-          <a class="karte" href="https://einfachstoppen.de/bauen">
+          <div class="karte">
             <div class="etikett"><span>Hardware · Beta · Open Source</span></div>
             <div class="bild"><img class="grafik" src="bilder/tor.svg" width="1000" height="320" loading="lazy"
                  alt="Übersicht: Sender, Tor, Handy und Server"></div>
             <h4>Zeittor und Kamera</h4>
             <p>Lichtschranke und Kamera-App als genauere Zeitquellen für einfachstoppen.</p>
-          </a>
+            <div class="kartenlinks">
+              <a href="https://einfachstoppen.de/bauen">Bauanleitung <span aria-hidden="true">→</span></a>
+              <a href="https://einfachstoppen.de/#/kamera">Kamera-App (Beta) <span aria-hidden="true">→</span></a>
+              <a href="https://github.com/marcobockelbrink/einfachstoppen-tor">Quellcode (Tor) <span aria-hidden="true">→</span></a>
+            </div>
+          </div>
 
         </div>
       </div>
