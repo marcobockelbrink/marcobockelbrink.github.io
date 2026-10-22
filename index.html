@@ -4,467 +4,314 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Marco Bockelbrink — Projekte</title>
-<meta name="description" content="Werkzeuge, die ohne Abhängigkeitsbaum laufen: Kapazitätsplanung für VMware Aria Operations, Zeitmessung für Rennen, ein tägliches KI-Briefing, eine Vereins-App, ein Spiel.">
-<meta name="color-scheme" content="light dark">
+<meta name="description" content="Marco Bockelbrink: Teamleiter in der IT, baut abends mit Claude Dinge, die er selbst braucht – Zeitmessung fürs Rennen, eine KI-Morgenzeitung, Kapazitätsplanung für VMware und Kubernetes.">
+<meta name="color-scheme" content="dark">
+<link rel="preload" href="schriften/bricolage-grotesque.woff2" as="font" type="font/woff2" crossorigin>
 <style>
-  /* Diese Seite lädt keine Schrift und kein Framework nach. Das ist nicht
-     Sparsamkeit, sondern das Thema: sie hält sich an das, was sie über die
-     drei Projekte behauptet. Anzeigeschrift ist deshalb der Systemsatz in
-     Monospace -- das hier sind Werkzeuge, keine Produkte mit Kampagne. */
-  :root {
-    --grund:   #f6f8f7;
-    --tinte:   #141c1e;
-    --lesbar:  #4e5f64;
-    --leise:   #606f75;
-    --linie:   #dae2e1;
-    --haarlinie: #e6ecea;
-    --punkt:   #b3c0bf;
-    --kante:   #c9d4d2;
-    --rahmen:  #d8e0dd;
-    --akzent:  #1f6f4f;    /* Reserve, Spielraum, freie Kapazität */
-    --akzent-hell: #14543a;
-    --schatten: 0 18px 44px -22px rgba(20, 40, 35, .28);
-    --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
-    --sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  /* Schriften liegen hier im Repo, nichts kommt von Google oder anderen
+     fremden Servern (siehe Impressum). */
+  @font-face {
+    font-family: "Bricolage Grotesque"; font-style: normal; font-weight: 400 800;
+    font-display: swap; src: url(schriften/bricolage-grotesque.woff2) format("woff2");
   }
-  @media (prefers-color-scheme: dark) {
-    :root {
-      --grund:   #0e1416;
-      --tinte:   #e9eff0;
-      --lesbar:  #a9b8bd;
-      --leise:   #8b9ca1;
-      --linie:   #263135;
-      --haarlinie: #1e282b;
-      --punkt:   #3c4a4e;
-      --kante:   #2c383c;
-      --rahmen:  #26332f;
-      --akzent:  #6cc79b;
-      --akzent-hell: #a5e0c2;
-      --schatten: 0 22px 50px -22px rgba(0, 0, 0, .9);
-    }
+  @font-face {
+    font-family: "IBM Plex Mono"; font-style: normal; font-weight: 400;
+    font-display: swap; src: url(schriften/ibm-plex-mono-400.woff2) format("woff2");
+  }
+  @font-face {
+    font-family: "IBM Plex Mono"; font-style: normal; font-weight: 500;
+    font-display: swap; src: url(schriften/ibm-plex-mono-500.woff2) format("woff2");
   }
 
+  :root {
+    --grund:   #0e1113;
+    --flaeche: #161b1d;
+    --gruppe:  #121719;
+    --bildgrund: #1f2629;
+    --linie:   #222a27;
+    --tinte:   #e8ecea;
+    --lesbar:  #c4ccc8;
+    --leise:   #a3aca8;
+    --akzent:  #7ee2b8;
+    --sans: "Bricolage Grotesque", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    --mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  }
   * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
   body {
     margin: 0; background: var(--grund); color: var(--tinte);
-    font-family: var(--sans); font-size: 17px; line-height: 1.6;
+    font-family: var(--sans); font-size: 17px; line-height: 1.5;
     -webkit-font-smoothing: antialiased;
   }
-  .blatt { max-width: 1180px; margin: 0 auto; padding: 40px 22px 48px; }
-  @media (min-width: 900px) { .blatt { padding: 72px 56px 64px; } }
+  a { color: inherit; text-decoration: none; }
+  a:focus-visible { outline: 3px solid var(--akzent); outline-offset: 4px; }
+  video:focus-visible { outline: 3px solid var(--grund); outline-offset: -3px; }
+  .karte:has(video:focus-visible) { border-color: var(--akzent); }
+  img, video { display: block; }
 
-  a { color: var(--akzent); text-decoration: none; }
-  a:hover { color: var(--akzent-hell); }
-  a:focus-visible { outline: 3px solid var(--akzent); outline-offset: 4px; border-radius: 3px; }
-
+  .blatt {
+    max-width: 1160px; margin: 0 auto; padding: 32px 24px 96px;
+    display: flex; flex-direction: column; gap: 72px;
+  }
+  main { display: flex; flex-direction: column; gap: inherit; }
   .mono { font-family: var(--mono); }
 
-  /* ------------------------------------------------------------ Kopf */
-  .kopf {
-    display: flex; flex-wrap: wrap; justify-content: space-between;
-    align-items: baseline; gap: 10px 24px;
-    padding-bottom: 12px; border-bottom: 1px solid var(--linie);
+  nav {
+    display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center;
+    gap: 16px; font-family: var(--mono); font-size: 14px;
   }
-  .name {
-    font-family: var(--mono); font-size: .78rem; letter-spacing: .18em;
-    text-transform: uppercase; color: var(--leise); margin: 0;
-  }
-  .kopf a { font-family: var(--mono); font-size: .78rem; letter-spacing: .06em; }
+  nav .marke { font-weight: 500; letter-spacing: .04em; }
+  nav .marke span { color: var(--akzent); }
+  nav .links { display: flex; flex-wrap: wrap; gap: 8px 28px; color: var(--leise); }
+  nav a:hover { color: var(--akzent); }
 
-  /* --------------------------------------------------------- Aufschlag */
-  .aufschlag { padding: 44px 0 40px; display: flex; flex-direction: column; gap: 22px; }
-  @media (min-width: 900px) { .aufschlag { padding: 76px 0 64px; gap: 26px; } }
+  .held {
+    display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
+    gap: 48px; align-items: center;
+  }
+  .held .text { display: flex; flex-direction: column; gap: 28px; }
+  .dachzeile {
+    margin: 0; font-family: var(--mono); font-size: 14px; color: var(--akzent);
+    letter-spacing: .08em; text-transform: uppercase;
+  }
   h1 {
-    font-family: var(--mono); font-weight: 600; margin: 0;
-    font-size: clamp(1.95rem, 5.4vw, 3.15rem); line-height: 1.13;
-    letter-spacing: -.025em; max-width: 19ch; text-wrap: balance;
+    margin: 0; font-size: clamp(44px, 6.4vw, 68px); line-height: 1;
+    font-weight: 800; letter-spacing: -.03em;
   }
-  h1 em { font-style: normal; color: var(--akzent); }
-  .these { margin: 0; max-width: 60ch; color: var(--lesbar); font-size: 1.04rem; }
-
-  /* --------------------------------------------------------- Projekte */
-  .projekt {
-    display: grid; grid-template-columns: minmax(0, 1fr);
-    gap: 28px; align-items: center;
-    padding: 38px 0; border-top: 1px solid var(--linie);
+  .vorstellung { margin: 0; max-width: 620px; font-size: 21px; line-height: 1.5; color: var(--lesbar); }
+  .knoepfe { display: flex; flex-wrap: wrap; gap: 12px; }
+  .knopf {
+    display: inline-flex; align-items: center; min-height: 48px; padding: 0 22px;
+    border-radius: 999px; border: 1px solid #2c3431; font-size: 16px;
   }
-  @media (min-width: 900px) {
-    .projekt {
-      grid-template-columns: minmax(0, 1fr) minmax(0, 1.08fr);
-      gap: 56px; padding: 52px 0;
-    }
-  }
-  .text { display: flex; flex-direction: column; gap: 18px; min-width: 0; }
-  .marke {
-    font-family: var(--mono); font-size: .72rem; letter-spacing: .16em;
-    text-transform: uppercase; color: var(--leise);
-  }
-  .marke.live { color: var(--akzent); }
-  h2 {
-    font-family: var(--mono); font-weight: 600; margin: 0;
-    font-size: clamp(1.35rem, 3.4vw, 1.7rem); letter-spacing: -.015em;
-  }
-  .projekt p { margin: 0; color: var(--lesbar); }
-
-  /* Die Bauweise in einer Zeile -- der eigentliche rote Faden der Seite. */
-  .bau {
-    display: flex; flex-wrap: wrap; gap: 8px 16px;
-    border-top: 1px solid var(--haarlinie); padding-top: 14px;
-    font-family: var(--mono); font-size: .76rem; letter-spacing: .04em;
-    color: var(--leise);
-  }
-  .bau i { font-style: normal; color: var(--punkt); }
-
-  .tuer {
-    align-self: flex-start; margin-top: 6px;
-    display: inline-flex; align-items: center; gap: 9px;
-    font-family: var(--mono); font-size: .95rem; font-weight: 600;
-    border-bottom: 2px solid var(--akzent); padding-bottom: 3px;
-  }
-  .tuer svg { transition: transform .18s ease; }
-  .tuer:hover svg { transform: translateX(3px); }
-  @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
-
-  /* Kein Link ist auch eine Aussage -- sie wird hingeschrieben. */
-  .keintuer {
-    margin: 6px 0 0; font-family: var(--mono); font-size: .8rem; line-height: 1.5;
-    color: var(--leise); border-left: 2px solid var(--kante); padding-left: 13px;
+  .knopf.voll { background: var(--akzent); border-color: var(--akzent); color: var(--grund); font-weight: 600; }
+  .knopf:hover { border-color: var(--akzent); }
+  .portraet {
+    width: 100%; height: auto; aspect-ratio: 16 / 9; object-fit: cover;
+    border-radius: 28px; border: 1px solid var(--linie);
   }
 
-  .bild { display: flex; justify-content: center; min-width: 0; }
-  .bild img, .bild video { display: block; width: 100%; height: auto; }
-  .rahmen-breit, .rahmen-hoch {
-    border: 1px solid var(--rahmen); overflow: hidden; box-shadow: var(--schatten);
+  .zahlen {
+    display: flex; flex-wrap: wrap; gap: 16px 40px; padding: 24px 0;
+    border-top: 1px solid var(--linie); border-bottom: 1px solid var(--linie);
   }
-  .rahmen-breit { border-radius: 10px; width: 100%; }
-  .rahmen-hoch  { border-radius: 20px; width: 100%; max-width: 268px; }
-  @media (min-width: 900px) { .rahmen-hoch { max-width: 300px; } }
-  .schmal { max-width: 232px; }
-  @media (min-width: 900px) { .schmal { max-width: 262px; } }
+  .zahlen div { display: flex; align-items: baseline; gap: 10px; }
+  .zahlen b { font-size: 44px; font-weight: 800; }
+  .zahlen b.akzent { color: var(--akzent); }
+  .zahlen span { font-family: var(--mono); font-size: 14px; color: var(--leise); }
 
-  /* ------------------------------------------------------------- Fuß */
+  #projekte { display: flex; flex-direction: column; gap: 24px; scroll-margin-top: 24px; }
+  h2 { margin: 0; font-size: 36px; font-weight: 600; letter-spacing: -.01em; }
+
+  .raster { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; }
+  .gruppe {
+    grid-column: 1 / -1; display: flex; flex-direction: column; gap: 18px; padding: 22px;
+    border-radius: 28px; border: 1.5px solid var(--akzent); background: var(--gruppe);
+  }
+  .gruppe .kopf { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 8px 24px; }
+  .gruppe .kopf div { display: flex; align-items: baseline; gap: 14px; }
+  .gruppe .kopf small {
+    font-family: var(--mono); font-size: 12px; letter-spacing: .08em;
+    text-transform: uppercase; color: var(--akzent);
+  }
+  .gruppe .kopf .gruppentitel { margin: 0; font-size: 26px; font-weight: 600; }
+  .gruppe .kopf p { margin: 0; font-size: 15px; color: var(--leise); }
+
+  .karte {
+    display: flex; flex-direction: column; gap: 14px; padding: 20px;
+    border-radius: 20px; background: var(--flaeche); border: 1px solid var(--linie);
+    transition: border-color .15s, transform .15s;
+  }
+  a.karte:hover { border-color: var(--akzent); transform: translateY(-2px); }
+  @media (prefers-reduced-motion: reduce) { a.karte:hover { transform: none; } }
+  .etikett {
+    display: flex; justify-content: space-between; gap: 12px;
+    font-family: var(--mono); font-size: 12px; color: var(--leise);
+  }
+  .etikett .live { color: var(--akzent); }
+  .bild {
+    height: 190px; border-radius: 12px; overflow: hidden; background: var(--bildgrund);
+    display: flex; justify-content: center; align-items: center;
+  }
+  .bild .hoch { height: 100%; width: auto; }
+  .bild .breit { width: 100%; height: 100%; object-fit: cover; object-position: top left; }
+  .bild .grafik { width: 92%; height: auto; }
+  .karte h3, .karte h4 { margin: 0; font-size: 22px; font-weight: 600; }
+  .karte p { margin: 0; font-size: 15px; line-height: 1.5; color: var(--leise); }
+  .karte .hinweis { margin-top: auto; font-family: var(--mono); font-size: 12px; color: #8a948f; }
+
   footer {
-    border-top: 1px solid var(--linie); padding-top: 30px; margin-top: 34px;
-    display: flex; flex-wrap: wrap; justify-content: space-between;
-    align-items: baseline; gap: 14px 24px;
+    display: flex; flex-wrap: wrap; justify-content: space-between; gap: 16px;
+    padding-top: 24px; border-top: 1px solid var(--linie);
+    font-family: var(--mono); font-size: 13px; color: #8a948f;
   }
-  footer p { margin: 0; max-width: 56ch; font-size: .9rem; color: var(--leise); }
-  footer a { font-family: var(--mono); font-size: .85rem; }
-  .fusslinks { display: flex; flex-wrap: wrap; gap: 8px 22px; }
+  footer .links { display: flex; flex-wrap: wrap; gap: 8px 22px; }
+  footer a:hover { color: var(--akzent); }
+
+  @media (max-width: 900px) {
+    .raster { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+  @media (max-width: 820px) {
+    .held { grid-template-columns: minmax(0, 1fr); gap: 32px; }
+  }
+  @media (max-width: 600px) {
+    .blatt { padding: 24px 16px 72px; gap: 56px; }
+    .raster { grid-template-columns: minmax(0, 1fr); }
+    .gruppe { padding: 14px; }
+  }
 </style>
 <!-- Besucherzählung: Umami auf eigenem Server (statistik.bockelbrink.net), ohne Cookies -->
 <script defer src="https://statistik.bockelbrink.net/script.js" data-website-id="9ceb2d33-f4ea-4c1e-baf0-656dc7562135" data-do-not-track="true" data-exclude-search="true" data-exclude-hash="true"></script>
 </head>
 <body>
-<main class="blatt">
+<div class="blatt">
 
-  <div class="kopf">
-    <p class="name">Marco Bockelbrink</p>
-    <a href="https://github.com/marcobockelbrink">github.com/marcobockelbrink</a>
+  <nav aria-label="Hauptmenü">
+    <a class="marke" href="./">bockelbrink<span>.net</span></a>
+    <div class="links">
+      <a href="#projekte">Projekte</a>
+      <a href="#ueber">Über mich</a>
+      <a href="https://github.com/marcobockelbrink">GitHub</a>
+    </div>
+  </nav>
+
+  <main>
+  <header class="held" id="ueber">
+    <div class="text">
+      <p class="dachzeile">Teamleiter · Bastler · Mountainbiker</p>
+      <h1>Hallo, ich bin Marco.</h1>
+      <p class="vorstellung">
+        Tagsüber leite ich ein Team in der IT. Abends baue ich mit Claude Dinge,
+        die ich selbst brauche – vom Zeitmesser fürs Rennen bis zur
+        KI-Morgenzeitung. Hier ist, was dabei herausgekommen ist.
+      </p>
+      <div class="knoepfe">
+        <a class="knopf voll" href="#projekte">Projekte ansehen</a>
+        <a class="knopf" href="https://github.com/marcobockelbrink">github.com/marcobockelbrink</a>
+      </div>
+    </div>
+    <img class="portraet" src="bilder/marco.jpg" width="1400" height="788" fetchpriority="high"
+         alt="Marco am Laptop, gezeichnet, umgeben von Code, Cloud und einer Gummiente">
+  </header>
+
+  <div class="zahlen">
+    <div><b>8</b><span>Projekte</span></div>
+    <div><b class="akzent">2</b><span>live im Netz</span></div>
+    <div><b>4</b><span>Open Source</span></div>
   </div>
 
-  <div class="aufschlag">
-    <h1>Werkzeuge, die <em>ohne Abhängigkeitsbaum</em> laufen.</h1>
-    <p class="these">
-      Neun Sachen, die ich gebaut habe: ein Rechenzentrum, eine Rennstrecke,
-      eine Morgenzeitung, ein Verein, ein Bikepark, eine Platine, ein Synchronisierer, ein
-      Chat-Bot fürs Haus, ein Messfühler im Cluster. Wo es
-      geht, gilt dieselbe Regel: so wenig Abhängigkeiten wie möglich, nichts,
-      was in zwei Jahren nicht mehr installierbar ist. Wo ein Gerät oder ein
-      Store dazukommt, steht es dabei.
-    </p>
-  </div>
+  <section id="projekte">
+    <h2>Was ich gebaut habe</h2>
+    <div class="raster">
 
-  <section class="projekt">
-    <div class="text">
-      <span class="marke">Aria Operations</span>
-      <h2>VMware Kapazitätsplanung</h2>
-      <p>
-        Wie viel Platz ist im Cluster noch übrig, und wer hat schon etwas
-        davon reserviert? Liest die Zahlen aus VMware Aria Operations und
-        zeigt sie je Cluster als Dashboard — mit einem Weg, künftige
-        Kapazität anzumelden und freigeben zu lassen, statt sie in einer
-        Tabelle zu verwalten.
-      </p>
-      <div class="bau">
-        <span>Python, nur Standardbibliothek</span><i>·</i>
-        <span>kein pip</span><i>·</i>
-        <span>kein Build</span><i>·</i>
-        <span>Oberfläche folgt der Browsersprache</span>
+      <div class="gruppe">
+        <div class="kopf">
+          <div><small>Ein Projekt</small><h3 class="gruppentitel">einfachstoppen</h3></div>
+          <p>Zeitmessung fürs Rennen – Web-App, Zeittor und Kamera, und ein Comic dazu.</p>
+        </div>
+        <div class="raster">
+
+          <div class="karte">
+            <div class="etikett"><span>Film · 38 s</span></div>
+            <div class="bild" style="background:#8cc4e8">
+              <video class="hoch" src="bilder/einfachstoppen-comic.mp4" poster="bilder/einfachstoppen-comic.jpg"
+                     width="540" height="960" controls muted playsinline preload="none"
+                     aria-label="Comic-Film zu einfachstoppen, ohne Ton" aria-describedby="film-text">
+                <a href="bilder/einfachstoppen-comic.mp4">Film herunterladen (MP4, 1,9 MB)</a>
+              </video>
+            </div>
+            <h4>Der Comic</h4>
+            <p id="film-text">einfachstoppen in 38 Sekunden: vom Zettel mit „Wer war zuerst?“ bis zum Treppchen.</p>
+          </div>
+
+          <a class="karte" href="https://einfachstoppen.de">
+            <div class="etikett"><span>Web-App</span><span class="live"><span aria-hidden="true">●</span> live</span></div>
+            <div class="bild"><img class="hoch" src="bilder/einfachstoppen.png" width="422" height="620" loading="lazy"
+                 alt="Siegerehrung: die ersten drei auf dem Treppchen, dahinter die Rangliste"></div>
+            <h4>einfachstoppen.de</h4>
+            <p>Rennen stoppen mit zwei Handys. Kein Konto, keine Installation.</p>
+          </a>
+
+          <a class="karte" href="https://einfachstoppen.de/bauen">
+            <div class="etikett"><span>Hardware · Beta · Open Source</span></div>
+            <div class="bild"><img class="grafik" src="bilder/tor.svg" width="1000" height="320" loading="lazy"
+                 alt="Übersicht: Sender, Tor, Handy und Server"></div>
+            <h4>Zeittor und Kamera</h4>
+            <p>Lichtschranke und Kamera-App als genauere Zeitquellen für einfachstoppen.</p>
+          </a>
+
+        </div>
       </div>
-      <a class="tuer" href="vmware/">Demo ansehen
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor"
-             stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <path d="M3 8h9"></path><path d="M8.5 4.5 12 8l-3.5 3.5"></path>
-        </svg>
+
+      <a class="karte" href="https://ki-espresso.de">
+        <div class="etikett"><span>KI-Briefing</span><span class="live"><span aria-hidden="true">●</span> live</span></div>
+        <div class="bild"><img class="breit" src="bilder/ki-espresso.jpg" width="1000" height="523" loading="lazy"
+             alt="Tagesausgabe mit Schlagzeile, Audio-Player und den wichtigsten Meldungen"></div>
+        <h3>ki-espresso.de</h3>
+        <p>Jeden Morgen die KI-Nachrichten auf Deutsch, zum Lesen und Hören.</p>
       </a>
-    </div>
-    <div class="bild">
-      <div class="rahmen-breit">
-        <img src="bilder/vmware.jpg" width="1000" height="523"
-             alt="Kapazitätsübersicht je Cluster mit Auslastungsbalken">
-      </div>
-    </div>
-  </section>
 
-  <section class="projekt">
-    <div class="text">
-      <span class="marke live">live</span>
-      <h2>einfachstoppen.de</h2>
-      <p>
-        Zeitmessung für ein Rennen mit zwei Handys: eines schickt die
-        Teilnehmer los, eines stoppt sie im Ziel, alle anderen sehen die
-        Ergebnisse live. Kein Konto, keine Installation. Die Uhren der Geräte
-        werden gegeneinander abgeglichen, und im Funkloch merkt sich das
-        Gerät die Tipps und schickt sie später mit ihrer echten Zeit nach.
-        Bis zu fünf Läufe je Rennen, Massen- oder Intervallstart, Ergebnisse
-        als Bild, CSV oder E-Mail.
-      </p>
-      <div class="bau">
-        <span>Python, FastAPI, SQLite</span><i>·</i>
-        <span>Oberfläche in reinem JavaScript</span><i>·</i>
-        <span>kein Build-Schritt</span><i>·</i>
-        <span>deutsch und englisch</span>
-      </div>
-      <a class="tuer" href="https://einfachstoppen.de">einfachstoppen.de
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor"
-             stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <path d="M3 8h9"></path><path d="M8.5 4.5 12 8l-3.5 3.5"></path>
-        </svg>
+      <a class="karte" href="vmware/">
+        <div class="etikett"><span>VMware · Kubernetes · Demo</span></div>
+        <div class="bild"><img class="breit" src="bilder/vmware.jpg" width="1000" height="523" loading="lazy"
+             alt="Kapazitätsübersicht je Cluster mit Auslastungsbalken"></div>
+        <h3>Kapazitätsplanung</h3>
+        <p>Wie viel Platz ist in VMware- und Kubernetes-Clustern frei, und wer hat schon reserviert? Liest Aria Operations und Prometheus.</p>
       </a>
-    </div>
-    <div class="bild">
-      <!-- Die App selbst kennt hell und dunkel. Auf heller Seite eine dunkle
-           Aufnahme zu zeigen sähe aus wie ein fremdes Bild. -->
-      <picture class="rahmen-hoch">
-        <source media="(prefers-color-scheme: dark)" srcset="bilder/einfachstoppen.png">
-        <img src="bilder/einfachstoppen-hell.png" width="422" height="620"
-             alt="Siegerehrung: die ersten drei auf dem Treppchen, dahinter die Rangliste">
-      </picture>
-    </div>
-  </section>
 
-  <section class="projekt">
-    <div class="text">
-      <span class="marke">Film</span>
-      <h2>einfachstoppen in 38 Sekunden</h2>
-      <p id="film-text">
-        Was die App tut, als Comic: vom Zettel mit „Wer war zuerst?“ über
-        Start- und Ziel-Handy und die Lichtschranke bis zum Treppchen. Jedes
-        Bild ist eine Browser-Seite, ffmpeg macht daraus das Video. Ohne Ton.
-      </p>
-      <div class="bau">
-        <span>HTML und CSS je Bild</span><i>·</i>
-        <span>ffmpeg</span><i>·</i>
-        <span>9:16 fürs Handy</span>
+      <div class="karte">
+        <div class="etikett"><span>Vereins-App</span></div>
+        <div class="bild" style="background:#e9eef0"><img class="hoch" src="bilder/mtb.png" width="212" height="460" loading="lazy"
+             alt="Terminliste der Vereins-App mit Touren und Trainings"></div>
+        <h3>MTB Bielefeld</h3>
+        <p>Termine, Anmeldungen und Fotoalben für den Verein.</p>
+        <p class="hinweis">Kein Link: steht in keinem App Store.</p>
       </div>
-    </div>
-    <div class="bild">
-      <div class="rahmen-hoch">
-        <video src="bilder/einfachstoppen-comic.mp4" poster="bilder/einfachstoppen-comic.jpg"
-               width="540" height="960" controls muted playsinline preload="none"
-               aria-label="Comic-Film zu einfachstoppen, ohne Ton" aria-describedby="film-text">
-          <a href="bilder/einfachstoppen-comic.mp4">Film herunterladen (MP4, 1,9 MB)</a>
-        </video>
-      </div>
-    </div>
-  </section>
 
-  <section class="projekt">
-    <div class="text">
-      <span class="marke live">live</span>
-      <h2>ki-espresso.de</h2>
-      <p>
-        Das tägliche KI-Briefing auf Deutsch. Claude recherchiert jeden Morgen
-        in Primärquellen und Fachpresse, der Dienst baut daraus eine Seite mit
-        Archiv, Themen, Suche und RSS und schickt die drei wichtigsten Punkte
-        aufs Handy. Sonntags kommt ein Wochenrückblick, der frühere
-        Behauptungen nachprüft, dazwischen Eilmeldungen nur, wenn wirklich
-        etwas Großes passiert. Jede Ausgabe gibt es auch zum Hören.
-      </p>
-      <div class="bau">
-        <span>Python, FastAPI</span><i>·</i>
-        <span>Claude-Code-Routine in der Cloud</span><i>·</i>
-        <span>Sprachausgabe mit Piper</span><i>·</i>
-        <span>JSON-API und RSS</span>
+      <div class="karte">
+        <div class="etikett"><span>Spiel · in Arbeit</span></div>
+        <div class="bild"><img class="breit" src="bilder/bikepark.jpg" width="1200" height="554" loading="lazy"
+             alt="3D-Ansicht: Liftstation im Fichtenwald"></div>
+        <h3>My little Bikepark</h3>
+        <p>Strecken in den Ettelsberg zeichnen und Besucher anlocken.</p>
+        <p class="hinweis">Kein Link: noch nicht veröffentlicht.</p>
       </div>
-      <a class="tuer" href="https://ki-espresso.de">ki-espresso.de
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor"
-             stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <path d="M3 8h9"></path><path d="M8.5 4.5 12 8l-3.5 3.5"></path>
-        </svg>
+
+      <a class="karte" href="https://github.com/marcobockelbrink/zitadel-netbird-sync">
+        <div class="etikett"><span>Open Source</span></div>
+        <div class="bild"><span class="mono" style="font-size:15px;color:#8a948f">Go · Zitadel → NetBird</span></div>
+        <h3>zitadel-netbird-sync</h3>
+        <p>Zitadel-Projekte als NetBird-Gruppen, auch mit NetBird Cloud.</p>
       </a>
-    </div>
-    <div class="bild">
-      <div class="rahmen-breit">
-        <img src="bilder/ki-espresso.jpg" width="1000" height="523"
-             alt="Tagesausgabe mit Schlagzeile, Audio-Player und den drei wichtigsten Meldungen">
-      </div>
-    </div>
-  </section>
 
-  <section class="projekt">
-    <div class="text">
-      <span class="marke">Vereins-App</span>
-      <h2>MTB Bielefeld</h2>
-      <p>
-        Die App des Vereins: Termine, Anmeldungen zu Touren und
-        Jugendtrainings, Fotoalben. Läuft samt eigener Schnittstelle auf einem
-        kleinen Server. Das Vereinsblau darin ist nicht geschätzt, sondern aus
-        der verbindlichen Druckdefinition umgerechnet — dieselben Farben trägt
-        auch einfachstoppen.
-      </p>
-      <div class="bau">
-        <span>React Native</span><i>·</i>
-        <span>eigene API</span><i>·</i>
-        <span>PostgreSQL</span>
-      </div>
-      <p class="keintuer">Kein Link: die App steht in keinem App Store.</p>
-    </div>
-    <div class="bild">
-      <div class="rahmen-hoch schmal">
-        <img src="bilder/mtb.png" width="212" height="460"
-             alt="Terminliste der Vereins-App mit Touren und Trainings">
-      </div>
-    </div>
-  </section>
+      <a class="karte" href="https://github.com/marcobockelbrink/claude-matrix-bot">
+        <div class="etikett"><span>Open Source</span></div>
+        <div class="bild"><span class="mono" style="font-size:15px;color:#8a948f">Python · Matrix · Home Assistant</span></div>
+        <h3>claude-matrix-bot</h3>
+        <p>Ein Chat-Bot, der mein Home Assistant vom Handy aus bedient.</p>
+      </a>
 
-  <section class="projekt">
-    <div class="text">
-      <span class="marke">Hardware · Beta</span>
-      <h2>einfachstoppen Tor und Kamera</h2>
-      <p>
-        Zwei genauere Zeitquellen für einfachstoppen: eine Lichtschranke und ein Startstab auf ESP32-C3, dazu eine iPhone-App, die vom Stativ aus am Start oder im Ziel jeden Durchgang auf die Hundertstel stoppt. Fotos verlassen das Handy nie, an den Server geht nur der Zeitpunkt. Die Bauanleitung ist ein Vorschlag zum Nachbauen, kein fertiges Produkt; was am Gerät noch nicht geprüft ist, steht im Repo dazu.
-      </p>
-      <div class="bau">
-        <span>ESP32-C3, C++</span><i>·</i>
-        <span>Bluetooth</span><i>·</i>
-        <span>React Native, TestFlight-Beta</span>
-      </div>
-      <a class="tuer" href="https://einfachstoppen.de/bauen">Bauanleitung
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor"
-             stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <path d="M3 8h9"></path><path d="M8.5 4.5 12 8l-3.5 3.5"></path>
-        </svg>
+      <a class="karte" href="https://github.com/marcobockelbrink/kubernetes-fun/tree/main/db-wifi-check">
+        <div class="etikett"><span>Fun-Tool · Open Source</span></div>
+        <div class="bild"><img class="breit" src="bilder/db-wifi-check.jpg" width="1000" height="766" loading="lazy"
+             alt="Übersichtsseite mit aktueller Latenz zu 8.8.8.8, Kennzahlen und Verlauf"></div>
+        <h3>db-wifi-check</h3>
+        <p>Misst im Cluster, wie schnell DNS-Server antworten.</p>
       </a>
-      <a class="tuer" href="https://einfachstoppen.de/#/kamera">Kamera-App (Beta)
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor"
-             stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <path d="M3 8h9"></path><path d="M8.5 4.5 12 8l-3.5 3.5"></path>
-        </svg>
-      </a>
-      <a class="tuer" href="https://github.com/marcobockelbrink/einfachstoppen-tor">Quellcode (Tor)
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor"
-             stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <path d="M3 8h9"></path><path d="M8.5 4.5 12 8l-3.5 3.5"></path>
-        </svg>
-      </a>
-    </div>
-    <div class="bild">
-      <div class="rahmen-breit">
-        <img src="bilder/tor.svg" width="1000" height="320"
-             alt="Übersicht: Sender, Tor, Handy und Server">
-      </div>
-    </div>
-  </section>
 
-  <section class="projekt">
-    <div class="text">
-      <span class="marke">Spiel · in Arbeit</span>
-      <h2>My little Bikepark</h2>
-      <p>
-        Ein Tycoon-Spiel über Bikeparks: Der Spieler zeichnet Strecken in den Ettelsberg bei Willingen, der aus amtlichen Höhendaten nachgebaut ist, und finanziert sie mit Besuchern. Gespielt mit zwei Daumen, offline, auf iOS und Android.
-      </p>
-      <div class="bau">
-        <span>Godot 4, GDScript</span><i>·</i>
-        <span>keine kostenpflichtigen Plugins</span><i>·</i>
-        <span>amtliche Höhendaten</span>
-      </div>
-      <p class="keintuer">Kein Link: das Repository ist privat, das Spiel nicht veröffentlicht.</p>
-    </div>
-    <div class="bild">
-      <div class="rahmen-hoch schmal">
-        <img src="bilder/bikepark.png" width="390" height="844"
-             alt="Bergübersicht mit Konturlinien und Geländenamen">
-      </div>
     </div>
   </section>
-
-  <section class="projekt" style="grid-template-columns:minmax(0,1fr)">
-    <div class="text">
-      <span class="marke">Open Source · experimentell</span>
-      <h2>zitadel-netbird-sync</h2>
-      <p>
-        Spiegelt Zitadel-Projekte und ihre Mitglieder in NetBird-Gruppen, über die normale NetBird-API. Damit geht es auch mit NetBird Cloud, wo Gruppen sonst nur aus einer festen Liste von Anbietern kommen. Läuft ohne Datenbank, der Probelauf ist Standard.
-      </p>
-      <div class="bau">
-        <span>Go, nur Standardbibliothek</span><i>·</i>
-        <span>eine statische Binärdatei</span><i>·</i>
-        <span>ohne Zustand</span>
-      </div>
-      <a class="tuer" href="https://github.com/marcobockelbrink/zitadel-netbird-sync">Quellcode
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor"
-             stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <path d="M3 8h9"></path><path d="M8.5 4.5 12 8l-3.5 3.5"></path>
-        </svg>
-      </a>
-    </div>
-  </section>
-
-  <section class="projekt" style="grid-template-columns:minmax(0,1fr)">
-    <div class="text">
-      <span class="marke">Open Source</span>
-      <h2>claude-matrix-bot</h2>
-      <p>
-        Ein Chat-Bot, der mein Home Assistant vom Handy aus bedient: Zustände lesen, Automatisierungen ändern, Dienste aufrufen, Protokolle ansehen, Core neu starten. Er läuft mit dem Claude Agent SDK, antwortet nur den Matrix-Konten auf seiner Liste und fragt bei zerstörerischen Befehlen im Chat nach. Sprachnachrichten werden lokal abgeschrieben, Bilder und Dateien kommen in den Raum zurück. Er gibt einem Bot die Schlüssel zum Haus; die README sagt vor dem Start, was das heißt.
-      </p>
-      <div class="bau">
-        <span>Python, matrix-nio</span><i>·</i>
-        <span>Docker</span><i>·</i>
-        <span>nur ausgehende Verbindungen</span><i>·</i>
-        <span>deutsch und englisch</span>
-      </div>
-      <a class="tuer" href="https://github.com/marcobockelbrink/claude-matrix-bot">Quellcode
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor"
-             stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <path d="M3 8h9"></path><path d="M8.5 4.5 12 8l-3.5 3.5"></path>
-        </svg>
-      </a>
-    </div>
-  </section>
-
-  <section class="projekt" style="grid-template-columns:minmax(0,1fr)">
-    <div class="text">
-      <span class="marke">Open Source · Spielwiese</span>
-      <h2>db-wifi-check</h2>
-      <p>
-        Misst im Kubernetes-Cluster, ob ein oder mehrere DNS-Server erreichbar sind und wie schnell, und zeigt das als ASCII-Grafik im Protokoll und als Übersichtsseite auf Port 8080. Weil die PodSecurity-Stufe „restricted“ keinen echten Ping erlaubt, misst es per TCP-Verbindung zum DNS-Port. Ein eigenes Image braucht es nicht: Der Code kommt als ConfigMap in das öffentliche Python-Image, der Verlauf übersteht Neustarts auf einem Volume.
-      </p>
-      <div class="bau">
-        <span>Python, nur Standardbibliothek</span><i>·</i>
-        <span>kein eigenes Image</span><i>·</i>
-        <span>läuft als Nicht-Root</span>
-      </div>
-      <a class="tuer" href="https://github.com/marcobockelbrink/kubernetes-fun/tree/main/db-wifi-check">Quellcode
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor"
-             stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <path d="M3 8h9"></path><path d="M8.5 4.5 12 8l-3.5 3.5"></path>
-        </svg>
-      </a>
-    </div>
-  </section>
+  </main>
 
   <footer>
-    <p>
-      Diese Seite selbst: keine Webschrift, kein Framework, kein Build — HTML
-      und ein paar Aufnahmen.
-    </p>
-    <span class="fusslinks">
+    <span>Gebaut mit Claude.</span>
+    <span class="links">
       <a href="impressum/">Impressum &amp; Datenschutz</a>
       <a href="https://github.com/marcobockelbrink">github.com/marcobockelbrink</a>
     </span>
   </footer>
 
-</main>
+</div>
 </body>
 </html>

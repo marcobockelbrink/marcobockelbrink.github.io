@@ -3,5 +3,5 @@
 Übersicht über meine Projekte: VMware Kapazitätsplanung, einfachstoppen.de,
 ki-espresso.de, die MTB-Bielefeld-App und mehr.
 
-Eine Datei, keine Webschrift, kein Build — dieselbe Bauweise, die die Seite
-über die Projekte behauptet.
+Eine HTML-Datei, kein Build. Schriften (`schriften/`, OFL) und Bilder liegen
+im Repo; nichts kommt von fremden Servern außer der eigenen Besucherzählung.
