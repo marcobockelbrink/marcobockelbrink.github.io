@@ -84,6 +84,8 @@
     font-family: var(--mono); font-size: .78rem; color: var(--leise);
   }
 </style>
+<!-- Besucherzählung: Umami auf eigenem Server (statistik.bockelbrink.net), ohne Cookies -->
+<script defer src="https://statistik.bockelbrink.net/script.js" data-website-id="9ceb2d33-f4ea-4c1e-baf0-656dc7562135" data-do-not-track="true" data-exclude-search="true" data-exclude-hash="true"></script>
 </head>
 <body>
 <main class="blatt">
@@ -129,10 +131,11 @@
   <h3>Was diese Seite nicht tut</h3>
   <p>
     Sie setzt keine Cookies, speichert nichts im Browser und lädt nichts von
-    fremden Servern nach — keine Webschrift, kein Analysedienst, keine
-    eingebetteten Inhalte Dritter. Die Bilder und die Demo liegen auf
-    demselben Server wie die Seite. Ein Formular gibt es nicht; wer schreiben
-    möchte, nutzt die E-Mail-Adresse oben.
+    fremden Servern nach — keine Webschrift, keine eingebetteten Inhalte
+    Dritter. Die Bilder und die Demo liegen auf demselben Server wie die
+    Seite; einzig das Zählskript kommt von meinem eigenen Server (siehe
+    „Besucherzählung“). Ein Formular gibt es nicht; wer schreiben möchte,
+    nutzt die E-Mail-Adresse oben.
   </p>
 
   <h3>Was der Server trotzdem sieht</h3>
@@ -153,6 +156,62 @@
     Näheres in der Datenschutzerklärung von GitHub:
     <a href="https://docs.github.com/site-policy/privacy-policies/github-general-privacy-statement">docs.github.com/site-policy</a>.
   </p>
+
+  <h3>Besucherzählung</h3>
+  <p>
+    Um zu sehen, welche Seiten gelesen werden und woher Besucher kommen, zähle
+    ich Seitenaufrufe mit der freien Software Umami. Sie läuft auf meinem
+    eigenen Server bei der Hetzner Online GmbH in Deutschland
+    (statistik.bockelbrink.net); es werden keine Daten an Dritte übertragen.
+    Ein kleines Skript meldet beim Aufruf die aufgerufene Seite (Adresse ohne
+    Suchbegriffe) und ihren Titel, die verweisende Seite (ebenfalls ohne
+    Suchbegriffe), Zeitpunkt, Browser, Betriebssystem, Gerätetyp,
+    Bildschirmgröße und Spracheinstellung. Aus Ihrer IP-Adresse ermittelt
+    Umami Land, Region und Stadt. Das Skript setzt <b>keine Cookies</b> und
+    schreibt nichts in Ihren Browser; es liest dort nur, ob Sie die Zählung
+    abgeschaltet haben.
+  </p>
+  <p>
+    Ihre IP-Adresse wird nicht gespeichert. Um Aufrufe desselben Tages zu
+    einem Besuch zusammenzufassen, bildet Umami aus IP-Adresse,
+    Browserkennung, einem geheimen Schlüssel des Servers und dem Datum eine
+    Prüfsumme; am nächsten Tag entsteht eine neue. Die Daten sind damit
+    pseudonym: Ich kann sie keiner Person zuordnen und versuche es auch nicht.
+    Die Zählung lösche ich nach spätestens 25 Monaten, Sicherungskopien nach
+    weiteren 14 Tagen.
+  </p>
+  <p>
+    Rechtsgrundlage ist Art. 6 Abs. 1 lit. f DSGVO, mein berechtigtes
+    Interesse, die Reichweite dieser nicht kommerziellen Seite zu kennen. Sie
+    können jederzeit widersprechen: Ist in Ihrem Browser „Do Not Track“
+    eingeschaltet, wird nichts gezählt, und mit dem Knopf hier schalten Sie die
+    Zählung in diesem Browser ab; das merkt sich Ihr Browser (lokaler
+    Speicher, Eintrag <code>umami.disabled</code>), bis Sie sie wieder
+    einschalten.
+  </p>
+  <p>
+    <button type="button" id="zaehlung-aus" hidden>Zählung in diesem Browser abschalten</button>
+    <button type="button" id="zaehlung-an" hidden>Zählung wieder einschalten</button>
+    <span id="zaehlung-stand" role="status"></span>
+  </p>
+  <script>
+  // Widerspruch gegen die Zählung: setzt bzw. löscht localStorage["umami.disabled"], das Umamis Skript vor
+  // jedem Senden liest. Nur auf Knopfdruck, sendet nichts.
+  (() => {
+    const aus = document.getElementById('zaehlung-aus'), an = document.getElementById('zaehlung-an');
+    const stand = document.getElementById('zaehlung-stand'), KEY = 'umami.disabled';
+    const lesen = () => { try { return localStorage.getItem(KEY) === '1'; } catch { return null; } };
+    const zeigen = () => {
+      const ab = lesen();
+      if (ab === null) { stand.textContent = 'Ihr Browser erlaubt keinen lokalen Speicher – nutzen Sie „Do Not Track“ oder schreiben Sie mir.'; return; }
+      aus.hidden = ab; an.hidden = !ab;
+      stand.textContent = ab ? 'Die Zählung ist in diesem Browser abgeschaltet.' : 'Die Zählung ist in diesem Browser eingeschaltet.';
+    };
+    aus.addEventListener('click', () => { try { localStorage.setItem(KEY, '1'); } catch {} zeigen(); });
+    an.addEventListener('click', () => { try { localStorage.removeItem(KEY); } catch {} zeigen(); });
+    zeigen();
+  })();
+  </script>
 
   <h3>Ihre Rechte</h3>
   <ul>
