@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Marco Bockelbrink — Projekte</title>
-<meta name="description" content="Werkzeuge, die ohne Abhängigkeitsbaum laufen: Kapazitätsplanung für VMware Aria Operations, Zeitmessung für Rennen, eine Vereins-App, ein Spiel.">
+<meta name="description" content="Werkzeuge, die ohne Abhängigkeitsbaum laufen: Kapazitätsplanung für VMware Aria Operations, Zeitmessung für Rennen, ein tägliches KI-Briefing, eine Vereins-App, ein Spiel.">
 <meta name="color-scheme" content="light dark">
 <style>
   /* Diese Seite lädt keine Schrift und kein Framework nach. Das ist nicht
@@ -132,7 +132,7 @@
   }
 
   .bild { display: flex; justify-content: center; min-width: 0; }
-  .bild img { display: block; width: 100%; height: auto; }
+  .bild img, .bild video { display: block; width: 100%; height: auto; }
   .rahmen-breit, .rahmen-hoch {
     border: 1px solid var(--rahmen); overflow: hidden; box-shadow: var(--schatten);
   }
@@ -166,9 +166,9 @@
   <div class="aufschlag">
     <h1>Werkzeuge, die <em>ohne Abhängigkeitsbaum</em> laufen.</h1>
     <p class="these">
-      Sieben Sachen, die ich gebaut habe: ein Rechenzentrum, eine Rennstrecke,
-      ein Verein, ein Bikepark, eine Platine, ein Synchronisierer, ein
-      Chat-Bot fürs Haus. Wo es
+      Neun Sachen, die ich gebaut habe: ein Rechenzentrum, eine Rennstrecke,
+      eine Morgenzeitung, ein Verein, ein Bikepark, eine Platine, ein Synchronisierer, ein
+      Chat-Bot fürs Haus, ein Messfühler im Cluster. Wo es
       geht, gilt dieselbe Regel: so wenig Abhängigkeiten wie möglich, nichts,
       was in zwei Jahren nicht mehr installierbar ist. Wo ein Gerät oder ein
       Store dazukommt, steht es dabei.
@@ -217,6 +217,8 @@
         Ergebnisse live. Kein Konto, keine Installation. Die Uhren der Geräte
         werden gegeneinander abgeglichen, und im Funkloch merkt sich das
         Gerät die Tipps und schickt sie später mit ihrer echten Zeit nach.
+        Bis zu fünf Läufe je Rennen, Massen- oder Intervallstart, Ergebnisse
+        als Bild, CSV oder E-Mail.
       </p>
       <div class="bau">
         <span>Python, FastAPI, SQLite</span><i>·</i>
@@ -239,6 +241,65 @@
         <img src="bilder/einfachstoppen-hell.png" width="422" height="620"
              alt="Siegerehrung: die ersten drei auf dem Treppchen, dahinter die Rangliste">
       </picture>
+    </div>
+  </section>
+
+  <section class="projekt">
+    <div class="text">
+      <span class="marke">Film</span>
+      <h2>einfachstoppen in 38 Sekunden</h2>
+      <p id="film-text">
+        Was die App tut, als Comic: vom Zettel mit „Wer war zuerst?“ über
+        Start- und Ziel-Handy und die Lichtschranke bis zum Treppchen. Jedes
+        Bild ist eine Browser-Seite, ffmpeg macht daraus das Video. Ohne Ton.
+      </p>
+      <div class="bau">
+        <span>HTML und CSS je Bild</span><i>·</i>
+        <span>ffmpeg</span><i>·</i>
+        <span>9:16 fürs Handy</span>
+      </div>
+    </div>
+    <div class="bild">
+      <div class="rahmen-hoch">
+        <video src="bilder/einfachstoppen-comic.mp4" poster="bilder/einfachstoppen-comic.jpg"
+               width="540" height="960" controls muted playsinline preload="none"
+               aria-label="Comic-Film zu einfachstoppen, ohne Ton" aria-describedby="film-text">
+          <a href="bilder/einfachstoppen-comic.mp4">Film herunterladen (MP4, 1,9 MB)</a>
+        </video>
+      </div>
+    </div>
+  </section>
+
+  <section class="projekt">
+    <div class="text">
+      <span class="marke live">live</span>
+      <h2>ki-espresso.de</h2>
+      <p>
+        Das tägliche KI-Briefing auf Deutsch. Claude recherchiert jeden Morgen
+        in Primärquellen und Fachpresse, der Dienst baut daraus eine Seite mit
+        Archiv, Themen, Suche und RSS und schickt die drei wichtigsten Punkte
+        aufs Handy. Sonntags kommt ein Wochenrückblick, der frühere
+        Behauptungen nachprüft, dazwischen Eilmeldungen nur, wenn wirklich
+        etwas Großes passiert. Jede Ausgabe gibt es auch zum Hören.
+      </p>
+      <div class="bau">
+        <span>Python, FastAPI</span><i>·</i>
+        <span>Claude-Code-Routine in der Cloud</span><i>·</i>
+        <span>Sprachausgabe mit Piper</span><i>·</i>
+        <span>JSON-API und RSS</span>
+      </div>
+      <a class="tuer" href="https://ki-espresso.de">ki-espresso.de
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor"
+             stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M3 8h9"></path><path d="M8.5 4.5 12 8l-3.5 3.5"></path>
+        </svg>
+      </a>
+    </div>
+    <div class="bild">
+      <div class="rahmen-breit">
+        <img src="bilder/ki-espresso.jpg" width="1000" height="523"
+             alt="Tagesausgabe mit Schlagzeile, Audio-Player und den drei wichtigsten Meldungen">
+      </div>
     </div>
   </section>
 
@@ -273,7 +334,7 @@
       <span class="marke">Hardware · Beta</span>
       <h2>einfachstoppen Tor und Kamera</h2>
       <p>
-        Zwei genauere Zeitquellen für einfachstoppen: eine Lichtschranke und ein Startstab auf ESP32-C3, dazu eine iPhone-App, die vom Stativ aus jeden Durchgang auf die Hundertstel stoppt. Fotos verlassen das Handy nie, an den Server geht nur der Zeitpunkt. Die Bauanleitung ist ein Vorschlag zum Nachbauen, kein fertiges Produkt; was am Gerät noch nicht geprüft ist, steht im Repo dazu.
+        Zwei genauere Zeitquellen für einfachstoppen: eine Lichtschranke und ein Startstab auf ESP32-C3, dazu eine iPhone-App, die vom Stativ aus am Start oder im Ziel jeden Durchgang auf die Hundertstel stoppt. Fotos verlassen das Handy nie, an den Server geht nur der Zeitpunkt. Die Bauanleitung ist ein Vorschlag zum Nachbauen, kein fertiges Produkt; was am Gerät noch nicht geprüft ist, steht im Repo dazu.
       </p>
       <div class="bau">
         <span>ESP32-C3, C++</span><i>·</i>
@@ -281,6 +342,12 @@
         <span>React Native, TestFlight-Beta</span>
       </div>
       <a class="tuer" href="https://einfachstoppen.de/bauen">Bauanleitung
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor"
+             stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M3 8h9"></path><path d="M8.5 4.5 12 8l-3.5 3.5"></path>
+        </svg>
+      </a>
+      <a class="tuer" href="https://einfachstoppen.de/#/kamera">Kamera-App (Beta)
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor"
              stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <path d="M3 8h9"></path><path d="M8.5 4.5 12 8l-3.5 3.5"></path>
@@ -358,6 +425,27 @@
         <span>deutsch und englisch</span>
       </div>
       <a class="tuer" href="https://github.com/marcobockelbrink/claude-matrix-bot">Quellcode
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor"
+             stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M3 8h9"></path><path d="M8.5 4.5 12 8l-3.5 3.5"></path>
+        </svg>
+      </a>
+    </div>
+  </section>
+
+  <section class="projekt" style="grid-template-columns:minmax(0,1fr)">
+    <div class="text">
+      <span class="marke">Open Source · Spielwiese</span>
+      <h2>db-wifi-check</h2>
+      <p>
+        Misst im Kubernetes-Cluster, ob ein oder mehrere DNS-Server erreichbar sind und wie schnell, und zeigt das als ASCII-Grafik im Protokoll und als Übersichtsseite auf Port 8080. Weil die PodSecurity-Stufe „restricted“ keinen echten Ping erlaubt, misst es per TCP-Verbindung zum DNS-Port. Ein eigenes Image braucht es nicht: Der Code kommt als ConfigMap in das öffentliche Python-Image, der Verlauf übersteht Neustarts auf einem Volume.
+      </p>
+      <div class="bau">
+        <span>Python, nur Standardbibliothek</span><i>·</i>
+        <span>kein eigenes Image</span><i>·</i>
+        <span>läuft als Nicht-Root</span>
+      </div>
+      <a class="tuer" href="https://github.com/marcobockelbrink/kubernetes-fun/tree/main/db-wifi-check">Quellcode
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor"
              stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <path d="M3 8h9"></path><path d="M8.5 4.5 12 8l-3.5 3.5"></path>
