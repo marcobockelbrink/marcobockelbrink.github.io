@@ -145,6 +145,10 @@
     font-family: var(--mono); font-size: 13px; color: var(--akzent);
   }
   .kartenlinks a:hover { text-decoration: underline; text-underline-offset: 4px; }
+  .karte .adresse {
+    display: inline-flex; align-items: center; gap: 6px; margin-top: auto; min-height: 44px;
+    font-family: var(--mono); font-size: 13px; color: var(--akzent);
+  }
   .karte .hinweis { margin-top: auto; font-family: var(--mono); font-size: 12px; color: #8a948f; }
 
   footer {
@@ -237,6 +241,7 @@
                  alt="Siegerehrung: die ersten drei auf dem Treppchen, dahinter die Rangliste"></div>
             <h4>einfachstoppen.de</h4>
             <p>Rennen stoppen mit zwei Handys. Kein Konto, keine Installation.</p>
+            <span class="adresse">einfachstoppen.de <span aria-hidden="true">→</span></span>
           </a>
 
           <div class="karte">
@@ -261,6 +266,7 @@
              alt="Tagesausgabe mit Schlagzeile, Audio-Player und den wichtigsten Meldungen"></div>
         <h3>ki-espresso.de</h3>
         <p>Jeden Morgen die KI-Nachrichten auf Deutsch, zum Lesen und Hören.</p>
+        <span class="adresse">ki-espresso.de <span aria-hidden="true">→</span></span>
       </a>
 
       <a class="karte" href="vmware/">
@@ -280,23 +286,23 @@
         <p class="hinweis">Kein Link: steht in keinem App Store.</p>
       </div>
 
-      <div class="karte">
+      <a class="karte" href="https://family.bockelbrink.net">
         <div class="etikett"><span>Familien-App · selbst gehostet</span></div>
         <div class="bild" style="background:#1c1c1e"><img class="hoch" src="bilder/family.png" width="230" height="460" loading="lazy"
              alt="Wochenansicht des Familienkalenders mit Filtern je Person und Leiste für Kalender, Aufgaben, Listen, Rezepte und Familie"></div>
         <h3>Family App</h3>
         <p>Familienkalender fürs iPhone und iPad: Termine, Aufgaben, Listen und Rezepte, mit Abgleich zu Outlook.</p>
-        <p class="hinweis">Kein Link: nur für die Familie, per TestFlight.</p>
-      </div>
+        <span class="adresse">family.bockelbrink.net <span aria-hidden="true">→</span></span>
+      </a>
 
-      <div class="karte">
+      <a class="karte" href="https://mylittlebikepark.de">
         <div class="etikett"><span>Spiel · in Arbeit</span></div>
         <div class="bild"><img class="breit" src="bilder/bikepark.jpg" width="1200" height="554" loading="lazy"
              alt="3D-Ansicht: Liftstation im Fichtenwald"></div>
         <h3>My little Bikepark</h3>
         <p>Strecken in den Ettelsberg zeichnen und Besucher anlocken.</p>
-        <p class="hinweis">Kein Link: noch nicht veröffentlicht.</p>
-      </div>
+        <span class="adresse">mylittlebikepark.de <span aria-hidden="true">→</span></span>
+      </a>
 
       <a class="karte" href="https://github.com/marcobockelbrink/zitadel-netbird-sync">
         <div class="etikett"><span>Open Source</span></div>
