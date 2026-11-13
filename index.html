@@ -37,7 +37,7 @@
     --mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   }
   * { box-sizing: border-box; }
-  html { scroll-behavior: smooth; overflow-x: clip; }
+  html { scroll-behavior: smooth; }
   @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
   body {
     margin: 0; position: relative; background: var(--grund); color: var(--tinte);
@@ -45,7 +45,7 @@
     -webkit-font-smoothing: antialiased;
   }
   a { color: inherit; text-decoration: none; }
-  a:focus-visible, button:focus-visible { outline: 3px solid var(--akzent); outline-offset: 4px; border-radius: 6px; }
+  a:focus-visible, button:focus-visible { outline: 3px solid var(--akzent); outline-offset: 4px; }
   img, video { display: block; }
   .mono { font-family: var(--mono); }
 
@@ -113,6 +113,9 @@
     font-style: normal; color: var(--akzent);
     background: linear-gradient(90deg, var(--akzent), var(--violett));
     -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+  }
+  @media (forced-colors: active) {
+    h1 em { background: none; -webkit-text-fill-color: currentColor; }
   }
   .cursor {
     display: inline-block; width: 10px; height: 1.1em; margin-left: 4px;
@@ -199,7 +202,7 @@
   .k .hinweis { font-family: var(--mono); font-size: 12px; color: var(--leise); }
   .k.code { justify-content: space-between; }
   .k.code pre {
-    margin: 0; font-family: var(--mono); font-size: 13px; line-height: 1.7; color: #71717a; white-space: pre-wrap;
+    margin: 0; font-family: var(--mono); font-size: 13px; line-height: 1.7; color: var(--leise); white-space: pre-wrap;
   }
   .k.code pre b { color: var(--akzent); font-weight: 400; }
 
@@ -336,7 +339,7 @@
         <div class="schleier"></div>
         <div class="badges"><span class="b">Familien-App</span><span class="b">selbst gehostet</span></div>
         <h3>Family App</h3>
-        <p>Familienkalender fürs iPhone und iPad, mit Abgleich zu Outlook.</p>
+        <p>Familienkalender fürs iPhone und iPad: Termine, Aufgaben, Listen und Rezepte, mit Abgleich zu Outlook.</p>
         <span class="adresse">family.bockelbrink.net <span aria-hidden="true">→</span></span>
       </a>
 
@@ -426,7 +429,9 @@ Zitadel-Projekte lesen …
 <dialog id="comic" aria-label="Comic-Film zu einfachstoppen">
   <video src="bilder/einfachstoppen-comic.mp4" poster="bilder/einfachstoppen-comic.jpg"
          width="540" height="960" controls muted playsinline preload="none"
-         aria-describedby="film-text"></video>
+         aria-label="Comic-Film zu einfachstoppen, ohne Ton" aria-describedby="film-text">
+    <a href="bilder/einfachstoppen-comic.mp4">Film herunterladen (MP4, 1,9 MB)</a>
+  </video>
   <form method="dialog" class="dialogfuss">
     <span id="film-text">Vom Zettel mit „Wer war zuerst?“ bis zum Treppchen. Ohne Ton.</span>
     <button>Schließen</button>
@@ -438,7 +443,8 @@ Zitadel-Projekte lesen …
   const comic = document.getElementById("comic");
   const film = comic.querySelector("video");
   document.querySelector('[data-dialog="comic"]').addEventListener("click", (e) => {
-    if (typeof comic.showModal !== "function") return;
+    // Mit Cmd/Strg/Shift/Alt bleibt es ein normaler Link (z. B. neuer Tab).
+    if (typeof comic.showModal !== "function" || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
     e.preventDefault();
     comic.showModal();
     film.play().catch(() => {});
