@@ -9,7 +9,8 @@
 <link rel="preload" href="schriften/bricolage-grotesque.woff2" as="font" type="font/woff2" crossorigin>
 <style>
   /* Schriften liegen hier im Repo, nichts kommt von Google oder anderen
-     fremden Servern (siehe Impressum). */
+     fremden Servern (siehe Impressum). Effekte nach dem Vorbild von
+     Magic UI und Aceternity UI, von Hand gebaut, ohne Bibliothek. */
   @font-face {
     font-family: "Bricolage Grotesque"; font-style: normal; font-weight: 400 800;
     font-display: swap; src: url(schriften/bricolage-grotesque.woff2) format("woff2");
@@ -24,72 +25,96 @@
   }
 
   :root {
-    --grund:   #09090b;
-    --flaeche: #0f0f12;
-    --glas:    rgba(15, 15, 18, .72);
+    --grund:   #060608;
+    --flaeche: #0e0e12;
+    --glas:    rgba(14, 14, 18, .72);
     --linie:   rgba(255, 255, 255, .08);
     --tinte:   #fafafa;
     --lesbar:  #d4d4d8;
     --leise:   #a1a1aa;
     --akzent:  #7ee2b8;
-    --violett: #c4b5fd;
+    --violett: #a78bfa;
+    --rosa:    #f0abfc;
     --sans: "Bricolage Grotesque", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
     --mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   }
+  @property --winkel { syntax: "<angle>"; inherits: false; initial-value: 0deg; }
+
   * { box-sizing: border-box; }
-  html { scroll-behavior: smooth; }
-  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+  /* Platz unten, damit das Dock fokussierte Links nicht verdeckt */
+  html { scroll-behavior: smooth; scroll-padding-bottom: 96px; }
   body {
-    margin: 0; position: relative; background: var(--grund); color: var(--tinte);
+    margin: 0; background: var(--grund); color: var(--tinte);
     font-family: var(--sans); font-size: 17px; line-height: 1.5;
     -webkit-font-smoothing: antialiased;
   }
   a { color: inherit; text-decoration: none; }
   a:focus-visible, button:focus-visible { outline: 3px solid var(--akzent); outline-offset: 4px; }
   img, video { display: block; }
-  .mono { font-family: var(--mono); }
+  .blatt { position: relative; max-width: 1160px; margin: 0 auto; padding: 0 24px; }
 
-  /* Polarlicht und Gitter hinter dem Kopf */
-  .licht, .gitter { position: absolute; inset: 0 0 auto 0; pointer-events: none; z-index: 0; }
-  .licht {
-    height: 900px;
+  /* ---------- Bühne: Polarlicht, Lichtstrahlen, Meteore ---------- */
+  .buehne { position: relative; overflow: hidden; padding-bottom: 8px; }
+  .buehne::before {
+    content: ""; position: absolute; inset: -20% -10% auto; height: 900px; pointer-events: none;
     background:
-      radial-gradient(640px 340px at 22% 34%, rgba(126, 226, 184, .20), transparent 70%),
-      radial-gradient(560px 320px at 76% 22%, rgba(139, 92, 246, .20), transparent 70%);
+      radial-gradient(600px 320px at 20% 30%, rgba(126, 226, 184, .22), transparent 70%),
+      radial-gradient(520px 300px at 80% 20%, rgba(167, 139, 250, .24), transparent 70%),
+      radial-gradient(400px 240px at 55% 70%, rgba(240, 171, 252, .10), transparent 70%);
+    animation: wabern 18s ease-in-out infinite alternate;
   }
-  .gitter {
-    height: 720px; opacity: .55;
-    background-image: linear-gradient(var(--linie) 1px, transparent 1px),
-                      linear-gradient(90deg, var(--linie) 1px, transparent 1px);
-    background-size: 48px 48px;
-    -webkit-mask-image: radial-gradient(ellipse at 50% 0, #000 20%, transparent 70%);
-            mask-image: radial-gradient(ellipse at 50% 0, #000 20%, transparent 70%);
+  @keyframes wabern { to { transform: translate3d(3%, 4%, 0) scale(1.08); } }
+  .strahlen { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; opacity: .7; }
+  .strahlen path { fill: none; stroke: url(#strahl); stroke-width: 1.2; stroke-dasharray: 120 1400; animation: fliessen 7s linear infinite; }
+  .strahlen path:nth-child(2n) { animation-duration: 9s; animation-delay: -3s; }
+  .strahlen path:nth-child(3n) { animation-duration: 11s; animation-delay: -6s; }
+  .strahlen .spur { stroke: rgba(255, 255, 255, .04); stroke-dasharray: none; animation: none; }
+  /* Außer Sicht ruhen die Dauer-Animationen (spart Akku) */
+  .ruhe, .ruhe *, .ruhe::before, .ruhe::after { animation-play-state: paused !important; }
+  @keyframes fliessen { from { stroke-dashoffset: 1520; } to { stroke-dashoffset: 0; } }
+  .meteor {
+    position: absolute; top: -10px; width: 2px; height: 2px; border-radius: 50%; background: #fff;
+    transform: rotate(215deg); animation: meteor linear infinite; pointer-events: none;
+  }
+  .meteor::before {
+    content: ""; position: absolute; top: 50%; width: 70px; height: 1px; transform: translateY(-50%);
+    background: linear-gradient(90deg, #fff, transparent);
+  }
+  @keyframes meteor {
+    0% { transform: rotate(215deg) translateX(0); opacity: 1; }
+    70% { opacity: 1; }
+    100% { transform: rotate(215deg) translateX(-900px); opacity: 0; }
   }
 
-  .blatt {
-    position: relative; z-index: 1;
-    max-width: 1160px; margin: 0 auto; padding: 24px 24px 96px;
-    display: flex; flex-direction: column; gap: 56px;
-  }
-  main { display: flex; flex-direction: column; gap: inherit; }
-
-  /* Leiste oben */
+  /* ---------- Leiste oben ---------- */
   .leiste {
+    position: relative; z-index: 2; margin-top: 20px;
     display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center;
-    gap: 10px 24px; padding: 10px 16px; border: 1px solid var(--linie); border-radius: 12px;
-    background: var(--glas); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
-    font-family: var(--mono); font-size: 14px; color: var(--leise);
+    gap: 10px 24px; padding: 10px 16px; border: 1px solid var(--linie); border-radius: 999px;
+    background: var(--glas); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
+    font-family: var(--mono); font-size: 13px; color: var(--leise);
   }
-  .leiste .marke { color: var(--tinte); font-weight: 500; letter-spacing: .02em; }
-  .leiste .marke span, .leiste .status i { color: var(--akzent); font-style: normal; }
-  .leiste .links { display: flex; flex-wrap: wrap; gap: 6px 24px; }
-  .leiste a:hover { color: var(--akzent); }
+  .leiste .marke { color: var(--tinte); font-weight: 500; }
+  .leiste .marke span { color: var(--akzent); }
+  .leiste .links { display: flex; flex-wrap: wrap; gap: 6px 22px; }
+  .leiste a:hover { color: var(--tinte); }
+  .neu {
+    display: inline-flex; align-items: center; gap: 8px; padding: 4px 10px 4px 4px;
+    border-radius: 999px; border: 1px solid var(--linie); background: rgba(255, 255, 255, .03);
+  }
+  .neu b { font-weight: 500; color: var(--grund); background: var(--akzent); border-radius: 999px; padding: 1px 8px; }
 
-  /* Terminal-Fenster */
+  /* ---------- Terminal mit wanderndem Lichtrand ---------- */
   .fenster {
-    border: 1px solid var(--linie); border-radius: 16px; overflow: hidden;
-    background: var(--glas); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px);
-    box-shadow: 0 40px 120px -40px rgba(126, 226, 184, .35), 0 0 0 1px rgba(139, 92, 246, .08);
+    position: relative; z-index: 2; margin-top: 64px; border-radius: 18px; padding: 1px;
+    background: conic-gradient(from var(--winkel, 0deg), transparent 0 70%, var(--akzent) 80%, var(--violett) 88%, transparent 96%), var(--linie);
+    animation: kreisen 6s linear infinite;
+    box-shadow: 0 50px 140px -40px rgba(126, 226, 184, .35), 0 30px 120px -50px rgba(167, 139, 250, .45);
+  }
+  @keyframes kreisen { to { --winkel: 360deg; } }
+  .fenster-innen {
+    border-radius: 17px; overflow: hidden; background: rgba(10, 10, 13, .92);
+    -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px);
   }
   .titel {
     display: flex; align-items: center; gap: 8px; padding: 12px 16px;
@@ -105,15 +130,27 @@
   .shell p { margin: 0; }
   .shell .p { color: var(--akzent); }
   .shell .aus { color: var(--leise); }
+  /* Zeilen erscheinen nacheinander; nur mit JavaScript ausgeblendet,
+     und per opacity, damit Screenreader sie sofort lesen. */
+  .tippen .zeile { opacity: 0; }
+  .tippen .zeile.da, .tippen .zeile:focus-within { opacity: 1; }
   h1 {
-    margin: 12px 0 14px; font-family: var(--sans); font-size: clamp(38px, 5.4vw, 62px);
+    margin: 12px 0 14px; font-family: var(--sans); font-size: clamp(38px, 5.4vw, 64px);
     line-height: 1.02; font-weight: 700; letter-spacing: -.035em;
   }
+  h1 .wort { display: inline-block; transition: opacity .5s, filter .5s, transform .5s; }
+  .tippen h1 .wort { opacity: 0; filter: blur(10px); transform: translateY(8px); }
+  .tippen h1.da .wort { opacity: 1; filter: none; transform: none; }
   h1 em {
     font-style: normal; color: var(--akzent);
-    background: linear-gradient(90deg, var(--akzent), var(--violett));
+    background: linear-gradient(90deg, var(--akzent), var(--violett), var(--rosa), var(--akzent));
+    background-size: 300% 100%;
     -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+    animation: schimmer 6s linear infinite;
   }
+  /* Wörter haben eigene Ebenen; Safari schneidet den Verlauf sonst nicht zu */
+  h1 em .wort { background: inherit; -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+  @keyframes schimmer { to { background-position: 300% 0; } }
   @media (forced-colors: active) {
     h1 em { background: none; -webkit-text-fill-color: currentColor; }
   }
@@ -124,13 +161,18 @@
   @keyframes blinken { 50% { opacity: 0; } }
   .knoepfe { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 24px; font-family: var(--sans); }
   .knopf {
-    display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 18px;
-    border-radius: 10px; border: 1px solid var(--linie); font-size: 15px; font-weight: 500;
-    transition: border-color .15s, background .15s;
+    position: relative; overflow: hidden; display: inline-flex; align-items: center; gap: 8px;
+    min-height: 44px; padding: 0 18px; border-radius: 10px; border: 1px solid var(--linie);
+    font-size: 15px; font-weight: 500; transition: border-color .15s;
   }
-  .knopf:hover { border-color: var(--akzent); }
+  .knopf:not(.voll):hover { border-color: var(--akzent); }
   .knopf.voll { background: var(--tinte); border-color: var(--tinte); color: var(--grund); }
-  .knopf.voll:hover { background: var(--akzent); border-color: var(--akzent); }
+  .knopf.voll::after { /* durchlaufender Glanz */
+    content: ""; position: absolute; inset: 0; transform: translateX(-120%); pointer-events: none;
+    background: linear-gradient(100deg, transparent 30%, rgba(126, 226, 184, .55) 50%, transparent 70%);
+    animation: glanz 3.2s ease-in-out infinite;
+  }
+  @keyframes glanz { 60%, 100% { transform: translateX(120%); } }
   .portraet { position: relative; border-left: 1px solid var(--linie); }
   .portraet img { width: 100%; height: 100%; object-fit: cover; }
   .portraet::after {
@@ -138,60 +180,111 @@
     background: repeating-linear-gradient(transparent 0 3px, rgba(0, 0, 0, .14) 3px 4px);
   }
 
-  /* Zahlen */
+  /* ---------- Zahlen ---------- */
   .zahlen {
+    position: relative; z-index: 2; margin-top: 40px;
     display: grid; grid-template-columns: repeat(3, minmax(0, 1fr));
     border: 1px solid var(--linie); border-radius: 14px; background: var(--glas);
   }
   .zahlen div { padding: 20px 24px; border-left: 1px solid var(--linie); }
   .zahlen div:first-child { border-left: 0; }
-  .zahlen b { display: block; font-size: 36px; font-weight: 700; line-height: 1.1; }
+  .zahlen b { display: block; font-size: 40px; font-weight: 700; line-height: 1.1; font-variant-numeric: tabular-nums; }
   .zahlen b.akzent { color: var(--akzent); }
   .zahlen span { font-family: var(--mono); font-size: 13px; color: var(--leise); }
 
-  /* Projekte als Bento-Raster */
-  #projekte { display: flex; flex-direction: column; gap: 8px; scroll-margin-top: 24px; }
-  h2 { margin: 0; font-size: 32px; font-weight: 700; letter-spacing: -.02em; }
-  .unter { margin: 0 0 18px; color: var(--leise); }
+  /* ---------- Laufband ---------- */
+  .band {
+    margin-top: 72px; overflow: hidden; border-block: 1px solid var(--linie);
+    -webkit-mask-image: linear-gradient(90deg, transparent, #000 15%, #000 85%, transparent);
+            mask-image: linear-gradient(90deg, transparent, #000 15%, #000 85%, transparent);
+  }
+  .band div {
+    display: flex; gap: 44px; width: max-content; padding: 16px 0;
+    font-family: var(--mono); font-size: 14px; font-weight: 500; color: var(--leise);
+    text-transform: uppercase; letter-spacing: .1em; animation: laufen 40s linear infinite;
+  }
+  .band span::before { content: "✦ "; color: var(--akzent); }
+  .band:hover div { animation-play-state: paused; }
+  @keyframes laufen { to { transform: translateX(-50%); } }
+
+  /* ---------- Lampe über der Überschrift ---------- */
+  #projekte { scroll-margin-top: 24px; }
+  .lampe { position: relative; height: 230px; margin-top: 40px; display: flex; justify-content: center; align-items: flex-end; overflow: hidden; }
+  .lampe .kegel {
+    position: absolute; top: 0; width: 640px; max-width: 100%; height: 200px; transform-origin: top;
+    background: conic-gradient(from 180deg at 50% 0, transparent 140deg, rgba(126, 226, 184, .35) 165deg, rgba(167, 139, 250, .35) 195deg, transparent 220deg);
+    -webkit-mask-image: linear-gradient(#000 20%, transparent); mask-image: linear-gradient(#000 20%, transparent);
+  }
+  .lampe .stab {
+    position: absolute; top: 0; width: 320px; max-width: 70%; height: 2px;
+    background: linear-gradient(90deg, transparent, var(--akzent), var(--violett), transparent);
+    box-shadow: 0 0 24px 4px rgba(126, 226, 184, .5);
+  }
+  .js .lampe .kegel, .js .lampe .stab { animation: aufleuchten 1.4s ease-out both paused; }
+  .js .lampe.an .kegel, .js .lampe.an .stab { animation-play-state: running; }
+  @keyframes aufleuchten { from { transform: scaleX(.3); opacity: 0; } }
+  .lampe h2 {
+    position: relative; margin: 0 0 6px; text-align: center;
+    font-size: clamp(34px, 5vw, 52px); font-weight: 700; letter-spacing: -.03em; color: var(--tinte);
+    background: linear-gradient(#fff, #a1a1aa); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+  }
+  @media (forced-colors: active) { .lampe h2 { background: none; -webkit-text-fill-color: currentColor; } }
+  .unter { margin: 0 0 32px; text-align: center; color: var(--leise); }
+
+  /* ---------- Projekte als Bento-Raster ---------- */
   .bento {
     display: grid; grid-template-columns: repeat(4, minmax(0, 1fr));
-    grid-auto-rows: minmax(250px, auto); grid-auto-flow: dense; gap: 14px;
+    grid-auto-rows: minmax(250px, auto); grid-auto-flow: dense; gap: 14px; perspective: 1200px;
   }
   .k {
     position: relative; isolation: isolate; overflow: hidden;
     display: flex; flex-direction: column; justify-content: flex-end; gap: 6px;
-    padding: 18px; padding-top: 56px; border-radius: 14px;
-    border: 1px solid var(--linie); background: var(--flaeche);
-    transition: border-color .2s;
+    padding: 56px 18px 18px; border-radius: 16px; border: 1px solid var(--linie); background: var(--flaeche);
+    transform: rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+    transition: transform .25s ease-out, border-color .2s, opacity .7s, filter .7s, translate .7s;
+    transition-delay: 0s, 0s, var(--verz, 0s), var(--verz, 0s), var(--verz, 0s);
   }
-  .k.gross { grid-column: span 2; grid-row: span 2; }
+  .k.gross { grid-column: span 2; grid-row: span 2; border-color: transparent; }
   .k.breit { grid-column: span 2; }
-  /* Lichtkegel folgt der Maus (Position kommt per JavaScript) */
+  /* Lichtkegel folgt der Maus (Position per JavaScript) */
   .k::before {
     content: ""; position: absolute; inset: 0; z-index: -1; opacity: 0; transition: opacity .3s;
-    background: radial-gradient(360px circle at var(--x, 50%) var(--y, 50%), rgba(126, 226, 184, .14), transparent 60%);
+    background: radial-gradient(380px circle at var(--x, 50%) var(--y, 50%), rgba(126, 226, 184, .16), transparent 60%);
   }
   .k:hover::before { opacity: 1; }
   a.k:hover, .k:focus-within { border-color: rgba(126, 226, 184, .4); }
-  a.k:focus-visible { outline: 3px solid var(--akzent); outline-offset: 3px; border-radius: 14px; }
+  a.k:focus-visible { outline: 3px solid var(--akzent); outline-offset: 3px; }
+  /* Lichtpunkt läuft um die große Kachel */
+  .k.gross::after {
+    content: ""; position: absolute; inset: 0; z-index: 1; border-radius: inherit; padding: 1.5px; pointer-events: none;
+    background: conic-gradient(from var(--winkel, 0deg), transparent 0 75%, var(--akzent) 85%, var(--violett) 92%, transparent 98%), var(--linie);
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor; mask-composite: exclude;
+    animation: kreisen 5s linear infinite;
+  }
   .k .hg {
     position: absolute; inset: 0; z-index: -3; width: 100%; height: 100%;
-    object-fit: cover; object-position: top center; opacity: .5;
-    transition: transform .5s, opacity .3s;
+    object-fit: cover; object-position: top center; opacity: .5; transition: transform .6s, opacity .3s;
   }
-  a.k:hover .hg { transform: scale(1.04); opacity: .7; }
+  a.k:hover .hg { transform: scale(1.05); opacity: .7; }
   .k .schleier {
     position: absolute; inset: 0; z-index: -2;
-    background: linear-gradient(rgba(9, 9, 11, .1) 0%, rgba(9, 9, 11, .5) 25%, rgba(9, 9, 11, .92) 52%, rgba(9, 9, 11, .98) 100%);
+    background: linear-gradient(rgba(6, 6, 8, .1) 0%, rgba(6, 6, 8, .5) 25%, rgba(6, 6, 8, .92) 52%, rgba(6, 6, 8, .98) 100%);
   }
   .badges { position: absolute; top: 14px; left: 14px; right: 14px; display: flex; flex-wrap: wrap; gap: 6px; }
+  .k.code .badges { position: static; margin-bottom: 10px; }
   .b {
     font-family: var(--mono); font-size: 11px; font-weight: 500; padding: 3px 8px; border-radius: 6px;
-    background: rgba(9, 9, 11, .8); border: 1px solid var(--linie); color: var(--lesbar);
+    background: rgba(6, 6, 8, .8); border: 1px solid var(--linie); color: var(--lesbar);
   }
   .b.live { color: var(--akzent); border-color: rgba(126, 226, 184, .4); }
+  .b.live i {
+    display: inline-block; width: 6px; height: 6px; margin-right: 5px; border-radius: 50%;
+    background: var(--akzent); vertical-align: 1px; animation: puls 2s infinite;
+  }
+  @keyframes puls { 0% { box-shadow: 0 0 0 0 rgba(126, 226, 184, .7); } 100% { box-shadow: 0 0 0 7px rgba(126, 226, 184, 0); } }
   .k h3 { margin: 0; font-size: 21px; font-weight: 600; letter-spacing: -.01em; }
-  .k.gross h3 { font-size: 30px; }
+  .k.gross h3 { font-size: 32px; }
   .k p { margin: 0; font-size: 15px; line-height: 1.45; color: var(--lesbar); }
   .k .adresse, .kartenlinks a {
     display: inline-flex; align-items: center; gap: 6px; min-height: 36px;
@@ -201,12 +294,13 @@
   .kartenlinks a:hover { text-decoration: underline; text-underline-offset: 4px; }
   .k .hinweis { font-family: var(--mono); font-size: 12px; color: var(--leise); }
   .k.code { justify-content: space-between; }
-  .k.code pre {
-    margin: 0; font-family: var(--mono); font-size: 13px; line-height: 1.7; color: var(--leise); white-space: pre-wrap;
-  }
+  .k.code pre { margin: 0; font-family: var(--mono); font-size: 13px; line-height: 1.7; color: var(--leise); white-space: pre-wrap; }
   .k.code pre b { color: var(--akzent); font-weight: 400; }
+  /* Einblenden beim Scrollen, nur mit JavaScript */
+  .js .einblenden { opacity: 0; filter: blur(8px); translate: 0 16px; }
+  .js .einblenden.da { opacity: 1; filter: none; translate: 0 0; }
 
-  /* Comic-Film im Dialog */
+  /* ---------- Comic-Film im Dialog ---------- */
   dialog {
     padding: 0; border: 1px solid var(--linie); border-radius: 16px; background: var(--flaeche);
     color: var(--tinte); max-width: min(92vw, 420px);
@@ -225,197 +319,262 @@
 
   footer {
     display: flex; flex-wrap: wrap; justify-content: space-between; gap: 16px;
-    padding-top: 24px; border-top: 1px solid var(--linie);
+    margin-top: 80px; padding: 24px 0 128px; border-top: 1px solid var(--linie);
     font-family: var(--mono); font-size: 13px; color: var(--leise);
   }
   footer .links { display: flex; flex-wrap: wrap; gap: 8px 22px; }
   footer a:hover { color: var(--akzent); }
 
+  /* ---------- Dock unten: Symbole wachsen zur Maus ---------- */
+  .dock {
+    position: fixed; left: 50%; bottom: 18px; z-index: 20; translate: -50% 0;
+    display: flex; align-items: flex-end; gap: 8px; padding: 8px 10px;
+    border: 1px solid var(--linie); border-radius: 20px; background: rgba(14, 14, 18, .78);
+    -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px);
+    box-shadow: 0 20px 60px -20px rgba(0, 0, 0, .8);
+  }
+  .dock a {
+    position: relative; display: grid; place-items: center;
+    width: calc(44px * var(--s, 1)); height: calc(44px * var(--s, 1)); border-radius: 12px;
+    background: rgba(255, 255, 255, .05); border: 1px solid var(--linie); transition: width .15s, height .15s, background .2s;
+  }
+  .dock a:hover { background: rgba(126, 226, 184, .12); }
+  .dock a { color: var(--lesbar); }
+  .dock svg { width: 46%; height: 46%; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+  .dock span {
+    position: absolute; bottom: calc(100% + 10px); left: 50%; translate: -50% 4px; opacity: 0; pointer-events: none;
+    white-space: nowrap; font-family: var(--mono); font-size: 12px; padding: 4px 8px; border-radius: 6px;
+    background: var(--tinte); color: var(--grund); transition: opacity .15s, translate .15s;
+  }
+  .dock a:hover span, .dock a:focus-visible span { opacity: 1; translate: -50% 0; }
+  .dock .trenner { width: 1px; align-self: stretch; margin: 4px 2px; background: var(--linie); }
+
   @media (max-width: 900px) {
     .bento { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-    .k.gross { grid-row: span 1; min-height: 420px; }
+    .k.gross { grid-row: span 1; min-height: 440px; }
   }
   @media (max-width: 820px) {
     .inhalt { grid-template-columns: minmax(0, 1fr); }
     .portraet { border-left: 0; border-top: 1px solid var(--linie); aspect-ratio: 16 / 9; }
   }
   @media (max-width: 600px) {
-    .blatt { padding: 16px 16px 72px; gap: 40px; }
-    .leiste .status { display: none; }
+    .blatt { padding: 0 16px; }
+    .leiste { border-radius: 14px; }
+    .leiste .neu { display: none; }
+    .fenster { margin-top: 32px; }
     .shell { padding: 24px 20px; font-size: 14px; }
     .zahlen div { padding: 16px; }
-    .zahlen b { font-size: 28px; }
+    .zahlen b { font-size: 30px; }
+    .band { margin-top: 48px; }
+    .lampe { height: 190px; }
     .bento { grid-template-columns: minmax(0, 1fr); }
     .k.gross, .k.breit { grid-column: auto; }
-    .k.gross { min-height: 380px; }
+    .k.gross { min-height: 400px; }
   }
   @media (prefers-reduced-motion: reduce) {
-    .cursor { animation: none; }
-    .k::before { display: none; }
-    a.k:hover .hg { transform: none; }
+    html { scroll-behavior: auto; }
+    *, *::before, *::after { animation: none !important; transition: none !important; }
+    .meteor, .strahlen { display: none; }
+    .js .einblenden, .tippen .zeile, .tippen h1 .wort { opacity: 1; filter: none; translate: none; transform: none; }
+  }
+  @media print {
+    .js .einblenden, .tippen .zeile, .tippen h1 .wort { opacity: 1; filter: none; translate: none; transform: none; }
+    .js .lampe * { animation: none; }
+    .dock, .meteor, .strahlen { display: none; }
   }
 </style>
 <!-- Besucherzählung: Umami auf eigenem Server (statistik.bockelbrink.net), ohne Cookies -->
 <script defer src="https://statistik.bockelbrink.net/script.js" data-website-id="9ceb2d33-f4ea-4c1e-baf0-656dc7562135" data-do-not-track="true" data-exclude-search="true" data-exclude-hash="true"></script>
 </head>
 <body>
-<div class="licht" aria-hidden="true"></div>
-<div class="gitter" aria-hidden="true"></div>
-<div class="blatt">
+<main>
+<div class="buehne" id="buehne">
+  <svg class="strahlen" viewBox="0 0 1440 900" preserveAspectRatio="none" aria-hidden="true" focusable="false">
+    <defs>
+      <linearGradient id="strahl" x1="0" x2="1">
+        <stop offset="0" stop-color="#7ee2b8" stop-opacity="0"/>
+        <stop offset=".5" stop-color="#7ee2b8"/>
+        <stop offset="1" stop-color="#a78bfa"/>
+      </linearGradient>
+    </defs>
+    <g>
+      <path class="spur" d="M-40 120 C 300 160, 520 420, 760 380 S 1200 140, 1500 260"/>
+      <path d="M-40 120 C 300 160, 520 420, 760 380 S 1200 140, 1500 260"/>
+      <path d="M-40 300 C 260 260, 480 560, 780 520 S 1180 300, 1500 420"/>
+      <path class="spur" d="M-40 300 C 260 260, 480 560, 780 520 S 1180 300, 1500 420"/>
+      <path d="M-40 520 C 320 480, 560 760, 820 700 S 1220 480, 1500 600"/>
+      <path d="M-40 40 C 340 80, 600 260, 860 220 S 1240 40, 1500 120"/>
+      <path d="M-40 700 C 280 640, 520 880, 800 840 S 1200 640, 1500 760"/>
+    </g>
+  </svg>
 
-  <nav class="leiste" aria-label="Hauptmenü">
-    <a class="marke" href="./">bockelbrink<span>.net</span></a>
-    <span class="links">
-      <a href="#projekte">Projekte</a>
-      <a href="#ueber">Über mich</a>
-      <a href="https://github.com/marcobockelbrink">GitHub</a>
-    </span>
-    <span class="status"><i aria-hidden="true">●</i> 2 Projekte live</span>
-  </nav>
+  <div class="blatt">
+    <nav class="leiste" aria-label="Hauptmenü">
+      <a class="marke" href="./">bockelbrink<span>.net</span></a>
+      <a class="neu" href="https://family.bockelbrink.net"><b>Neu</b> Family App – Familienkalender <span aria-hidden="true">→</span></a>
+      <span class="links">
+        <a href="#projekte">Projekte</a>
+        <a href="#ueber">Über mich</a>
+        <a href="https://github.com/marcobockelbrink">GitHub</a>
+      </span>
+    </nav>
 
-  <main>
-  <header class="fenster" id="ueber">
-    <div class="titel" aria-hidden="true"><i></i><i></i><i></i><span>~/marco — zsh</span></div>
-    <div class="inhalt">
-      <div class="shell">
-        <p aria-hidden="true"><span class="p">marco@werkstatt</span> ~ $ whoami</p>
-        <h1>Hallo, ich bin Marco.<br><em>Ich baue, was ich brauche.</em></h1>
-        <p class="aus">Teamleiter in der IT · Bastler · Mountainbiker</p>
-        <p aria-hidden="true"><span class="p">marco@werkstatt</span> ~ $ cat abends.txt</p>
-        <p class="aus">Abends baue ich mit Claude Dinge, die ich selbst brauche – vom Zeitmesser fürs Rennen bis zur KI-Morgenzeitung.</p>
-        <p aria-hidden="true"><span class="p">marco@werkstatt</span> ~ $ ls projekte/<span class="cursor"></span></p>
-        <div class="knoepfe">
-          <a class="knopf voll" href="#projekte">Projekte ansehen <span aria-hidden="true">→</span></a>
-          <a class="knopf" href="https://github.com/marcobockelbrink">GitHub</a>
+    <header class="fenster" id="ueber">
+      <div class="fenster-innen">
+        <div class="titel" aria-hidden="true"><i></i><i></i><i></i><span>~/marco — zsh</span></div>
+        <div class="inhalt">
+          <div class="shell" id="shell">
+            <p class="zeile" aria-hidden="true"><span class="p">marco@werkstatt</span> ~ $ <span data-tipp>whoami</span></p>
+            <h1 class="zeile" id="gruss">Hallo, ich bin Marco.<br><em>Ich baue, was ich brauche.</em></h1>
+            <p class="zeile aus">Teamleiter in der IT · Bastler · Mountainbiker</p>
+            <p class="zeile" aria-hidden="true"><span class="p">marco@werkstatt</span> ~ $ <span data-tipp>cat abends.txt</span></p>
+            <p class="zeile aus">Abends baue ich mit Claude Dinge, die ich selbst brauche – vom Zeitmesser fürs Rennen bis zur KI-Morgenzeitung.</p>
+            <p class="zeile" aria-hidden="true"><span class="p">marco@werkstatt</span> ~ $ <span data-tipp>ls projekte/</span><span class="cursor"></span></p>
+            <div class="zeile knoepfe">
+              <a class="knopf voll" href="#projekte">Projekte ansehen <span aria-hidden="true">→</span></a>
+              <a class="knopf" href="https://github.com/marcobockelbrink">GitHub</a>
+            </div>
+          </div>
+          <div class="portraet">
+            <img src="bilder/marco.jpg" width="1400" height="788" fetchpriority="high"
+                 alt="Marco am Laptop, gezeichnet, umgeben von Code, Cloud und einer Gummiente">
+          </div>
         </div>
       </div>
-      <div class="portraet">
-        <img src="bilder/marco.jpg" width="1400" height="788" fetchpriority="high"
-             alt="Marco am Laptop, gezeichnet, umgeben von Code, Cloud und einer Gummiente">
+    </header>
+
+    <div class="zahlen">
+      <div><b data-zaehle="10">10</b><span>Projekte</span></div>
+      <div><b class="akzent" data-zaehle="2">2</b><span>live im Netz</span></div>
+      <div><b data-zaehle="4">4</b><span>Open Source</span></div>
+    </div>
+  </div>
+</div>
+
+<div class="band" aria-hidden="true"><div>
+  <span>Zeitmessung</span><span>Lichtschranke</span><span>KI-Briefing</span><span>Kubernetes</span><span>VMware</span><span>Home Assistant</span><span>Matrix</span><span>NetBird</span><span>iOS</span><span>Mountainbike</span>
+  <span>Zeitmessung</span><span>Lichtschranke</span><span>KI-Briefing</span><span>Kubernetes</span><span>VMware</span><span>Home Assistant</span><span>Matrix</span><span>NetBird</span><span>iOS</span><span>Mountainbike</span>
+</div></div>
+
+<section class="blatt" id="projekte" aria-labelledby="projekte-titel">
+  <div class="lampe" id="lampe">
+    <div class="kegel" aria-hidden="true"></div><div class="stab" aria-hidden="true"></div>
+    <h2 id="projekte-titel">Was ich gebaut habe</h2>
+  </div>
+  <p class="unter">Von der Lichtschranke bis zum Familienkalender.</p>
+
+  <div class="bento">
+
+    <div class="k gross einblenden">
+      <img class="hg" src="bilder/einfachstoppen.png" width="422" height="620"
+           alt="Siegerehrung: die ersten drei auf dem Treppchen, dahinter die Rangliste">
+      <div class="schleier"></div>
+      <div class="badges"><span class="b live"><i aria-hidden="true"></i>live</span><span class="b">Web-App</span><span class="b">Hardware · Beta</span><span class="b">Open Source</span></div>
+      <h3>einfachstoppen</h3>
+      <p>Rennen stoppen mit zwei Handys. Kein Konto, keine Installation. Dazu Lichtschranke und Kamera-App als genauere Zeitquellen – und ein Comic in 38 Sekunden.</p>
+      <div class="kartenlinks">
+        <a href="https://einfachstoppen.de">einfachstoppen.de <span aria-hidden="true">→</span></a>
+        <a href="bilder/einfachstoppen-comic.mp4" data-dialog="comic">Comic ansehen (38 s) <span aria-hidden="true">▶</span></a>
+        <a href="https://einfachstoppen.de/bauen">Zeittor bauen <span aria-hidden="true">→</span></a>
+        <a href="https://einfachstoppen.de/#/kamera">Kamera-App (Beta) <span aria-hidden="true">→</span></a>
+        <a href="https://github.com/marcobockelbrink/einfachstoppen-tor">Quellcode (Tor) <span aria-hidden="true">→</span></a>
       </div>
     </div>
-  </header>
 
-  <div class="zahlen">
-    <div><b>10</b><span>Projekte</span></div>
-    <div><b class="akzent">2</b><span>live im Netz</span></div>
-    <div><b>4</b><span>Open Source</span></div>
-  </div>
+    <a class="k breit einblenden" href="https://ki-espresso.de">
+      <img class="hg" src="bilder/ki-espresso.jpg" width="1000" height="523" loading="lazy"
+           alt="Tagesausgabe mit Schlagzeile, Audio-Player und den wichtigsten Meldungen">
+      <div class="schleier"></div>
+      <div class="badges"><span class="b live"><i aria-hidden="true"></i>live</span><span class="b">KI-Briefing</span></div>
+      <h3>ki-espresso.de</h3>
+      <p>Jeden Morgen die KI-Nachrichten auf Deutsch, zum Lesen und Hören.</p>
+      <span class="adresse">ki-espresso.de <span aria-hidden="true">→</span></span>
+    </a>
 
-  <section id="projekte">
-    <h2>Was ich gebaut habe</h2>
-    <p class="unter">Von der Lichtschranke bis zum Familienkalender.</p>
-    <div class="bento">
+    <a class="k einblenden" href="https://family.bockelbrink.net">
+      <img class="hg" src="bilder/family.png" width="230" height="460" loading="lazy"
+           alt="Wochenansicht des Familienkalenders mit Filtern je Person und Leiste für Kalender, Aufgaben, Listen, Rezepte und Familie">
+      <div class="schleier"></div>
+      <div class="badges"><span class="b">Familien-App</span><span class="b">selbst gehostet</span></div>
+      <h3>Family App</h3>
+      <p>Familienkalender fürs iPhone und iPad: Termine, Aufgaben, Listen und Rezepte, mit Abgleich zu Outlook.</p>
+      <span class="adresse">family.bockelbrink.net <span aria-hidden="true">→</span></span>
+    </a>
 
-      <div class="k gross">
-        <img class="hg" src="bilder/einfachstoppen.png" width="422" height="620"
-             alt="Siegerehrung: die ersten drei auf dem Treppchen, dahinter die Rangliste">
-        <div class="schleier"></div>
-        <div class="badges"><span class="b live"><span aria-hidden="true">●</span> live</span><span class="b">Web-App</span><span class="b">Hardware · Beta</span><span class="b">Open Source</span></div>
-        <h3>einfachstoppen</h3>
-        <p>Rennen stoppen mit zwei Handys. Kein Konto, keine Installation. Dazu Lichtschranke und Kamera-App als genauere Zeitquellen – und ein Comic in 38 Sekunden.</p>
-        <div class="kartenlinks">
-          <a href="https://einfachstoppen.de">einfachstoppen.de <span aria-hidden="true">→</span></a>
-          <a href="bilder/einfachstoppen-comic.mp4" data-dialog="comic">Comic ansehen (38 s) <span aria-hidden="true">▶</span></a>
-          <a href="https://einfachstoppen.de/bauen">Zeittor bauen <span aria-hidden="true">→</span></a>
-          <a href="https://einfachstoppen.de/#/kamera">Kamera-App (Beta) <span aria-hidden="true">→</span></a>
-          <a href="https://github.com/marcobockelbrink/einfachstoppen-tor">Quellcode (Tor) <span aria-hidden="true">→</span></a>
-        </div>
-      </div>
+    <a class="k einblenden" href="https://mylittlebikepark.de">
+      <img class="hg" src="bilder/bikepark.jpg" width="1200" height="554" loading="lazy"
+           alt="3D-Ansicht: Liftstation im Fichtenwald">
+      <div class="schleier"></div>
+      <div class="badges"><span class="b">Spiel · in Arbeit</span></div>
+      <h3>My little Bikepark</h3>
+      <p>Strecken in den Ettelsberg zeichnen und Besucher anlocken.</p>
+      <span class="adresse">mylittlebikepark.de <span aria-hidden="true">→</span></span>
+    </a>
 
-      <a class="k breit" href="https://ki-espresso.de">
-        <img class="hg" src="bilder/ki-espresso.jpg" width="1000" height="523" loading="lazy"
-             alt="Tagesausgabe mit Schlagzeile, Audio-Player und den wichtigsten Meldungen">
-        <div class="schleier"></div>
-        <div class="badges"><span class="b live"><span aria-hidden="true">●</span> live</span><span class="b">KI-Briefing</span></div>
-        <h3>ki-espresso.de</h3>
-        <p>Jeden Morgen die KI-Nachrichten auf Deutsch, zum Lesen und Hören.</p>
-        <span class="adresse">ki-espresso.de <span aria-hidden="true">→</span></span>
-      </a>
+    <a class="k breit einblenden" href="vmware/">
+      <img class="hg" src="bilder/vmware.jpg" width="1000" height="523" loading="lazy"
+           alt="Kapazitätsübersicht je Cluster mit Auslastungsbalken">
+      <div class="schleier"></div>
+      <div class="badges"><span class="b">Demo</span><span class="b">VMware · Kubernetes</span></div>
+      <h3>Kapazitätsplanung</h3>
+      <p>Wie viel Platz ist in VMware- und Kubernetes-Clustern frei, und wer hat schon reserviert? Liest Aria Operations und Prometheus.</p>
+    </a>
 
-      <a class="k" href="https://family.bockelbrink.net">
-        <img class="hg" src="bilder/family.png" width="230" height="460" loading="lazy"
-             alt="Wochenansicht des Familienkalenders mit Filtern je Person und Leiste für Kalender, Aufgaben, Listen, Rezepte und Familie">
-        <div class="schleier"></div>
-        <div class="badges"><span class="b">Familien-App</span><span class="b">selbst gehostet</span></div>
-        <h3>Family App</h3>
-        <p>Familienkalender fürs iPhone und iPad: Termine, Aufgaben, Listen und Rezepte, mit Abgleich zu Outlook.</p>
-        <span class="adresse">family.bockelbrink.net <span aria-hidden="true">→</span></span>
-      </a>
+    <div class="k einblenden">
+      <img class="hg" src="bilder/mtb.png" width="212" height="460" loading="lazy"
+           alt="Terminliste der Vereins-App mit Touren und Trainings">
+      <div class="schleier"></div>
+      <div class="badges"><span class="b">Vereins-App</span></div>
+      <h3>MTB Bielefeld</h3>
+      <p>Termine, Anmeldungen und Fotoalben für den Verein.</p>
+      <p class="hinweis">Kein Link: steht in keinem App Store.</p>
+    </div>
 
-      <a class="k" href="https://mylittlebikepark.de">
-        <img class="hg" src="bilder/bikepark.jpg" width="1200" height="554" loading="lazy"
-             alt="3D-Ansicht: Liftstation im Fichtenwald">
-        <div class="schleier"></div>
-        <div class="badges"><span class="b">Spiel · in Arbeit</span></div>
-        <h3>My little Bikepark</h3>
-        <p>Strecken in den Ettelsberg zeichnen und Besucher anlocken.</p>
-        <span class="adresse">mylittlebikepark.de <span aria-hidden="true">→</span></span>
-      </a>
+    <a class="k einblenden" href="https://github.com/marcobockelbrink/kubernetes-fun/tree/main/db-wifi-check">
+      <img class="hg" src="bilder/db-wifi-check.jpg" width="1000" height="766" loading="lazy"
+           alt="Übersichtsseite mit aktueller Latenz zu 8.8.8.8, Kennzahlen und Verlauf">
+      <div class="schleier"></div>
+      <div class="badges"><span class="b">Fun-Tool</span><span class="b">Open Source</span></div>
+      <h3>db-wifi-check</h3>
+      <p>Misst im Cluster, wie schnell DNS-Server antworten.</p>
+    </a>
 
-      <a class="k breit" href="vmware/">
-        <img class="hg" src="bilder/vmware.jpg" width="1000" height="523" loading="lazy"
-             alt="Kapazitätsübersicht je Cluster mit Auslastungsbalken">
-        <div class="schleier"></div>
-        <div class="badges"><span class="b">Demo</span><span class="b">VMware · Kubernetes</span></div>
-        <h3>Kapazitätsplanung</h3>
-        <p>Wie viel Platz ist in VMware- und Kubernetes-Clustern frei, und wer hat schon reserviert? Liest Aria Operations und Prometheus.</p>
-      </a>
+    <div class="k breit einblenden">
+      <img class="hg" src="bilder/insta-manager.jpg" width="772" height="400" loading="lazy"
+           alt="Profi-Check eines Demo-Kontos: Verlauf von Followern, Reichweite und Profilaufrufen über 30 Tage">
+      <div class="schleier"></div>
+      <div class="badges"><span class="b">Web-App</span><span class="b">Verein</span><span class="b">Claude</span></div>
+      <h3>insta-manager</h3>
+      <p>Instagram-Beiträge für den Verein planen, von Claude prüfen lassen und erst nach Freigabe veröffentlichen – Kinderkonten nur mit OK der Eltern.</p>
+      <p class="hinweis">Kein Link: nur für den Verein.</p>
+    </div>
 
-      <div class="k">
-        <img class="hg" src="bilder/mtb.png" width="212" height="460" loading="lazy"
-             alt="Terminliste der Vereins-App mit Touren und Trainings">
-        <div class="schleier"></div>
-        <div class="badges"><span class="b">Vereins-App</span></div>
-        <h3>MTB Bielefeld</h3>
-        <p>Termine, Anmeldungen und Fotoalben für den Verein.</p>
-        <p class="hinweis">Kein Link: steht in keinem App Store.</p>
-      </div>
-
-      <a class="k" href="https://github.com/marcobockelbrink/kubernetes-fun/tree/main/db-wifi-check">
-        <img class="hg" src="bilder/db-wifi-check.jpg" width="1000" height="766" loading="lazy"
-             alt="Übersichtsseite mit aktueller Latenz zu 8.8.8.8, Kennzahlen und Verlauf">
-        <div class="schleier"></div>
-        <div class="badges"><span class="b">Fun-Tool</span><span class="b">Open Source</span></div>
-        <h3>db-wifi-check</h3>
-        <p>Misst im Cluster, wie schnell DNS-Server antworten.</p>
-      </a>
-
-      <div class="k breit">
-        <img class="hg" src="bilder/insta-manager.jpg" width="772" height="400" loading="lazy"
-             alt="Profi-Check eines Demo-Kontos: Verlauf von Followern, Reichweite und Profilaufrufen über 30 Tage">
-        <div class="schleier"></div>
-        <div class="badges"><span class="b">Web-App</span><span class="b">Verein</span><span class="b">Claude</span></div>
-        <h3>insta-manager</h3>
-        <p>Instagram-Beiträge für den Verein planen, von Claude prüfen lassen und erst nach Freigabe veröffentlichen – Kinderkonten nur mit OK der Eltern.</p>
-        <p class="hinweis">Kein Link: nur für den Verein.</p>
-      </div>
-
-      <a class="k code" href="https://github.com/marcobockelbrink/zitadel-netbird-sync">
-        <pre aria-hidden="true"><b>$</b> zitadel-netbird-sync
+    <a class="k code einblenden" href="https://github.com/marcobockelbrink/zitadel-netbird-sync">
+      <pre aria-hidden="true"><b>$</b> zitadel-netbird-sync
 Zitadel-Projekte lesen …
 <b>✓</b> NetBird-Gruppen angelegt</pre>
-        <div>
-          <div class="badges" style="position:static;margin-bottom:10px"><span class="b">Open Source</span><span class="b">Go</span></div>
-          <h3>zitadel-netbird-sync</h3>
-          <p>Zitadel-Projekte als NetBird-Gruppen, auch mit NetBird Cloud.</p>
-        </div>
-      </a>
+      <div>
+        <div class="badges"><span class="b">Open Source</span><span class="b">Go</span></div>
+        <h3>zitadel-netbird-sync</h3>
+        <p>Zitadel-Projekte als NetBird-Gruppen, auch mit NetBird Cloud.</p>
+      </div>
+    </a>
 
-      <a class="k code" href="https://github.com/marcobockelbrink/claude-matrix-bot">
-        <pre aria-hidden="true"><b>&gt;</b> Mach das Licht im Flur an
+    <a class="k code einblenden" href="https://github.com/marcobockelbrink/claude-matrix-bot">
+      <pre aria-hidden="true"><b>&gt;</b> Mach das Licht im Flur an
 <b>✓</b> Flur: an</pre>
-        <div>
-          <div class="badges" style="position:static;margin-bottom:10px"><span class="b">Open Source</span><span class="b">Python · Matrix</span></div>
-          <h3>claude-matrix-bot</h3>
-          <p>Ein Chat-Bot, der mein Home Assistant vom Handy aus bedient.</p>
-        </div>
-      </a>
+      <div>
+        <div class="badges"><span class="b">Open Source</span><span class="b">Python · Matrix</span></div>
+        <h3>claude-matrix-bot</h3>
+        <p>Ein Chat-Bot, der mein Home Assistant vom Handy aus bedient.</p>
+      </div>
+    </a>
 
-    </div>
-  </section>
-  </main>
+  </div>
+</section>
+</main>
 
+<div class="blatt">
   <footer>
     <span>Gebaut mit Claude.</span>
     <span class="links">
@@ -423,8 +582,17 @@ Zitadel-Projekte lesen …
       <a href="https://github.com/marcobockelbrink">github.com/marcobockelbrink</a>
     </span>
   </footer>
-
 </div>
+
+<nav class="dock" aria-label="Schnellzugriff">
+  <a href="#ueber" aria-label="Start"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3 11l9-8 9 8v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1z"/></svg><span aria-hidden="true">Start</span></a>
+  <a href="#projekte" aria-label="Projekte"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg><span aria-hidden="true">Projekte</span></a>
+  <i class="trenner" aria-hidden="true"></i>
+  <a href="https://einfachstoppen.de" aria-label="einfachstoppen.de"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5M10 2h4M12 2v3"/></svg><span aria-hidden="true">einfachstoppen</span></a>
+  <a href="https://ki-espresso.de" aria-label="ki-espresso.de"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 9h13v5a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5zM17 10h1.5a2.5 2.5 0 0 1 0 5H17M8 3v3M12 3v3"/></svg><span aria-hidden="true">ki-espresso</span></a>
+  <i class="trenner" aria-hidden="true"></i>
+  <a href="https://github.com/marcobockelbrink" aria-label="GitHub"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M9 19c-4.3 1.4-4.3-2.5-6-3m12 5v-3.5c0-1 .1-1.4-.5-2 2.8-.3 5.5-1.4 5.5-6a4.6 4.6 0 0 0-1.3-3.2 4.2 4.2 0 0 0-.1-3.2s-1.1-.3-3.5 1.3a12.3 12.3 0 0 0-6.2 0C6.5 2.8 5.4 3.1 5.4 3.1a4.2 4.2 0 0 0-.1 3.2A4.6 4.6 0 0 0 4 9.5c0 4.6 2.7 5.7 5.5 6-.6.6-.6 1.2-.5 2V21"/></svg><span aria-hidden="true">GitHub</span></a>
+</nav>
 
 <dialog id="comic" aria-label="Comic-Film zu einfachstoppen">
   <video src="bilder/einfachstoppen-comic.mp4" poster="bilder/einfachstoppen-comic.jpg"
@@ -439,10 +607,13 @@ Zitadel-Projekte lesen …
 </dialog>
 
 <script>
+  const ruhig = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const warte = (ms) => new Promise((r) => setTimeout(r, ms));
+
   // Comic im Dialog abspielen; ohne JavaScript öffnet der Link die MP4-Datei.
   const comic = document.getElementById("comic");
   const film = comic.querySelector("video");
-  document.querySelector('[data-dialog="comic"]').addEventListener("click", (e) => {
+  document.querySelector('[data-dialog="comic"]')?.addEventListener("click", (e) => {
     // Mit Cmd/Strg/Shift/Alt bleibt es ein normaler Link (z. B. neuer Tab).
     if (typeof comic.showModal !== "function" || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
     e.preventDefault();
@@ -452,13 +623,139 @@ Zitadel-Projekte lesen …
   comic.addEventListener("close", () => film.pause());
   comic.addEventListener("click", (e) => { if (e.target === comic) comic.close(); });
 
-  // Lichtkegel folgt der Maus über die Kacheln.
-  if (!matchMedia("(prefers-reduced-motion: reduce)").matches) {
-    document.querySelectorAll(".k").forEach((k) => k.addEventListener("pointermove", (e) => {
-      const r = k.getBoundingClientRect();
-      k.style.setProperty("--x", `${e.clientX - r.left}px`);
-      k.style.setProperty("--y", `${e.clientY - r.top}px`);
-    }));
+  // Meteore über der Bühne.
+  if (!ruhig) {
+    const buehne = document.getElementById("buehne");
+    for (let i = 0; i < 14; i++) {
+      const m = document.createElement("span");
+      m.className = "meteor";
+      m.setAttribute("aria-hidden", "true");
+      m.style.left = `${Math.random() * 110}%`;
+      m.style.animationDelay = `${Math.random() * 8}s`;
+      m.style.animationDuration = `${3 + Math.random() * 6}s`;
+      buehne.appendChild(m);
+    }
+  }
+
+  // Überschrift in Wörter zerlegen (nur Textknoten, kein HTML aus Zeichenketten).
+  const gruss = document.getElementById("gruss");
+  function zerlege(el) {
+    for (const n of [...el.childNodes]) {
+      if (n.nodeType === Node.TEXT_NODE) {
+        const teile = document.createDocumentFragment();
+        for (const stueck of n.textContent.split(/(\s+)/)) {
+          if (!stueck) continue;
+          if (/^\s+$/.test(stueck)) { teile.append(stueck); continue; }
+          const w = document.createElement("span");
+          w.className = "wort";
+          w.textContent = stueck;
+          teile.append(w);
+        }
+        n.replaceWith(teile);
+      } else if (n.nodeName === "EM") zerlege(n);
+    }
+  }
+
+  // Terminal tippt sich selbst. In einem Hintergrund-Tab (gebremste Timer)
+  // wird sofort alles gezeigt, damit niemand auf eine halbe Begrüßung trifft.
+  async function tippen() {
+    if (ruhig || document.hidden) return;
+    zerlege(gruss);
+    const shell = document.getElementById("shell");
+    const zeilen = [...shell.querySelectorAll(".zeile")];
+    const befehle = [...shell.querySelectorAll("[data-tipp]")].map((el) => [el, el.textContent]);
+    let fertig = false;
+    const alles = () => {
+      fertig = true;
+      befehle.forEach(([el, text]) => { el.textContent = text; });
+      zeilen.forEach((z) => z.classList.add("da"));
+      gruss.querySelectorAll(".wort").forEach((w) => { w.style.transitionDelay = "0ms"; });
+    };
+    document.addEventListener("visibilitychange", () => { if (document.hidden) alles(); }, { once: true });
+    shell.classList.add("tippen");
+    for (const zeile of zeilen) {
+      if (fertig) return;
+      const ziel = zeile.querySelector("[data-tipp]");
+      if (ziel) {
+        const text = ziel.textContent;
+        ziel.textContent = "";
+        zeile.classList.add("da");
+        for (const z of text) {
+          if (fertig) return;
+          ziel.textContent += z;
+          await warte(55 + Math.random() * 60);
+        }
+        await warte(250);
+      } else if (zeile === gruss) {
+        gruss.querySelectorAll(".wort").forEach((w, i) => { w.style.transitionDelay = `${i * 90}ms`; });
+        zeile.classList.add("da");
+        await warte(900);
+      } else {
+        zeile.classList.add("da");
+        await warte(260);
+      }
+    }
+  }
+  tippen();
+
+  // Zähler, Lampe und Einblenden, sobald sichtbar. Die Klasse .js (die
+  // Kacheln erst ausblendet) wird nur gesetzt, wenn das Einblenden sicher klappt.
+  if ("IntersectionObserver" in window) {
+  const beobachter = new IntersectionObserver((eintraege) => eintraege.forEach((e) => {
+    if (!e.isIntersecting) return;
+    const el = e.target;
+    beobachter.unobserve(el);
+    if (el.dataset.zaehle) {
+      if (ruhig) return;
+      const ende = Number(el.dataset.zaehle), start = performance.now();
+      const schritt = (t) => {
+        const p = Math.min(1, (t - start) / 1400);
+        el.textContent = String(Math.round(ende * (1 - Math.pow(1 - p, 3))));
+        if (p < 1) requestAnimationFrame(schritt);
+      };
+      requestAnimationFrame(schritt);
+    } else el.classList.add(el.id === "lampe" ? "an" : "da");
+  }), { threshold: 0.2 });
+  document.documentElement.classList.add("js");
+  document.querySelectorAll(".einblenden").forEach((el, i) => el.style.setProperty("--verz", `${(i % 4) * 80}ms`));
+  document.querySelectorAll("[data-zaehle], #lampe, .einblenden").forEach((el) => beobachter.observe(el));
+
+  // Dauer-Animationen pausieren, solange ihr Bereich nicht zu sehen ist.
+  const ruhe = new IntersectionObserver((eintraege) => eintraege.forEach((e) => {
+    e.target.classList.toggle("ruhe", !e.isIntersecting);
+  }));
+  document.querySelectorAll("#buehne, .band, .k.gross").forEach((el) => ruhe.observe(el));
+  }
+
+  // Kacheln: Lichtkegel und leichte 3D-Neigung zur Maus.
+  if (!ruhig) document.querySelectorAll(".k").forEach((k) => {
+    k.addEventListener("pointermove", (e) => {
+      if (e.pointerType !== "mouse") return;
+      const r = k.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top;
+      k.style.setProperty("--x", `${x}px`);
+      k.style.setProperty("--y", `${y}px`);
+      k.style.setProperty("--ry", `${(x / r.width - 0.5) * 8}deg`);
+      k.style.setProperty("--rx", `${(y / r.height - 0.5) * -8}deg`);
+    });
+    k.addEventListener("pointerleave", () => {
+      k.style.setProperty("--rx", "0deg");
+      k.style.setProperty("--ry", "0deg");
+    });
+  });
+
+  // Dock: Symbole wachsen, je näher die Maus kommt.
+  const dock = document.querySelector(".dock"), symbole = [...dock.querySelectorAll("a")];
+  if (!ruhig) {
+    dock.addEventListener("pointermove", (e) => {
+      if (e.pointerType !== "mouse") return;
+      // Erst alle Maße lesen, dann schreiben (sonst rechnet der Browser mehrfach).
+      const mitten = symbole.map((a) => { const r = a.getBoundingClientRect(); return r.left + r.width / 2; });
+      symbole.forEach((a, i) => {
+        const abstand = Math.abs(e.clientX - mitten[i]);
+        a.style.setProperty("--s", (1 + Math.max(0, 1 - abstand / 140) * 0.55).toFixed(3));
+      });
+    });
+    dock.addEventListener("pointerleave", () => symbole.forEach((a) => a.style.setProperty("--s", "1")));
   }
 </script>
 </body>
