@@ -42,7 +42,9 @@ for (const [tag] of html.matchAll(/<(?:script|link|img|video|source|audio|iframe
 for (const [, url] of html.matchAll(/(?:url\(\s*["']?|@import\s+["'])([^"')]+)/g))
   if (extern(url)) fehler.push(`Fremder Server im CSS: ${url}`);
 
-for (const teil of ['class="fenster"', 'class="bento"', "<dialog"]) muss(teil, "Bauteil");
+for (const teil of ['class="fenster"', 'class="bento"', "<dialog", 'class="dock"', 'id="lampe"', "data-zaehle=", "prefers-reduced-motion"])
+  muss(teil, "Bauteil");
+if (/innerHTML|eval\(|document\.write/.test(html)) fehler.push("Unsicheres DOM-Schreiben (innerHTML/eval/document.write)");
 
 if (fehler.length) {
   console.error(fehler.join("\n"));
