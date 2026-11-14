@@ -44,6 +44,14 @@ for (const [, url] of html.matchAll(/(?:url\(\s*["']?|@import\s+["'])([^"')]+)/g
 
 for (const teil of ['class="fenster"', 'class="bento"', "<dialog", 'class="dock"', 'id="lampe"', "data-zaehle=", "prefers-reduced-motion"])
   muss(teil, "Bauteil");
+// Landmarken: Projekte gehören in <main>, die Fußzeile steht danach (contentinfo).
+const mainAuf = html.indexOf("<main"), mainZu = html.indexOf("</main>");
+const projekte = html.indexOf('id="projekte"'), fuss = html.indexOf("<footer");
+if (!(mainAuf < projekte && projekte < mainZu)) fehler.push("Projekte stehen nicht in <main>");
+if (!(fuss > mainZu)) fehler.push("<footer> steht nicht nach </main>");
+if (/<section[^>]*>(?:(?!<\/section>)[\s\S])*<footer/.test(html)) fehler.push("<footer> steckt in einer <section>");
+// Was nur mit JavaScript eingeblendet wird, muss im Druck sichtbar sein.
+if (html.includes(".js .einblenden") && !/@media print/.test(html)) fehler.push("@media print fehlt für eingeblendete Kacheln");
 if (/innerHTML|eval\(|document\.write/.test(html)) fehler.push("Unsicheres DOM-Schreiben (innerHTML/eval/document.write)");
 
 if (fehler.length) {

@@ -41,7 +41,8 @@
   @property --winkel { syntax: "<angle>"; inherits: false; initial-value: 0deg; }
 
   * { box-sizing: border-box; }
-  html { scroll-behavior: smooth; }
+  /* Platz unten, damit das Dock fokussierte Links nicht verdeckt */
+  html { scroll-behavior: smooth; scroll-padding-bottom: 96px; }
   body {
     margin: 0; background: var(--grund); color: var(--tinte);
     font-family: var(--sans); font-size: 17px; line-height: 1.5;
@@ -68,6 +69,8 @@
   .strahlen path:nth-child(2n) { animation-duration: 9s; animation-delay: -3s; }
   .strahlen path:nth-child(3n) { animation-duration: 11s; animation-delay: -6s; }
   .strahlen .spur { stroke: rgba(255, 255, 255, .04); stroke-dasharray: none; animation: none; }
+  /* Außer Sicht ruhen die Dauer-Animationen (spart Akku) */
+  .ruhe, .ruhe *, .ruhe::before, .ruhe::after { animation-play-state: paused !important; }
   @keyframes fliessen { from { stroke-dashoffset: 1520; } to { stroke-dashoffset: 0; } }
   .meteor {
     position: absolute; top: -10px; width: 2px; height: 2px; border-radius: 50%; background: #fff;
@@ -104,7 +107,7 @@
   /* ---------- Terminal mit wanderndem Lichtrand ---------- */
   .fenster {
     position: relative; z-index: 2; margin-top: 64px; border-radius: 18px; padding: 1px;
-    background: conic-gradient(from var(--winkel), transparent 0 70%, var(--akzent) 80%, var(--violett) 88%, transparent 96%), var(--linie);
+    background: conic-gradient(from var(--winkel, 0deg), transparent 0 70%, var(--akzent) 80%, var(--violett) 88%, transparent 96%), var(--linie);
     animation: kreisen 6s linear infinite;
     box-shadow: 0 50px 140px -40px rgba(126, 226, 184, .35), 0 30px 120px -50px rgba(167, 139, 250, .45);
   }
@@ -130,7 +133,7 @@
   /* Zeilen erscheinen nacheinander; nur mit JavaScript ausgeblendet,
      und per opacity, damit Screenreader sie sofort lesen. */
   .tippen .zeile { opacity: 0; }
-  .tippen .zeile.da { opacity: 1; }
+  .tippen .zeile.da, .tippen .zeile:focus-within { opacity: 1; }
   h1 {
     margin: 12px 0 14px; font-family: var(--sans); font-size: clamp(38px, 5.4vw, 64px);
     line-height: 1.02; font-weight: 700; letter-spacing: -.035em;
@@ -145,6 +148,8 @@
     -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
     animation: schimmer 6s linear infinite;
   }
+  /* Wörter haben eigene Ebenen; Safari schneidet den Verlauf sonst nicht zu */
+  h1 em .wort { background: inherit; -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
   @keyframes schimmer { to { background-position: 300% 0; } }
   @media (forced-colors: active) {
     h1 em { background: none; -webkit-text-fill-color: currentColor; }
@@ -237,6 +242,7 @@
     padding: 56px 18px 18px; border-radius: 16px; border: 1px solid var(--linie); background: var(--flaeche);
     transform: rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
     transition: transform .25s ease-out, border-color .2s, opacity .7s, filter .7s, translate .7s;
+    transition-delay: 0s, 0s, var(--verz, 0s), var(--verz, 0s), var(--verz, 0s);
   }
   .k.gross { grid-column: span 2; grid-row: span 2; border-color: transparent; }
   .k.breit { grid-column: span 2; }
@@ -251,7 +257,7 @@
   /* Lichtpunkt läuft um die große Kachel */
   .k.gross::after {
     content: ""; position: absolute; inset: 0; z-index: 1; border-radius: inherit; padding: 1.5px; pointer-events: none;
-    background: conic-gradient(from var(--winkel), transparent 0 75%, var(--akzent) 85%, var(--violett) 92%, transparent 98%), var(--linie);
+    background: conic-gradient(from var(--winkel, 0deg), transparent 0 75%, var(--akzent) 85%, var(--violett) 92%, transparent 98%), var(--linie);
     -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
     -webkit-mask-composite: xor; mask-composite: exclude;
     animation: kreisen 5s linear infinite;
@@ -333,7 +339,8 @@
     background: rgba(255, 255, 255, .05); border: 1px solid var(--linie); transition: width .15s, height .15s, background .2s;
   }
   .dock a:hover { background: rgba(126, 226, 184, .12); }
-  .dock svg { width: 46%; height: 46%; stroke: var(--lesbar); fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+  .dock a { color: var(--lesbar); }
+  .dock svg { width: 46%; height: 46%; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
   .dock span {
     position: absolute; bottom: calc(100% + 10px); left: 50%; translate: -50% 4px; opacity: 0; pointer-events: none;
     white-space: nowrap; font-family: var(--mono); font-size: 12px; padding: 4px 8px; border-radius: 6px;
@@ -370,13 +377,17 @@
     .meteor, .strahlen { display: none; }
     .js .einblenden, .tippen .zeile, .tippen h1 .wort { opacity: 1; filter: none; translate: none; transform: none; }
   }
+  @media print {
+    .js .einblenden, .tippen .zeile, .tippen h1 .wort { opacity: 1; filter: none; translate: none; transform: none; }
+    .js .lampe * { animation: none; }
+    .dock, .meteor, .strahlen { display: none; }
+  }
 </style>
 <!-- Besucherzählung: Umami auf eigenem Server (statistik.bockelbrink.net), ohne Cookies -->
 <script defer src="https://statistik.bockelbrink.net/script.js" data-website-id="9ceb2d33-f4ea-4c1e-baf0-656dc7562135" data-do-not-track="true" data-exclude-search="true" data-exclude-hash="true"></script>
 </head>
 <body>
-<script>document.documentElement.classList.add("js");</script>
-
+<main>
 <div class="buehne" id="buehne">
   <svg class="strahlen" viewBox="0 0 1440 900" preserveAspectRatio="none" aria-hidden="true" focusable="false">
     <defs>
@@ -408,7 +419,6 @@
       </span>
     </nav>
 
-    <main>
     <header class="fenster" id="ueber">
       <div class="fenster-innen">
         <div class="titel" aria-hidden="true"><i></i><i></i><i></i><span>~/marco — zsh</span></div>
@@ -438,7 +448,6 @@
       <div><b class="akzent" data-zaehle="2">2</b><span>live im Netz</span></div>
       <div><b data-zaehle="4">4</b><span>Open Source</span></div>
     </div>
-    </main>
   </div>
 </div>
 
@@ -562,7 +571,10 @@ Zitadel-Projekte lesen …
     </a>
 
   </div>
+</section>
+</main>
 
+<div class="blatt">
   <footer>
     <span>Gebaut mit Claude.</span>
     <span class="links">
@@ -570,7 +582,7 @@ Zitadel-Projekte lesen …
       <a href="https://github.com/marcobockelbrink">github.com/marcobockelbrink</a>
     </span>
   </footer>
-</section>
+</div>
 
 <nav class="dock" aria-label="Schnellzugriff">
   <a href="#ueber" aria-label="Start"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3 11l9-8 9 8v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1z"/></svg><span aria-hidden="true">Start</span></a>
@@ -601,7 +613,7 @@ Zitadel-Projekte lesen …
   // Comic im Dialog abspielen; ohne JavaScript öffnet der Link die MP4-Datei.
   const comic = document.getElementById("comic");
   const film = comic.querySelector("video");
-  document.querySelector('[data-dialog="comic"]').addEventListener("click", (e) => {
+  document.querySelector('[data-dialog="comic"]')?.addEventListener("click", (e) => {
     // Mit Cmd/Strg/Shift/Alt bleibt es ein normaler Link (z. B. neuer Tab).
     if (typeof comic.showModal !== "function" || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
     e.preventDefault();
@@ -644,19 +656,35 @@ Zitadel-Projekte lesen …
     }
   }
 
-  // Terminal tippt sich selbst.
+  // Terminal tippt sich selbst. In einem Hintergrund-Tab (gebremste Timer)
+  // wird sofort alles gezeigt, damit niemand auf eine halbe Begrüßung trifft.
   async function tippen() {
-    if (ruhig) return;
+    if (ruhig || document.hidden) return;
     zerlege(gruss);
     const shell = document.getElementById("shell");
+    const zeilen = [...shell.querySelectorAll(".zeile")];
+    const befehle = [...shell.querySelectorAll("[data-tipp]")].map((el) => [el, el.textContent]);
+    let fertig = false;
+    const alles = () => {
+      fertig = true;
+      befehle.forEach(([el, text]) => { el.textContent = text; });
+      zeilen.forEach((z) => z.classList.add("da"));
+      gruss.querySelectorAll(".wort").forEach((w) => { w.style.transitionDelay = "0ms"; });
+    };
+    document.addEventListener("visibilitychange", () => { if (document.hidden) alles(); }, { once: true });
     shell.classList.add("tippen");
-    for (const zeile of shell.querySelectorAll(".zeile")) {
+    for (const zeile of zeilen) {
+      if (fertig) return;
       const ziel = zeile.querySelector("[data-tipp]");
       if (ziel) {
         const text = ziel.textContent;
         ziel.textContent = "";
         zeile.classList.add("da");
-        for (const z of text) { ziel.textContent += z; await warte(55 + Math.random() * 60); }
+        for (const z of text) {
+          if (fertig) return;
+          ziel.textContent += z;
+          await warte(55 + Math.random() * 60);
+        }
         await warte(250);
       } else if (zeile === gruss) {
         gruss.querySelectorAll(".wort").forEach((w, i) => { w.style.transitionDelay = `${i * 90}ms`; });
@@ -670,7 +698,9 @@ Zitadel-Projekte lesen …
   }
   tippen();
 
-  // Zähler, Lampe und Einblenden, sobald sichtbar.
+  // Zähler, Lampe und Einblenden, sobald sichtbar. Die Klasse .js (die
+  // Kacheln erst ausblendet) wird nur gesetzt, wenn das Einblenden sicher klappt.
+  if ("IntersectionObserver" in window) {
   const beobachter = new IntersectionObserver((eintraege) => eintraege.forEach((e) => {
     if (!e.isIntersecting) return;
     const el = e.target;
@@ -686,10 +716,16 @@ Zitadel-Projekte lesen …
       requestAnimationFrame(schritt);
     } else el.classList.add(el.id === "lampe" ? "an" : "da");
   }), { threshold: 0.2 });
-  document.querySelectorAll("[data-zaehle], #lampe, .einblenden").forEach((el, i) => {
-    if (el.classList.contains("einblenden")) el.style.transitionDelay = `${(i % 4) * 80}ms`;
-    beobachter.observe(el);
-  });
+  document.documentElement.classList.add("js");
+  document.querySelectorAll(".einblenden").forEach((el, i) => el.style.setProperty("--verz", `${(i % 4) * 80}ms`));
+  document.querySelectorAll("[data-zaehle], #lampe, .einblenden").forEach((el) => beobachter.observe(el));
+
+  // Dauer-Animationen pausieren, solange ihr Bereich nicht zu sehen ist.
+  const ruhe = new IntersectionObserver((eintraege) => eintraege.forEach((e) => {
+    e.target.classList.toggle("ruhe", !e.isIntersecting);
+  }));
+  document.querySelectorAll("#buehne, .band, .k.gross").forEach((el) => ruhe.observe(el));
+  }
 
   // Kacheln: Lichtkegel und leichte 3D-Neigung zur Maus.
   if (!ruhig) document.querySelectorAll(".k").forEach((k) => {
@@ -712,8 +748,10 @@ Zitadel-Projekte lesen …
   if (!ruhig) {
     dock.addEventListener("pointermove", (e) => {
       if (e.pointerType !== "mouse") return;
-      symbole.forEach((a) => {
-        const r = a.getBoundingClientRect(), abstand = Math.abs(e.clientX - (r.left + r.width / 2));
+      // Erst alle Maße lesen, dann schreiben (sonst rechnet der Browser mehrfach).
+      const mitten = symbole.map((a) => { const r = a.getBoundingClientRect(); return r.left + r.width / 2; });
+      symbole.forEach((a, i) => {
+        const abstand = Math.abs(e.clientX - mitten[i]);
         a.style.setProperty("--s", (1 + Math.max(0, 1 - abstand / 140) * 0.55).toFixed(3));
       });
     });
