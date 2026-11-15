@@ -231,6 +231,22 @@
   @media (forced-colors: active) { .lampe h2 { background: none; -webkit-text-fill-color: currentColor; } }
   .unter { margin: 0 0 32px; text-align: center; color: var(--leise); }
 
+  /* ---------- So wird geprüft: ein Pipeline-Lauf im Terminal ---------- */
+  #pruefung { margin-top: 96px; }
+  #pruefung h2 {
+    margin: 0 0 6px; text-align: center;
+    font-size: clamp(30px, 4.4vw, 44px); font-weight: 700; letter-spacing: -.03em; color: var(--tinte);
+  }
+  .lauf { max-width: 860px; margin: 0 auto; border-radius: 17px; border: 1px solid var(--linie); background: rgba(10, 10, 13, .92); overflow: hidden; }
+  .lauf ol { list-style: none; margin: 0; padding: 26px 30px; font-family: var(--mono); font-size: 14px; line-height: 1.8; color: var(--lesbar); }
+  .lauf-zeile { display: grid; grid-template-columns: 7.5em minmax(0, 1fr); gap: 0 12px; padding: 3px 0; transition: opacity .6s, filter .6s, translate .6s; transition-delay: var(--verz, 0s); }
+  .lauf-zeile.befehl, .lauf-zeile.fertig { display: block; }
+  .lauf .p, .lauf .ok, .lauf-zeile.fertig { color: var(--akzent); }
+  .lauf .stufe { color: var(--violett); }
+  .lauf .schritte { display: flex; flex-wrap: wrap; gap: 2px 18px; }
+  .lauf .schritte span { white-space: nowrap; }
+  .lauf .schritte .wo { color: var(--leise); flex-basis: 100%; white-space: normal; }
+
   /* ---------- Projekte als Bento-Raster ---------- */
   .bento {
     display: grid; grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -363,6 +379,9 @@
     .leiste .neu { display: none; }
     .fenster { margin-top: 32px; }
     .shell { padding: 24px 20px; font-size: 14px; }
+    .lauf ol { padding: 20px 18px; font-size: 13px; }
+    .lauf-zeile { grid-template-columns: minmax(0, 1fr); }
+    #pruefung { margin-top: 64px; }
     .zahlen div { padding: 16px; }
     .zahlen b { font-size: 30px; }
     .band { margin-top: 48px; }
@@ -572,6 +591,24 @@ Zitadel-Projekte lesen …
 
   </div>
 </section>
+
+<section class="blatt" id="pruefung" aria-labelledby="pruefung-titel">
+  <h2 id="pruefung-titel">So wird geprüft</h2>
+  <p class="unter">Meine Projekte laufen durch dieselben Stationen, bevor eine Änderung live geht.</p>
+  <div class="lauf">
+    <div class="titel" aria-hidden="true"><i></i><i></i><i></i><span>pipeline — lauf</span></div>
+    <ol role="list">
+      <li class="lauf-zeile befehl einblenden" aria-hidden="true"><span class="p">marco@werkstatt</span> ~ $ git push</li>
+      <li class="lauf-zeile einblenden"><span class="stufe"><span aria-hidden="true">▸ </span>lokal</span>
+        <span class="schritte"><span>Tests zuerst <b class="ok" aria-hidden="true">✓</b></span><span>KI-Code-Review <b class="ok" aria-hidden="true">✓</b></span><span>Sicherheits-Review <b class="ok" aria-hidden="true">✓</b></span><span>signierter Commit <b class="ok" aria-hidden="true">✓</b></span></span></li>
+      <li class="lauf-zeile einblenden"><span class="stufe"><span aria-hidden="true">▸ </span>CI</span>
+        <span class="schritte"><span class="wo">eigener Runner + GitHub Actions</span><span>SonarQube <b class="ok" aria-hidden="true">✓</b></span><span>KI-Review im PR <b class="ok" aria-hidden="true">✓</b></span><span>Geheimnisse <b class="ok" aria-hidden="true">✓</b></span><span>Sicherheitslücken <b class="ok" aria-hidden="true">✓</b></span><span>Images <b class="ok" aria-hidden="true">✓</b></span></span></li>
+      <li class="lauf-zeile einblenden"><span class="stufe"><span aria-hidden="true">▸ </span>laufend</span>
+        <span class="schritte"><span class="wo">Renovate: Updates nach Wartezeit, Sicherheits-Updates sofort</span></span></li>
+      <li class="lauf-zeile fertig einblenden"><span aria-hidden="true">✔ </span>bereit zum Merge</li>
+    </ol>
+  </div>
+</section>
 </main>
 
 <div class="blatt">
@@ -718,6 +755,7 @@ Zitadel-Projekte lesen …
   }), { threshold: 0.2 });
   document.documentElement.classList.add("js");
   document.querySelectorAll(".einblenden").forEach((el, i) => el.style.setProperty("--verz", `${(i % 4) * 80}ms`));
+  document.querySelectorAll("#pruefung .lauf-zeile").forEach((z, i) => z.style.setProperty("--verz", `${i * 140}ms`));
   document.querySelectorAll("[data-zaehle], #lampe, .einblenden").forEach((el) => beobachter.observe(el));
 
   // Dauer-Animationen pausieren, solange ihr Bereich nicht zu sehen ist.
