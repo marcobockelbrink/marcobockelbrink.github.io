@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+# Sucht vor jedem Commit in den vorgemerkten Änderungen nach Geheimnissen.
+# Einschalten (einmal je Klon): git config core.hooksPath .githooks
+set -euo pipefail
+if ! command -v gitleaks >/dev/null; then
+  echo "gitleaks fehlt (brew install gitleaks) – Commit abgebrochen." >&2
+  exit 1
+fi
+exec gitleaks git --pre-commit --staged --redact --no-banner

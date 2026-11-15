@@ -1,0 +1,6 @@
+# GitHub Pages (Jekyll): Arbeitsdateien nicht als Webseite veröffentlichen.
+# Im öffentlichen Repo bleiben sie sichtbar – nur bockelbrink.net liefert sie nicht aus.
+exclude:
+  - docs
+  - scripts
+  - README.md
