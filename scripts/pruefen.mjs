@@ -1,7 +1,7 @@
 // Prüft index.html ohne Abhängigkeiten: node scripts/pruefen.mjs
 // Bricht mit Exit 1 ab, wenn ein Projektlink, ein Text, ein Alt-Text oder
 // ein Bauteil des Designs fehlt oder etwas von einem fremden Server geladen wird.
-import { readFileSync } from "node:fs";
+import { readFileSync, readdirSync } from "node:fs";
 
 const html = readFileSync(new URL("../index.html", import.meta.url), "utf8");
 const fehler = [];
@@ -53,6 +53,38 @@ if (/<section[^>]*>(?:(?!<\/section>)[\s\S])*<footer/.test(html)) fehler.push("<
 // Was nur mit JavaScript eingeblendet wird, muss im Druck sichtbar sein.
 if (html.includes(".js .einblenden") && !/@media print/.test(html)) fehler.push("@media print fehlt für eingeblendete Kacheln");
 if (/innerHTML|eval\(|document\.write/.test(html)) fehler.push("Unsicheres DOM-Schreiben (innerHTML/eval/document.write)");
+
+// Abschnitt „So wird geprüft“: grob, ohne Interna – die Seite ist öffentlich.
+muss('id="pruefung"', "Abschnitt");
+muss('<h2 id="pruefung-titel">So wird geprüft</h2>', "Überschrift");
+for (const text of ["Tests zuerst", "KI-Code-Review", "Sicherheits-Review", "SonarQube", "Renovate", "bereit zum Merge"])
+  muss(text, "Prüfschritt");
+const pruefung = html.indexOf('id="pruefung"');
+if (pruefung !== -1 && !(html.indexOf("</section>", projekte) < pruefung && pruefung < mainZu))
+  fehler.push("Abschnitt Prüfung steht nicht nach den Projekten in <main>");
+
+// Keine Interna auf der öffentlichen Seite und in der mitveröffentlichten Doku.
+// Hier stehen nur allgemeine Muster – diese Datei ist selbst öffentlich.
+// Konkrete Namen (Rechner, Firmen, private Repos) stehen je Zeile in
+// scripts/verboten.local.txt; die Datei ist per .gitignore ausgeschlossen.
+const muster = [
+  /\blocalhost\b|\b[\w-]+\.local\b(?!\.)/i,                               // lokale Rechner
+  /\b[a-z][\w.-]*:\d{2,5}\b/i,                                            // Rechner:Port
+  /\b[A-Z][A-Z0-9_]*_(?:TOKEN|SECRET|KEY|PASSWORD)\b/,                    // Secret-Namen
+  /\b(?:10\.\d+|192\.168|172\.(?:1[6-9]|2\d|3[01]))\.\d+\.\d+\b/,         // private Netze
+];
+let lokal = [];
+try {
+  lokal = readFileSync(new URL("./verboten.local.txt", import.meta.url), "utf8")
+    .split("\n").map((z) => z.trim().toLowerCase()).filter((z) => z && !z.startsWith("#"));
+} catch { /* fehlt auf fremden Rechnern – dann nur die Muster */ }
+const oeffentlich = { "index.html": html };
+for (const datei of readdirSync(new URL("../docs", import.meta.url), { recursive: true }))
+  if (datei.endsWith(".md")) oeffentlich[`docs/${datei}`] = readFileSync(new URL(`../docs/${datei}`, import.meta.url), "utf8");
+for (const [datei, inhalt] of Object.entries(oeffentlich)) {
+  for (const m of muster) { const t = inhalt.match(m); if (t) fehler.push(`Interna in ${datei}: ${t[0]}`); }
+  for (const wort of lokal) if (inhalt.toLowerCase().includes(wort)) fehler.push(`Interna in ${datei}: Eintrag aus verboten.local.txt`);
+}
 
 if (fehler.length) {
   console.error(fehler.join("\n"));
