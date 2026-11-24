@@ -15,13 +15,25 @@ for (const ziel of [
   "https://github.com/marcobockelbrink/kubernetes-fun/tree/main/db-wifi-check",
   "https://github.com/marcobockelbrink/zitadel-netbird-sync",
   "https://github.com/marcobockelbrink/claude-matrix-bot", "impressum/",
+  "https://apps.apple.com/de/app/id6805995624",
+  "https://play.google.com/store/apps/details?id=de.mtbbielefeld.app",
 ]) muss(`href="${ziel}"`, "Link");
 
 for (const text of [
-  "Kein Link: steht in keinem App Store.", "Kein Link: nur für den Verein.",
-  "Termine, Aufgaben, Listen und Rezepte, mit Abgleich zu Outlook.",
+  "Kein Link: nicht öffentlich.", "<h3>Social Media Manager</h3>",
+  "Termine, Aufgaben, Listen, Rezepte und feste Orte, mit Abgleich zu Outlook.",
+  "Für Instagram und LinkedIn", "auf Instagram und LinkedIn",
   "Film herunterladen (MP4, 1,9 MB)", 'aria-label="Comic-Film zu einfachstoppen, ohne Ton"',
 ]) muss(text, "Text");
+
+for (const [, id] of html.matchAll(/href="#([^"]+)"/g))
+  if (!html.includes(`id="${id}"`)) fehler.push(`Sprungziel fehlt: #${id}`);
+
+const live = (html.match(/class="b live"/g) ?? []).length;
+if (!html.includes(`data-zaehle="${live}">${live}</b><span>live im Netz`))
+  fehler.push(`Zähler „live im Netz“ passt nicht zu ${live} live-Badges`);
+
+if (html.includes("steht in keinem App Store")) fehler.push("Veraltet: MTB-App steht inzwischen in den Stores");
 
 const titel = html.match(/<h3>[^<]+<\/h3>/g) ?? [];
 if (titel.length !== 10) fehler.push(`Erwartet 10 Projekttitel, gefunden ${titel.length}`);
